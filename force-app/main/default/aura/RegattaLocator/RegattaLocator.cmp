@@ -1,0 +1,11 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,force:appHostable,force:lightningQuickActionWithoutHeader,force:hasRecordId,force:appHostable,flexipage:availableForAllPageTypes">
+    <aura:dependency resource="markup://force:navigateToSObject" type="EVENT"/> 
+    <div>
+        <div>
+            <c:RegattaMap />
+        </div>
+        <div>
+            <c:RegattaList /> 
+        </div>
+    </div>
+</aura:component>

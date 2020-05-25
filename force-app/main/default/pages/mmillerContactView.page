@@ -1,0 +1,322 @@
+<apex:page id="cvpage" controller="mmillerCurrentDesignation"  >
+<apex:includeScript value="/soap/ajax/36.0/connection.js"/>
+<apex:includeScript value="/soap/ajax/36.0/apex.js"/>
+     
+    <script> window.onload = function() {  initTheButton(); } </script>
+    
+<!-- BEGIN TOP DISPLAY - Hello...display user name -->
+    
+    <apex:form id="cv1" >
+        
+        <apex:actionFunction name="sayHello" action="{!getUserName}" 
+			rerender="panelout1" id="uname1" status="status1"/>
+        
+    </apex:form>
+
+    <p>
+    <apex:outputPanel id="panelout1">
+    <apex:outputText value="Hello "/>
+    <apex:actionStatus startText="requesting..." id="status1" onstop="exposeSelections()">
+        <!-- 
+			 facet name must be "header", "footer", and "caption"   
+             facet name can also be start 'display when an AJAX request begins'
+			 or stop display when an AJAX request completes' 
+         -->
+
+        <apex:facet name="stop" >{!username} {!userrank}-{!userregion}-{!userstate}</apex:facet>
+
+    </apex:actionStatus>
+ 
+    </apex:outputPanel>
+    </p>
+            
+    <!-- Call the sayHello JavaScript function using a script element-->
+    <script type="text/javascript">
+
+        window.setTimeout(sayHello,2000)
+    
+    </script>
+<!-- END TOP DISPLAY -->    
+
+<!-- BEGIN MENTEE DISPLAY -->
+    
+    <apex:form id="cv2">
+        
+        <div id="pcv2" style="display: none;">
+
+        <p>
+        <apex:selectList id="chooseRankIn" value="{!RankIn}" size="1">
+            <apex:selectOption itemValue="" itemLabel="SELECT A RANK" />
+            <apex:selectOption itemValue="Candidate" itemLabel="Candidate" />
+            <apex:selectOption itemValue="Assistant" itemLabel="Assistant" />
+            <apex:selectOption itemValue="Referee" itemLabel="Referee" />
+            <apex:actionSupport event="onchange" reRender="panelout2" action="{!selectContactsForDesignation}"/>
+        </apex:selectList> 
+      
+         <apex:selectList id="chooseRegionIn" value="{!RegionIn}" size="1">
+             <apex:selectOption itemValue="" itemLabel="SELECT A REGION" />
+             <apex:selectOption itemValue="" itemLabel="Any Region" />
+            <apex:selectOption itemValue="Mid-Atlantic" itemLabel="Mid-Atlantic" />
+            <apex:selectOption itemValue="Midwest" itemLabel="Midwest" />
+            <apex:selectOption itemValue="Northeast" itemLabel="Northeast" />
+            <apex:selectOption itemValue="Northwest" itemLabel="Northwest" />
+            <apex:selectOption itemValue="Southeast" itemLabel="Southeast" />
+            <apex:selectOption itemValue="Southwest" itemLabel="Southwest" />
+            <apex:selectOption itemValue="International" itemLabel="International" />
+            <apex:actionSupport event="onchange" reRender="panelout2" action="{!selectContactsForDesignation}"/>
+        </apex:selectList> 
+
+        <apex:selectList id="chooseStateIn" value="{!StateIn}" size="1">
+            <apex:selectOption itemValue="" itemLabel="SELECT A STATE" />
+            <apex:selectOption itemValue="" itemLabel="Any State" />
+            <apex:selectOption itemValue="Alabama" itemLabel="Alabama" />
+            <apex:selectOption itemValue="Alaska" itemLabel="Alaska" />
+            <apex:selectOption itemValue="Arizona" itemLabel="Arizona" />
+            <apex:selectOption itemValue="Arkansas" itemLabel="Arkansas" />
+            <apex:selectOption itemValue="California" itemLabel="California" />
+            <apex:selectOption itemValue="Colorado" itemLabel="Colorado" />
+            <apex:selectOption itemValue="Connecticut" itemLabel="Connecticut" />
+            <apex:selectOption itemValue="Delaware" itemLabel="Delaware" />
+            <apex:selectOption itemValue="Florida" itemLabel="Florida" />
+            <apex:selectOption itemValue="Georgia" itemLabel="Georgia" />
+            <apex:selectOption itemValue="Hawaii" itemLabel="Hawaii" />
+            <apex:selectOption itemValue="Idaho" itemLabel="Idaho" />
+            <apex:selectOption itemValue="Illinois" itemLabel="Illinois" />
+            <apex:selectOption itemValue="Indiana" itemLabel="Indiana" />
+            <apex:selectOption itemValue="Iowa" itemLabel="Iowa" />
+            <apex:selectOption itemValue="Kansas" itemLabel="Kansas" />
+            <apex:selectOption itemValue="Kentucky" itemLabel="Kentucky" />
+            <apex:selectOption itemValue="Louisiana" itemLabel="Louisiana" />
+            <apex:selectOption itemValue="Maine" itemLabel="Maine" />
+            <apex:selectOption itemValue="Maryland" itemLabel="Maryland" />
+            <apex:selectOption itemValue="Massachusetts" itemLabel="Massachusetts" />
+            <apex:selectOption itemValue="Michigan" itemLabel="Michigan" />
+            <apex:selectOption itemValue="Minnesota" itemLabel="Minnesota" />
+            <apex:selectOption itemValue="Mississippi" itemLabel="Mississippi" />
+            <apex:selectOption itemValue="Missouri" itemLabel="Missouri" />
+            <apex:selectOption itemValue="Montana" itemLabel="Montana" />
+            <apex:selectOption itemValue="Nebraska" itemLabel="Nebraska" />
+            <apex:selectOption itemValue="Nevada" itemLabel="Nevada" />
+            <apex:selectOption itemValue="New Hampshire" itemLabel="New Hampshire" />
+            <apex:selectOption itemValue="New Jersey" itemLabel="New Jersey" />
+            <apex:selectOption itemValue="New Mexico" itemLabel="New Mexico" />
+            <apex:selectOption itemValue="New York" itemLabel="New York" />
+            <apex:selectOption itemValue="North Carolina" itemLabel="North Carolina" />
+            <apex:selectOption itemValue="North Dakota" itemLabel="North Dakota" />
+            <apex:selectOption itemValue="Ohio" itemLabel="Ohio" />
+            <apex:selectOption itemValue="Oklahoma" itemLabel="Oklahoma" />
+            <apex:selectOption itemValue="Oregon" itemLabel="Oregon" />
+            <apex:selectOption itemValue="Pennsylvania" itemLabel="Pennsylvania" />
+            <apex:selectOption itemValue="Rhode Island" itemLabel="Rhode Island" />
+            <apex:selectOption itemValue="South Carolina" itemLabel="South Carolina" />
+            <apex:selectOption itemValue="South Dakota" itemLabel="South Dakota" />
+            <apex:selectOption itemValue="Tennessee" itemLabel="Tennessee" />
+            <apex:selectOption itemValue="Texas" itemLabel="Texas" />
+            <apex:selectOption itemValue="Utah" itemLabel="Utah" />
+            <apex:selectOption itemValue="Vermont" itemLabel="Vermont" />
+            <apex:selectOption itemValue="Virginia" itemLabel="Virginia" />
+            <apex:selectOption itemValue="Washington" itemLabel="Washington" />
+            <apex:selectOption itemValue="West Virginia" itemLabel="West Virginia" />
+            <apex:selectOption itemValue="Wisconsin" itemLabel="Wisconsin" />
+            <apex:selectOption itemValue="Wyoming" itemLabel="Wyoming" />       
+              <apex:actionSupport event="onchange" reRender="panelout2" action="{!selectContactsForDesignation}"/>
+        </apex:selectList> 
+                  
+        </p>
+            
+        <apex:actionFunction name="getMentees" action="{!selectContactsForDesignation}" 
+            reRender="panelout2" id="listcnt" status="status2">
+            <apex:param id="contid" name="contid" value="" assignTo="{!ContactIdIn}" />
+            <apex:param id="rank" name="rank" value="" assignTo="{!RankIn}"/>
+        	<apex:param id="region" name="region" value="" assignTo="{!RegionIn}"/>
+            <apex:param id="state" name="state" value="" assignTo="{!StateIn}"/>
+        </apex:actionFunction>
+            
+    <apex:outputPanel id="panelout2">
+        
+		<apex:pageBlock title="Mentee Detail" >
+           
+            <apex:pageBlockSection title="Mentees - {!RankIn} ({!listsize})" columns="1">
+                <apex:pageBlockTable value="{!contactdata}" var="cont1" >
+                    <apex:column >  
+                        <apex:inputCheckbox id="monitee" onclick="selectMentee('{!cont1.Id}','{!cont1.Referee_Rank__c}','{!cont1.Region__c}','{!cont1.MailingState}')" />
+                    </apex:column>
+                    <apex:column value="{!cont1.Name}"/>
+                    <apex:column value="{!cont1.Referee_Rank__c}"/>
+                    <apex:column value="{!cont1.Region__c}"/>
+                    <apex:column value="{!cont1.MailingState}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+           
+        </apex:pageBlock>        
+        
+        
+     </apex:outputPanel>
+
+    </div>   
+        
+    
+ 
+     </apex:form>
+    
+<!-- END COUNT DISPLAY -->                    
+
+<!-- BEGIN MENTOR DISPLAY -->
+    
+     <apex:form id="cv3">
+         
+         <apex:actionFunction name="getMentors" action="{!selectContactsForDesignation}" 
+            reRender="panelout3" id="listcnt3" status="status3">
+            <apex:param id="contid" name="contid" value="" assignTo="{!ContactIdIn}" />
+             <apex:param id="rank" name="rank" value="Referee" assignTo="{!RankIn}"/>
+        	<apex:param id="region" name="region" value="" assignTo="{!RegionIn}"/>
+            <apex:param id="state" name="state" value="" assignTo="{!StateIn}"/>
+        </apex:actionFunction>
+         
+         <div id="p3" style="display: none;">
+ 
+           <apex:outputPanel id="panelout3">
+
+		<apex:pageBlock title="Mentors Detail" >
+           
+        <apex:pageBlockSection title="Mentors - {!RankIn} ({!listsize})" columns="1">
+                <apex:pageBlockTable value="{!contactdata}" var="cont2" >
+                    <apex:column >  
+                        <apex:inputCheckbox id="monitor" onclick="selectMentor('{!cont2.Id}','{!cont2.Referee_Rank__c}','{!cont2.Region__c}','{!cont2.MailingState}')" />
+                    </apex:column>
+                    <apex:column value="{!cont2.Name}"/>
+                    <apex:column value="{!cont2.Referee_Rank__c}"/>
+                    <apex:column value="{!cont2.Region__c}"/>
+                    <apex:column value="{!cont2.MailingState}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+           
+        </apex:pageBlock>     
+        
+        </apex:outputPanel>
+            
+         </div>
+         
+         <div id="b">
+             <apex:commandButton value="Build Relationship" id="theButton" onclick="buildRelation()" />
+         </div>
+         
+    </apex:form>     
+         
+	<apex:form id="tst">
+        <apex:actionFunction name="testreload" action="{!initVariables}" id="testreload" reRender="panelout1"/>
+    </apex:form>
+    
+    
+<!-- END MENTOR DISPLAY -->    
+ 
+     <script type="text/javascript">
+            
+        window.setTimeout(sayHello,2000);
+    
+        function initTheButton() {
+            
+            document.getElementById("pcv2").style.display = "none";
+            document.getElementById("b").style.display = "none";
+            document.getElementById("p3").style.display = "none";
+            
+             testreload();  
+            
+            var s1 = document.getElementById('{!$Component.cvpage.cv2.chooseRankIn}');
+            s1.selectedIndex = 0;
+            s1.value = "";
+            var s2 = document.getElementById('{!$Component.cvpage.cv2.chooseRegionIn}');
+            s2.selectedIndex = 0;
+            s2.value = "";
+            var s3 = document.getElementById('{!$Component.cvpage.cv2.chooseStateIn}');
+            s3.selectedIndex = 0;
+            s3.value = "";
+            
+            document.getElementById('{!$Component.cvpage.cv2.contid}').value = "";
+            document.getElementById('{!$Component.cvpage.cv3.contid}').value = "";
+            
+        }
+        
+        function exposeSelections() {
+            document.getElementById("pcv2").style.display = "block";
+        }
+        
+        function selectMentee(selectedid,selectedrank,selectedregion,selectedstate) { 
+            // NOTE SF ID IS 15 + 3 = 18 - THE 3 ARE A CHECK DIGIT - YOU CAN USE EITHER THE 15 OR FULL 18 IN A SELECT
+			
+            //alert(selectedid + " " + selectedrank + " " + selectedregion + " " + selectedstate);
+            contid = selectedid;
+            rank = selectedrank;
+            region = selectedregion;
+            state = selectedstate;
+            //alert("requesting data using: " + contid + " " + rank + " " + region + " " + state); 
+            getMentees(contid, rank, region, state);
+            
+            getMentors("", "Referee", region, state);
+            
+            document.getElementById("p3").style.display = "block";
+        }
+
+        function selectMentor(selectedid,selectedrank,selectedregion,selectedstate) { 
+ 			
+            //alert(selectedid + " " + selectedrank + " " + selectedregion + " " + selectedstate);
+            contid = selectedid;
+            rank = selectedrank;
+            region = selectedregion;
+            state = selectedstate;
+            //alert("requesting data using: " + contid + " " + rank + " " + region + " " + state); 
+            
+            getMentors(contid, rank, region, state);
+            
+            document.getElementById("b").style.display = "block";
+           
+        }
+        
+        function buildRelation() {
+          
+            var txt;
+            var r = confirm("Press OK to complete Mentor-Mentee relationship!");
+            
+            if (r == true) {
+              txt = "You pressed OK! Completing relationship. (Not really, this is a test.)";
+                alert(txt); 
+                var s1 = document.getElementById('{!$Component.cvpage.cv2.chooseRankIn}');
+                s1.selectedIndex = 0;
+                s1.value = "";
+                var s2 = document.getElementById('{!$Component.cvpage.cv2.chooseRegionIn}');
+                s2.selectedIndex = 0;
+                s2.value = "";
+                var s3 = document.getElementById('{!$Component.cvpage.cv2.chooseStateIn}');
+                s3.selectedIndex = 0;
+                s3.value = "";
+  				var contid = ""
+            	var rank = ""
+            	var region = ""
+            	var state = "";
+                selectedid = "";
+            	selectedrank = "";
+                selectedregion = "";
+            	selectedstate = "";
+               
+                testreload();               
+                
+                selectMentee(contid, rank, region, state);
+                selectMentor(contid, rank, region, state);
+                
+                document.getElementById('{!$Component.cvpage.cv2}').reset();
+                document.getElementById('{!$Component.cvpage.cv3}').reset();
+                
+                alert("reload follows");
+                location.reload();
+                
+            } else {
+              txt = "You pressed Cancel!";
+                alert(txt);
+            } 
+                
+        }
+        
+     </script>
+    
+    
+</apex:page>

@@ -1,0 +1,9 @@
+<aura:component>
+    <aura:attribute name="map" type="Object"/>
+    <aura:handler event="c:RegattasLoaded" action="{!c.regattasLoaded}"/>
+    <aura:handler event="c:RegattaSelected" action="{!c.regattaSelected}"/>
+    <ltng:require styles="/resource/leaflet/leaflet.css"
+        scripts="/resource/leaflet/leaflet.js"
+        afterScriptsLoaded="{!c.jsLoaded}" />
+    <div id="map"></div>
+</aura:component>

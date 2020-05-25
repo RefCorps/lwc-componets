@@ -1,0 +1,492 @@
+<aura:component controller="EvaluationQuestionsController" 
+                implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" 
+                access="global" >
+   
+    <!-- This will fire on load - it starts the process of filling out the form -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    
+    <!-- Base Attributes -->
+    
+    <aura:attribute name="evaluator" type="User" />
+
+    <aura:attribute name="evaldate" type="Date" default="" />
+    <aura:attribute name="regattadate" type="Date" default="" />
+
+    <aura:attribute name="props" type="Evaluation_Properties__c[]" default="" />
+    <aura:attribute name="mindate" type="Date" default="" />
+    <aura:attribute name="maxdate" type="Date" default="" />
+    <aura:attribute name="RestrictRegattaDaySelection" type="boolean" default="false" />
+
+    <aura:attribute name="questionnaireTS" type="DateTime" default="" />
+    <aura:attribute name="lastNDays" type="string" default="190" />
+    
+    <aura:attribute name="isPhone" type="boolean" default="false" />
+    
+    <aura:attribute name="regattas" type="Object[]" />
+    <aura:attribute name="regattaName" type="String" default="No regatta" />
+    <aura:attribute name="regattaId" type="String" default="No Id" />
+    <aura:attribute name="regattaStartDate" type="String" />
+    
+    <aura:attribute name="participants" type="Object[]" />
+    <aura:attribute name="evalueeId" type="String" />
+    <aura:attribute name="evalueeName" type="String" />
+    <aura:attribute name="evalueeloaded" type="boolean" default="false" />
+
+    <aura:attribute name="preface" type="Evaluation_Questions__c[]" />
+    <aura:attribute name="prefaceloaded" type="boolean" default="false" />
+    
+    <aura:attribute name="evaluationtypes" type="String[]"/>
+    
+    <aura:attribute name="questions" type="Evaluation_Questions__c[]" />
+    <aura:attribute name="questionratings" type="Evaluation_QuestionTypeResp__c[]" />
+    <aura:attribute name="questionsloaded" type="boolean" default="false" />
+    
+    <!-- MODAL TOOLS -->
+    <aura:attribute name="isIntroModalOpen" type="boolean" default="false"/>
+    <aura:attribute name="isModalOpen" type="boolean" default="false"/>
+    <aura:attribute name="passedEdits" type="boolean" default="false"/>
+    <aura:attribute name="evaluationReview" type="String"  access="private" default="default"/>
+    <aura:attribute name="evaluationReviewList" type="List"  access="private" default="default"/>
+    <!-- END MODAL TOOLS -->
+    
+    <!-- TOAST TOOLS --> 
+    <aura:attribute name="isSubmitCompleted" type="boolean" default="false"/>
+    <aura:attribute name="wasSubmitSuccessful" type="boolean" default="true" />
+    <aura:attribute name="toastTheme" type="String" default="slds-notify slds-notify_toast slds-theme_success" />
+    <aura:attribute name="toastClass" type="String" default="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" />
+    <aura:attribute name="toastMessage" type="String" default="unknown status." />
+    <!-- END TOAST TOOLS -->
+    
+    <!-- THIS IS USED TO HOLD RESPONSES TO THE DYNAMICALLY GENERATED QUESTIONS -->
+    <aura:attribute name="responses" type="String[]" />
+
+    <!-- A HEADER MAY GO HERE IF NEEDED -->
+   
+<!-- ========================================================================================= -->     
+<!-- BEGIN TOAST SUCCESS OR FAILURE -->
+<aura:if isTrue="{!v.isSubmitCompleted}">
+  <div class="evalcomplete" style="height:4rem">
+  <div class="slds-notify_container slds-is-relative">
+      
+    <div class="{!v.toastTheme}" role="status">
+      <span class="slds-assistive-text">success</span>
+      
+      <span class="{!v.toastClass}" title="Description of icon when needed">
+      
+      </span>
+      <div class="slds-notify__content">
+        <h2 class="slds-text-heading_small ">Evaluation questionnaire for {!v.evalueeName} {!v.toastMessage}  
+        </h2>
+      </div>
+      <div class="slds-notify__close">
+        <lightning:buttonIcon iconName="utility:close"
+                              onclick="{! c.myrefresh }"
+                              alternativeText="Close"
+                              variant="bare-inverse"
+                              size="large"
+                              class="slds-button slds-button_icon slds-button_icon-inverse"/>
+      </div>
+    </div>
+  </div>
+</div>
+    </aura:if>
+<!-- END TOAST SUCCESS -->    
+<!-- ========================================================================================= --> 
+
+
+<!-- ========================================================================================= -->    
+    <!-- NEW QUESTIONNAIRE LAYOUT -->
+    <lightning:layout>
+        <lightning:layoutItem padding="around-small" size="12">
+        
+    <!-- CREATE NEW QUESTIONNAIRE -->
+    <div aria-labelledby="newquestionnaireform">
+        
+    <!-- BOXED AREA -->
+    	<fieldset class="slds-box slds-theme--default slds-container--max-large">
+          
+          <aura:if isTrue="{!(v.prefaceloaded)}">
+            <div style="float:right">
+                    <lightning:button variant="base"
+                          label="Referee Assessment Preface"
+                          title="Referee Assessment Preface"
+                          onclick="{! c.openIntroModal }" />
+  			</div>
+          </aura:if>
+            
+    <!-- CREATE NEW QUESTIONNAIRE FORM -->
+    <form class="slds-form--stacked">      
+            
+	<div class="slds-box slds-box_xx-medium">
+
+            <lightning:input aura:id="evaluatorname" 
+                             label="Evaluator Name"
+                             name="evaluatorname"
+                             value="{!v.evaluator.Name}"
+                            
+                             readonly="true"
+                             />
+            <lightning:input aura:id="evaluatorid" 
+                             name="evaluatorid" 
+                             value="{!v.evaluator.Id}" 
+                             required="true" class="slds-hide" />
+        
+<!-- ========================================================================================= -->
+        
+ 	<lightning:select name="selectregatta" 
+                      aura:id="selectedregatta" 
+                      label="Regatta where Evaluee Observed" 
+                      required="true" onchange="{!c.setRegattaSelection}">
+    	<option value="Introduction">choose regatta...</option>
+        <aura:iteration items="{!v.regattas}" var="item">
+        	<option text="{!item.label}" value="{!item.value}"/>
+        </aura:iteration> 
+                                                              
+	</lightning:select>
+        
+<!-- ========================================================================================= -->
+
+    <lightning:select name="selectevaluee" 
+                      aura:id="selectedevaluee" 
+                      label="Select Evaluee from Regatta Participants" 
+                      required="true" onchange="{!c.setEvalueeId}">
+    	<option value="">choose evaluee...</option>
+        <aura:iteration items="{!v.participants}" var="item">
+        	<option text="{!item.label}" value="{!item.value}"/>
+        </aura:iteration> 
+                                                              
+	</lightning:select>
+
+<!-- ========================================================================================= -->                
+
+        
+         <aura:if isTrue="{!v.isPhone}">  
+            <ui:inputDate aura:id="evaluationdate" label="Regatta Observation Date" 
+                          class="slds-input-height"
+                          value="{!v.evaldate}" 
+                          displayDatePicker="true"/>
+             
+            <!-- DUE TO TIME ELEMENT THIS DOES NOT WORK WELL WHEN JUST PROCESSING DATE
+                 USING DEPRECIATED ELEMENT UNTIL THIS IS RESOLVED
+            <lightning:input aura:id="evaluationdate" label="Regatta Date"
+                     type="date" 
+                     name="evaluationdate"
+                     value="{!v.evaldate}"
+                     onchange="{!c.regattaDateCheck}"
+                             />
+           -->
+             
+        <aura:set attribute="else">
+        <lightning:input aura:id="evaluationdate" label="Regatta Observation Date"
+                         type="date" 
+                         name="evaluationdate" 
+                         value="{!v.evaldate}" 
+                         min="2019-01-01" 
+                         max="2020-09-22" 
+                         onchange="{!c.regattaDateCheck}"
+                         />
+        </aura:set>
+        </aura:if>
+    </div>
+        
+<!-- ========================================================================================= -->                
+
+     <aura:if isTrue="{!v.evalueeloaded}" >
+    <lightning:select name="selectItem" 
+                      aura:id="selectedEvaluationType" 
+                      label="Select Evaluation Type" 
+                      required="true" onchange="{!c.getEvalQuestionsByType}">
+        <option value="">choose one...</option>
+        <aura:iteration items="{!v.evaluationtypes}" var="qt">
+        	<option text="{!qt}" value="{!qt}"/>
+        </aura:iteration>
+        
+    </lightning:select>
+        </aura:if>
+ <!-- ========================================================================================= -->            
+    <p>&nbsp;</p>
+            
+     <aura:if isTrue="{!v.questionsloaded}" >    
+    <div class="slds-box slds-box_xx-large">
+        <!-- TABLE CONTAINS QUESTIONS AND RESPONSES - ROW FORMAT IS CONTROLLED BY IsQuestionGroupHeader__c -->  
+		<table width="100%">
+
+                <aura:iteration items="{!v.questions}" var="q" >
+                    
+                <aura:if isTrue="{!(q.IsQuestionGroupHeader__c)}">
+                    
+                    <tr style="border-bottom: thin solid lightgray; height: 35px; color:white; background-color: #0070D2">
+                    
+                    <td style="padding-left: 10px; padding-right: 10px">
+                        <span style="float:left;width:70%" >{!q.Question_Text__c}</span>
+                        <aura:if isTrue="{!v.isPhone}">
+                            <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
+                           		<span style="float:right;width:30%">{!q.QuestionType__r.Name}</span>
+                            </aura:if>
+                        </aura:if>
+                        <input type="hidden" id="questionId" name="questionId" value="{!q.Id}" />
+                    </td>
+                   
+                    <td> </td>
+                   
+                    <td style="text-align: center; vertical-align: middle;">
+                        <aura:if isTrue="{!v.isPhone ==false}">
+                        <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c > 0}" >
+                        {!q.QuestionType__r.Name}
+                        </aura:if>
+                        </aura:if>
+                    </td>
+                       
+                    <td></td>
+                        
+                    </tr>
+
+                <aura:set attribute="else">
+
+                    <aura:if isTrue="{!v.isPhone}">
+                    <!-- begin phone -->    
+                     <tr width="100%">
+                         
+                            <td colspan:="4">
+                            <table width="100%">
+                                
+                                <tr style="height: 35px;">
+                                    
+                                    <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
+                                        <td style="padding: 10px; text-align:center; vertical-align: middle; width:100%" colspan="4">
+                                            <lightning:formattedRichText value="{!q.Question_Text__c}" />
+                                            <aura:if isTrue="{!q.isRequired__c}"><label for="questionId" style="color:red;"> * </label></aura:if>
+                                            <input type="hidden" id="questionId" name="questionId" value="{!q.Id}" />
+                                        </td>
+                                        <aura:set attribute="else">
+                                        <td style="padding: 10px;" colspan="4">
+                                            <lightning:formattedRichText value="{!q.Question_Text__c}" />
+                                            <aura:if isTrue="{!q.isRequired__c}"><label for="questionId" style="color:red;"> * </label></aura:if>
+                                            <input type="hidden" id="questionId" name="questionId" value="{!q.Id}" />
+                                        </td>
+                                    </aura:set>
+                                    </aura:if>    
+                                    <td></td>
+                                    <td></td>
+                                       
+                                </tr>
+                                
+                                <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
+                                    
+                                <tr  style="font-size: 60%; text-align:center; border-bottom: thin solid lightgray; height: 50px;">
+                                    <td style="padding-left: 10px;">
+                                        <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
+                                            <input type="radio" id="{!(q.Question_Number__c+'-1')}" 
+                                                   name="{!q.Question_Number__c}" 
+                                                   value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_1__c + ']-1')}" 
+                                                   onclick="{!c.handleAnswer}"  />
+                                            <label for="r1">{!q.QuestionType__r.Response_Text_1__c}</label>
+                                        </aura:if>
+                                    </td>
+                                    
+                                    <td>
+                                        <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 2}">
+                                            <input type="radio" id="{!(q.Question_Number__c+'-2')}" name="{!q.Question_Number__c}" 
+                                                   value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_2__c + ']-2')}" 
+                                                   onclick="{!c.handleAnswer}"  />
+                                            <label for="r2">{!q.QuestionType__r.Response_Text_2__c}</label>
+                                        </aura:if>
+                                    </td>
+                                    
+                                    <td>
+                                        <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 3}">
+                                            <input type="radio" id="{!(q.Question_Number__c+'-3')}" name="{!q.Question_Number__c}" 
+                                                   value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_3__c + ']-3')}" 
+                                                   onclick="{!c.handleAnswer}"  />
+                                            <label for="r3">{!q.QuestionType__r.Response_Text_3__c}</label>
+                                        </aura:if>
+                                    </td>
+                                </tr>
+                                </aura:if>
+                            </table>
+                           </td>
+                        </tr>
+                    <!-- end phone -->    
+                    <aura:set attribute="else">
+                        
+                    <!-- begin desktop -->
+                    <tr style="border-bottom: thin solid lightgray; height: 35px;">
+                    
+                       
+                    <td style="padding-left: 20px" colspan="{!(4-q.QuestionType__r.Type_Response_Count__c)}">
+                         <lightning:formattedRichText value="{!q.Question_Text__c}" />
+                         <aura:if isTrue="{!q.isRequired__c}"><label for="questionId" style="color:red;"> * </label></aura:if>
+                         <input type="hidden" id="questionId" name="questionId" value="{!q.Id}" />
+                    </td>
+
+                      
+                    <td>
+                        <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
+                           <input type="radio" id="{!(q.Question_Number__c+'-1')}" 
+                                name="{!q.Question_Number__c}" 
+       							value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_1__c + ']-1')}" 
+                                onclick="{!c.handleAnswer}"  />
+  							<label for="r1">{!q.QuestionType__r.Response_Text_1__c}</label>
+                        </aura:if>
+                    </td>
+                      
+                    <td>
+                        <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 2}">
+                           <input type="radio" id="{!(q.Question_Number__c+'-2')}" name="{!q.Question_Number__c}" 
+       							value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_2__c + ']-2')}" 
+                                onclick="{!c.handleAnswer}"  />
+							<label for="r2">{!q.QuestionType__r.Response_Text_2__c}</label>
+                        </aura:if>
+                    </td>
+                     
+                    <td>
+                        <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 3}">
+                           <input type="radio" id="{!(q.Question_Number__c+'-3')}" name="{!q.Question_Number__c}" 
+       							value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_3__c + ']-3')}" 
+                                onclick="{!c.handleAnswer}"  />
+                    		<label for="r3">{!q.QuestionType__r.Response_Text_3__c}</label>
+                        </aura:if>
+                    </td>
+                        
+                    </tr>
+                    <!-- end deskstop -->
+                        
+                     </aura:set>    
+                    </aura:if>
+                    
+                    </aura:set>
+                    
+                </aura:if>
+                 
+                </aura:iteration>
+            </table>
+
+        <lightning:textarea aura:id="evaluatorcomment" name="evaluatorcomment" id="evaluatorcomment" value=""
+    		label="Comments" maxlength="300" />
+            
+    </div>
+            
+    <!-- aura:if isTrue="{!v.questionsloaded}" -->
+    <!-- LOOKS LIKE THE STANDARD STYLE FOR BRAND WAS CHANGED TO RED - ADDED CSS TO TAKE CONTROL OF COLOR -->   
+    <lightning:button label="Submit Evaluation" 
+                      class="slds-m-top--medium"
+                      variant="brand"
+                      onclick="{!c.openModel}"/>
+    </aura:if>
+        
+        
+	</form>
+        <!-- / CREATE NEW QUESTIONNAIRE FORM -->
+  
+        </fieldset>
+        <!-- / BOXED AREA -->
+    </div>
+    <!-- / CREATE NEW QUESTIONNAIRE -->   
+            
+        </lightning:layoutItem>
+    </lightning:layout>
+    <!-- / NEW QUESTIONNAIRE FORM -->
+    
+<!-- ========================================================================================= -->
+    
+<!-- MODAL CODE -->
+<aura:if isTrue="{!v.isModalOpen}">
+	<section role="dialog" tabindex="-1" aria-label="Evaluation Questionnaire" aria-labelledby="modal-heading-01" 
+         aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container">
+                    <!-- Modal/Popup Box Header Starts here-->
+                    <header class="slds-modal__header">
+                        <lightning:buttonIcon iconName="utility:close"
+                                              onclick="{! c.closeModel }"
+                                              alternativeText="Close"
+                                              variant="bare-inverse"
+                                              size="large"
+                                              class="slds-modal__close"/>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Review Responses</h2>
+                    </header>
+                    <!--Modal/Popup Box Body Starts here-->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        
+                        <lightning:formattedRichText value="{!v.evaluationReviewList}" />
+                        
+                    </div>
+                    <!--Modal/Popup Box Footer Starts here-->
+                    <footer class="slds-modal__footer">
+                        <lightning:button variant="neutral"
+                                          label="Cancel"
+                                          title="Cancel"
+                                          onclick="{! c.closeModel }"/>
+                        <aura:if isTrue="{!v.passedEdits}">
+                        <lightning:button variant="brand"
+                                          label="OK"
+                                          title="OK"
+                                          onclick="{!c.submitDetails}"/>
+                        </aura:if>
+                    </footer>
+                </div>
+	</section>
+	<div class="slds-backdrop slds-backdrop_open"></div>
+</aura:if>
+<!-- END MODAL CODE -->    
+    
+<!-- INTRO MODAL CODE -->
+<div class="slds-m-around_xx-large">
+        <!--Use aura:if tag to display Model Box, on the bese of conditions. [isOpen boolean attribute] -->   
+        <aura:if isTrue="{!v.isIntroModalOpen}">
+
+            <!--###### MODAL BOX Start######--> 
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <!-- ###### MODAL BOX HEADER Start ######-->
+                    <header class="slds-modal__header slds-modal__header_empty">
+                        <lightning:buttonIcon iconName="utility:close"
+                                              onclick="{! c.closeIntroModal }"
+                                              alternativeText="close"
+                                              variant="bare-inverse"
+                                              class="slds-modal__close"/>
+                        <!-- h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate" style="color:white;background-color: #0070D2;">Referee Assessment</h2 -->
+                    </header>
+                    <!--###### MODAL BOX BODY Part Start######-->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+
+                       <table>
+                            <aura:iteration items="{!v.preface}" var="p" >
+                                
+                                <aura:if isTrue="{!(p.IsQuestionGroupHeader__c)}">
+                                    <tr style="border-bottom: thin solid lightgray; height: 35px; color:white; background-color: #0070D2">
+                                        <td style="padding-left: 10px">
+                                            {!p.Question_Text__c}
+                                        </td>
+                                    </tr>
+                                <aura:set attribute="else">
+                                        <tr><td>
+                                            <lightning:formattedRichText value="{!p.Question_Text__c}" />
+                                        </td></tr>		
+                                    </aura:set>
+                                </aura:if>
+                                
+                            </aura:iteration>
+                       </table>
+                        
+                        
+                    </div>
+                    <!--###### MODAL BOX FOOTER Part Start ######-->
+                    <footer class="slds-modal__footer">
+                        <lightning:button variant="neutral" 
+                                          label="Close"
+                                          title="Close"
+                                          onclick="{! c.closeIntroModal }"/>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+            <!--###### MODAL BOX Part END Here ######-->
+            
+        </aura:if>
+    </div>
+<!-- END INTRO MODAL CODE -->    
+    
+    
+<!-- ========================================================================================= -->     
+    
+</aura:component>

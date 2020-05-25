@@ -1,0 +1,6 @@
+<aura:component>
+    <aura:registerEvent name="regattaSelected" type="c:RegattaSelected"/>
+    <aura:attribute name="regatta" type="Regatta__c"/>
+    <li><a onclick="{!c.regattaSelected}">{!v.regatta.Name}</a></li>
+    
+</aura:component>

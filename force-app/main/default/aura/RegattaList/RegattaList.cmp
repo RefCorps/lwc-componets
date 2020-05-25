@@ -1,0 +1,10 @@
+<aura:component controller="RegattaController">
+    <aura:registerEvent name="regattasLoaded" type="c:RegattasLoaded"/>
+    <aura:attribute name="regattas" type="Regatta__c[]"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <ul>
+    <aura:iteration items="{!v.regattas}" var="regatta">
+        <c:RegattaListItem regatta="{!regatta}"/>
+    </aura:iteration>
+    </ul>
+</aura:component>

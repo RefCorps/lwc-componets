@@ -1,0 +1,8 @@
+<apex:component >
+  <table>
+     <tr>
+     <td><apex:image id="USRowingLogo" value="{!$Resource.Referee_Logo_for_web }" width="50" height="50" alt="USRowing Logo"/></td>
+     <td><h1>Referee Assessment</h1></td>    
+     </tr>
+  </table>
+</apex:component>
