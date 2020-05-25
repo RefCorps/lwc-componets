@@ -130,6 +130,11 @@
                              name="evaluatorid" 
                              value="{!v.evaluator.Id}" 
                              required="true" class="slds-hide" />
+            <lightning:input aura:id="evaluatorcontactid" 
+                             name="evaluatorcontactid" 
+                             value="{!v.evaluator.ContactId}" 
+                             required="true" class="slds-hide" />
+
         
 <!-- ========================================================================================= -->
         

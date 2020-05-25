@@ -17,6 +17,9 @@
                 // now go fetch my regattas
                 var evaluatorId = uObj[0].Id;
                 
+                var evaluatorContactId = uObj[0].ContactId;                
+                //alert('evaluatorContactId = ' + evaluatorContactId);
+                
                 this.getMyRegattas(component,evaluatorId);
                 
                 // POSSIBLE AURA BUG - TRIED TO CALL THIS FROM doInit BUT IF FAILED DUE TO UNDEFINED COMPONENT

@@ -217,6 +217,7 @@
         var evaluationreview = ""; 
         var evaluatorname = component.find("evaluatorname").get("v.value");
         var evaluatorid = component.find("evaluatorid").get("v.value");
+        var evaluatorcontactid = component.find("evaluatorcontactid").get("v.value");
         
         var evalueename = component.get('v.evalueeName'); //component.find("evalueename").get("v.value");
         var evalueeid =  component.get('v.evalueeId'); //component.find("evalueeid").get("v.value");
@@ -316,7 +317,8 @@
         }
         //alert("No missing questions");
         var responseString = "evaluatorname=" + evaluatorname + "\nevaluatorid=" + evaluatorid + "\n"; 
-        responseString = responseString + "evalueeid=" + evalueeid + "\n"
+        responseString = responseString + "evaluatorcontactid=" + evaluatorcontactid + "\n";
+        responseString = responseString + "evalueeid=" + evalueeid + "\n";
         responseString = responseString + "evaluationtype=" + evaluationtype + "\n";
         responseString = responseString + "questionnairedatetime=" + questionnairedatetime + "\n";
         responseString = responseString + "evaluationlocation=" + evaluationlocation + "\n"; 
@@ -328,6 +330,7 @@
          review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Evalautor Comment</td><td>' + evaluatorcomment + '</td></tr>';
         review = review + '</table>';
         //alert(responseString + "\n" + responseList);
+        alert(responseString);
         
         component.set("v.evaluationReviewList", review); 
         component.set("v.evaluationReview",responseString);

@@ -1,7 +1,7 @@
 public class RefereeAssessment {
     
     public static String EvaluatorId {get; set;}
-	public static String EvalueeId {get; set;}    
+    public static String EvalueeId {get; set;}    
     public static String QuestionnaireId {get; set;}
     
     public string ResponseIn {get; set;}
@@ -10,7 +10,7 @@ public class RefereeAssessment {
     public static Evaluation_Questions__c SynopsisHeading {get; set;} 
     public static Evaluation_Questions__c Preface {get; set;} 
     public static String EvaluatorName {get; set;}
-	public static String EvalueeName {get; set;}
+    public static String EvalueeName {get; set;}
     public static String EvaluationLocation {get; set;}
     public static DateTime EvaluationDate {get; set;}
     public static String fmtEvaluationDate {get; set;}
@@ -27,17 +27,17 @@ public class RefereeAssessment {
 
     // =================================================================
     
-	/*
-		THIS IS THE ENTRY POINT FROM RefereeAssessment.vfp
-		THE FLOW IS A FOLLOWS        
-		EvaluationQuestionsController.apxc INVOKES THE FOLLOWING 
+    /*
+        THIS IS THE ENTRY POINT FROM RefereeAssessment.vfp
+        THE FLOW IS A FOLLOWS        
+        EvaluationQuestionsController.apxc INVOKES THE FOLLOWING 
             PageReference pageReferenceForPDF = Page.RefereeAssessment;   <<< THIS IS RefereeAssessment.vfp
             pageReferenceForPDF.getParameters().put('pEvaluatorId',pEvaluatorId);
             pageReferenceForPDF.getParameters().put('pEvalueeId',pEvalueeId);
             pageReferenceForPDF.getParameters().put('pQuestionnaireId',pQuestionnaireId);
-            Blob body = pageReferenceForPDF.getContent();	
+            Blob body = pageReferenceForPDF.getContent();   
 
-		EvaluationQuestionController WILL CALL RefereeAssessment.ContentDocumentLink MOVE CONTENT TO FILES
+        EvaluationQuestionController WILL CALL RefereeAssessment.ContentDocumentLink MOVE CONTENT TO FILES
     */
     @AuraEnabled
     public static void  getResponsesVF() {
@@ -55,7 +55,7 @@ public class RefereeAssessment {
         System.debug('pEvalueeId: ' + pEvalueeId);
         System.debug('pQuestionnaireId: ' + pQuestionnaireId);
         
-    	ra.getResponses(pEvaluatorId, pEvalueeId, pQuestionnaireId);
+        ra.getResponses(pEvaluatorId, pEvalueeId, pQuestionnaireId);
         
         System.debug('out getResponseVF');
     }    
@@ -72,7 +72,7 @@ public class RefereeAssessment {
         RefereeAssessment ra = new RefereeAssessment();
         
         if(String.isEmpty(pQuestionnaireId)) {
-        	pQuestionnaireId = RefereeAssessment.QuestionnaireId;
+            pQuestionnaireId = RefereeAssessment.QuestionnaireId;
         }
         if(String.isEmpty(pEvalueeId)) {
             pEvalueeId = RefereeAssessment.EvalueeId;
@@ -90,22 +90,22 @@ public class RefereeAssessment {
 
         System.debug('Select from Evaluation_Responses__c follows');
         selectedresp = [SELECT 
-              Evaluator_Id__r.name,
+              Evaluator_User_Id__r.name,
               Evaluee_Id__r.Name,
-              Questionnaire_DateTime__c,			
+              Questionnaire_DateTime__c,            
               Questionnaire_Id__c,          
               Evaluation_Date__c,
               Evaluation_Location__c,
               ResponseGroupHeader__c,
               Question_Id__r.IsQuestionGroupHeader__c,
-			  Question_Id__r.QuestionType__r.Type_Response_Count__c,
+              Question_Id__r.QuestionType__r.Type_Response_Count__c,
               Evaluation_Type__c,Question_Type__c,
               Question_Number__c,Question_Text__c,
               Evaluation_Rating_Text__c,
               Evaluator_Comment__c
               FROM Evaluation_Responses__c
-              where evaluator_id__c =: pEvaluatorId and evaluee_id__c =: pEvalueeId and Questionnaire_Id__c =: pQuestionnaireId	
-              order by question_number__c	];       
+              where evaluator_user_id__c =: pEvaluatorId and evaluee_id__c =: pEvalueeId and Questionnaire_Id__c =: pQuestionnaireId    
+              order by question_number__c   ];       
         
         String EvaluationTypeIn = selectedresp[0].Evaluation_Type__c;
         
@@ -120,7 +120,7 @@ public class RefereeAssessment {
                QuestionType__r.Type_Response_Count__c,
                IsQuestionGroupHeader__c 
                FROM Evaluation_Questions__c
-			   where QuestionType__r.Name = 'PREFACE' and IsQuestionGroupHeader__c = false
+               where QuestionType__r.Name = 'PREFACE' and IsQuestionGroupHeader__c = false
                order by question_number__c];    
             
         synopsisheadingtxt = [SELECT Name, 
@@ -132,9 +132,9 @@ public class RefereeAssessment {
                QuestionType__r.Type_Response_Count__c,
                IsQuestionGroupHeader__c 
                FROM Evaluation_Questions__c
-			   where Evaluation_Type__c =: EvaluationTypeIn and Question_Active__c = true and QuestionType__r.Type_Response_Count__c = 0
+               where Evaluation_Type__c =: EvaluationTypeIn and Question_Active__c = true and QuestionType__r.Type_Response_Count__c = 0
                     and IsQuestionGroupHeader__c = true
-			   order by question_number__c];    
+               order by question_number__c];    
             
        synopsistxt = [SELECT Name, 
                Evaluation_Type__c, 
@@ -145,9 +145,9 @@ public class RefereeAssessment {
                QuestionType__r.Type_Response_Count__c,
                IsQuestionGroupHeader__c 
                FROM Evaluation_Questions__c
-			   where Evaluation_Type__c =: EvaluationTypeIn and Question_Active__c = true and QuestionType__r.Type_Response_Count__c = 0
+               where Evaluation_Type__c =: EvaluationTypeIn and Question_Active__c = true and QuestionType__r.Type_Response_Count__c = 0
                     and IsQuestionGroupHeader__c = false
-			   order by question_number__c];      
+               order by question_number__c];      
             
             
         selectedquestions = [SELECT Name, 
@@ -159,11 +159,11 @@ public class RefereeAssessment {
                QuestionType__r.Type_Response_Count__c,
                IsQuestionGroupHeader__c 
                FROM Evaluation_Questions__c
-			   where Evaluation_Type__c =: EvaluationTypeIn 
+               where Evaluation_Type__c =: EvaluationTypeIn 
                              and Question_Active__c = true 
                              and QuestionType__r.Name != 'PREFACE'
                              and QuestionType__r.Name != 'SYNOPSIS'
-			   order by question_number__c];	    
+               order by question_number__c];        
           //         
             
         //RefereeAssessment.respCount = selectedresp.size();
@@ -178,21 +178,21 @@ public class RefereeAssessment {
                 //if(q.IsQuestionGroupHeader__c)    
                 //    break;
                 if(q.Question_Number__c == er.Question_Number__c) {
-                	//System.debug(er.Evaluator_Id__r.name);
-                	Synopsis = synopsistxt[0];
+                    //System.debug(er.Evaluator_User_Id__r.name);
+                    Synopsis = synopsistxt[0];
                     SynopsisHeading = synopsisheadingtxt[0];
                     Preface = prefacetxt[0];
-                    EvaluatorName = er.Evaluator_Id__r.name;
+                    EvaluatorName = er.Evaluator_User_Id__r.name;
                     EvalueeName = er.Evaluee_Id__r.name;
                     System.debug(EvalueeName);
                     EvaluationLocation = er.Evaluation_Location__c;
                     EvaluationDate = (DateTime) er.Evaluation_Date__c;
                     fmtEvaluationDate = EvaluationDate.format('MMMMM dd, yyyy');
                     if(String.isNotBlank(er.Evaluation_Type__c))
-                    	PositionEvaluated = er.Evaluation_Type__c;
+                        PositionEvaluated = er.Evaluation_Type__c;
                     if(String.isNotBlank(er.Evaluator_Comment__c))
                         EvaluatorComment = er.Evaluator_Comment__c;
-                	editedresp.add(er);
+                    editedresp.add(er);
                     match = true;
                 } 
             }
@@ -205,7 +205,7 @@ public class RefereeAssessment {
                 r.Question_Number__c = q.Question_Number__c;
                 r.Question_Type__c = q.QuestionType__r.Name;
                 if(q.IsQuestionGroupHeader__c)
-               		r.ResponseGroupHeader__c = true;
+                    r.ResponseGroupHeader__c = true;
                 if(q.QuestionType__r.Type_Response_Count__c == 0)
                     r.Evaluation_Rating_Text__c = '';
                 else if(!r.Question_Number__c.contains('_0') )
@@ -239,7 +239,7 @@ public class RefereeAssessment {
         //cv.OwnerId = linkedId; // owner exception
         //cv.firstPublishLocationId= linkedId;
         insert cv;
-		System.debug('createFile ContentVersion id = ' + cv.Id);
+        System.debug('createFile ContentVersion id = ' + cv.Id);
 
         // insert a ContentDocumentLink with the file version
         cv = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id =: cv.Id LIMIT 1];
@@ -251,7 +251,7 @@ public class RefereeAssessment {
         //cdl.Visibility = 'SharedUsers'; // share exception
         insert cdl;
         
-		System.debug('createFile ContentDocumentLink id = ' + cdl.Id + '  ContentDocument id = ' + cdl.ContentDocumentId);
+        System.debug('createFile ContentDocumentLink id = ' + cdl.Id + '  ContentDocument id = ' + cdl.ContentDocumentId);
         
         return cdl;
     }
@@ -271,7 +271,7 @@ public class RefereeAssessment {
         
      user[] u = [select name, id from user where contactid =: EvalueeId];
      if(u.size() < 1) {
-		System.debug('NO USER INFO FOUND');
+        System.debug('NO USER INFO FOUND');
          return;
      }   
      String rUserId = u[0].Id;
@@ -301,7 +301,7 @@ String UserNetworkID = null;
 String MemberId = null;
 NetworkMember[] nm =  [SELECT id, memberid, networkid FROM NetworkMember WHERE memberid =: rUserId]; 
         if(nm.size() > 0) {
-	UserNetworkID = nm[0].networkid;            
+    UserNetworkID = nm[0].networkid;            
     MemberId = nm[0].memberid;
         }
         
