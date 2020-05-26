@@ -9,6 +9,8 @@ $( document ).ready(function() {
 </script>
     <apex:form id="assessment" >
         
+    <div style="font-family: Arial Unicode MS;">
+
     <apex:outputPanel id="panelout1" >       
        
         <apex:pageBlock >
@@ -76,7 +78,7 @@ $( document ).ready(function() {
       
     </apex:outputPanel>
         
-       
+    </div>
         
     </apex:form>
 
