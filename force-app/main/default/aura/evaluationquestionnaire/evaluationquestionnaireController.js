@@ -95,6 +95,25 @@
        // alert("handleAnswer");
        var idx = event.target.value;
        var key = idx.substr(0,idx.indexOf("^"));
+
+/* TODO:  THIS CONTROL THE OPENING OF A TEXTAREA
+       if(idx.includes("Requires Training]") || idx.includes("Needs Work")) {
+           var k = key.split('-');
+           var ckey = k[0] + '-4r';
+           var ctoprow = k[0] +'-0r';
+           var cval = k[0] + '-4';
+           var cTR = document.getElementById(ckey);
+           var cTR1 = document.getElementById(ctoprow); 
+           //alert("style.display: " + cTR.style.display);
+           if(cTR.style.display.includes("none")) { 
+            cTR.style.display = "block";
+            cTR1.style.borderBottom = "none";
+            var testval =  cval.get("v.value");
+            alert("test val="+ testval);
+           }
+
+       }
+*/       
        var responses = component.get("v.responses");
        // remove duplicate response by key        
        for(var i = 0; i < responses.length; i++) {
@@ -216,9 +235,10 @@
         //alert("openMoal");
         var evaluationreview = ""; 
         var evaluatorname = component.find("evaluatorname").get("v.value");
-        var evaluatorid = component.find("evaluatorid").get("v.value");
+        //var evaluatorid = component.find("evaluatorid").get("v.value");
+        //var evaluatorcontactid = component.find("evaluatorcontactid").get("v.value");
         var evaluatorcontactid = component.find("evaluatorcontactid").get("v.value");
-        
+        var evaluatoruserid = component.find("evaluatoruserid").get("v.value");    
         var evalueename = component.get('v.evalueeName'); //component.find("evalueename").get("v.value");
         var evalueeid =  component.get('v.evalueeId'); //component.find("evalueeid").get("v.value");
         
@@ -316,7 +336,7 @@
             }
         }
         //alert("No missing questions");
-        var responseString = "evaluatorname=" + evaluatorname + "\nevaluatorid=" + evaluatorid + "\n"; 
+        var responseString = "evaluatorname=" + evaluatorname + "\nevaluatoruserid=" + evaluatoruserid + "\n"; 
         responseString = responseString + "evaluatorcontactid=" + evaluatorcontactid + "\n";
         responseString = responseString + "evalueeid=" + evalueeid + "\n";
         responseString = responseString + "evaluationtype=" + evaluationtype + "\n";
@@ -330,7 +350,7 @@
          review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Evalautor Comment</td><td>' + evaluatorcomment + '</td></tr>';
         review = review + '</table>';
         //alert(responseString + "\n" + responseList);
-        alert(responseString);
+        //alert(responseString);
         
         component.set("v.evaluationReviewList", review); 
         component.set("v.evaluationReview",responseString);

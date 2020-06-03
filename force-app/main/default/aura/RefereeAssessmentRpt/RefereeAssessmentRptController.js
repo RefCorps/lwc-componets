@@ -25,7 +25,7 @@
         }
         if(confirm("You selected assessment \n" + selectedassessment +  "\nDo you wish to resend this?" )) {
 			alert("Selected assessment will be resent now.");        
-            
+            //alert("assessmentId = " + assessmentId); 
             var p = assessmentId.split(";");
             helper.genRefereeAssessmentPDF(component, p[0], p[1], p[2] );
             

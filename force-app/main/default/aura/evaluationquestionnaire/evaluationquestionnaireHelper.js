@@ -15,13 +15,14 @@
 				// push the evaluator to the form
 				component.set("v.evaluator", uObj[0]);
                 // now go fetch my regattas
-                var evaluatorId = uObj[0].Id;
+                // var evaluatorId = uObj[0].Id;
+                var evaluatorcontactId = uObj[0].ContactId;
                 
                 var evaluatorContactId = uObj[0].ContactId;                
-                //alert('evaluatorContactId = ' + evaluatorContactId);
+                //alert('evaluator Ids = ' + evaluatorContactId + '|' + evaluatorId);
                 
-                this.getMyRegattas(component,evaluatorId);
-                
+                this.getMyRegattas(component,evaluatorcontactId);
+                                
                 // POSSIBLE AURA BUG - TRIED TO CALL THIS FROM doInit BUT IF FAILED DUE TO UNDEFINED COMPONENT
                 // THIS IS EXACTLY THE SAME CALL  
                 this.getQuestionnaireTS(component);
@@ -95,13 +96,13 @@
     
     
     // CALL getMyRegattas in EvaluationQuestionsController.apxc
-    getMyRegattas : function(component, evaluatorId) {
+    getMyRegattas : function(component, evaluatorcontactId) {
         
         var lastNDays = component.get("v.lastNDays");
     	var action = component.get("c.myRecentRegattas");
         //alert("getMyRegattas evaluatorId " + evaluatorId + " lastNDays " + lastNDays);
         action.setParams({
-             'myId': evaluatorId,
+             'myId': evaluatorcontactId,
              'lastNDays': lastNDays             
         });
         
@@ -134,8 +135,8 @@
 
         //alert("in helper getRegattaParticipants");
         var regattaId = component.find("selectedregatta").get("v.value");
-        var myId = component.find("evaluatorid").get("v.value");        
-        //alert("getRegattaParticipants regattaId=" + regattaId + "  myId=" + myId);
+        var myId = component.find("evaluatorcontactid").get("v.value");
+        //alert("getRegattaParticipants regattaId=" + regattaId + "  myId=" + myId );
         
         //var action = component.get("c.regattaParticipants");
         var action = component.get("c.regattaContacts");
@@ -255,7 +256,7 @@
                 	var p = result.split(";");
                     // generateRefAssessmentRPT(String pEvaluatorId, String pEvalueeId, String pQuestionnaireId, 
                     //alert("evaluationquestionnaireHelper insertRespHelper call insertResponses " + p);
-                    var pEvaluatorId = p[0];
+                    var pEvaluatorcontactId = p[0];
                     var pEvalueeId = p[1];
                     var pQuestionnaireId = p[2];
                     var pPosition = p[3];
@@ -272,7 +273,7 @@
                           "pLocation: " + pLocation + "\n" +
                           "pQuestionnaireId: " + pQuestionnaireId ); 
                     */
-                	this.genRefereeAssessmentPDF(component,pEvaluatorId,pEvalueeId,pEvaluee,pLocation,pPosition,pQuestionnaireId);
+                	this.genRefereeAssessmentPDF(component,pEvaluatorcontactId,pEvalueeId,pEvaluee,pLocation,pPosition,pQuestionnaireId);
                 }
                 
                 //alert("insertRespHelper success");
@@ -309,7 +310,7 @@
     },
 
                
-    genRefereeAssessmentPDF: function(component, evaluatorId, evalueeId, evaluee, location, position, questionnaireId) {
+    genRefereeAssessmentPDF: function(component, evaluatorcontactId, evalueeId, evaluee, location, position, questionnaireId) {
 
         
         //alert("in genRefereeAssessmentPDF test");
@@ -325,7 +326,7 @@
         //generateRefAssessmentRPT(String pEvaluatorId, String pEvalueeId, String pEvaluee, String pPosition, String pQuestionnaireId) 
         var action = component.get("c.generateRefAssessmentRPT");  // creates an assessment output to PDF
         action.setParams({
-           'pEvaluatorId':evaluatorId, 
+           'pEvaluatorId':evaluatorcontactId, 
            'pEvalueeId':evalueeId, 
             'pEvaluee':evaluee,
             'pPosition':position,

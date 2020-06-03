@@ -8,7 +8,8 @@
     <!-- Base Attributes -->
     
     <aura:attribute name="evaluator" type="User" />
-
+    <!-- aura:attribute name="evaluator" type="Contact" / -->
+    
     <aura:attribute name="evaldate" type="Date" default="" />
     <aura:attribute name="regattadate" type="Date" default="" />
 
@@ -126,14 +127,15 @@
                             
                              readonly="true"
                              />
-            <lightning:input aura:id="evaluatorid" 
-                             name="evaluatorid" 
-                             value="{!v.evaluator.Id}" 
-                             required="true" class="slds-hide" />
             <lightning:input aura:id="evaluatorcontactid" 
                              name="evaluatorcontactid" 
                              value="{!v.evaluator.ContactId}" 
                              required="true" class="slds-hide" />
+                            
+            <lightning:input aura:id="evaluatoruserid" 
+                             name="evaluatoruserid" 
+                             value="{!v.evaluator.Id}" 
+                             required="true" class="slds-hide" /> 
 
         
 <!-- ========================================================================================= -->
@@ -316,19 +318,17 @@
                         
                     <!-- begin desktop -->
                     <tr style="border-bottom: thin solid lightgray; height: 35px;">
-                    
                        
-                    <td style="padding-left: 20px" colspan="{!(4-q.QuestionType__r.Type_Response_Count__c)}">
+                    <td id="{!(q.Question_Number__c+'-0r')}" style="padding-left: 20px" colspan="{!(4-q.QuestionType__r.Type_Response_Count__c)}">
                          <lightning:formattedRichText value="{!q.Question_Text__c}" />
                          <aura:if isTrue="{!q.isRequired__c}"><label for="questionId" style="color:red;"> * </label></aura:if>
                          <input type="hidden" id="questionId" name="questionId" value="{!q.Id}" />
                     </td>
-
                       
                     <td>
                         <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
                            <input type="radio" id="{!(q.Question_Number__c+'-1')}" 
-                                name="{!q.Question_Number__c}" 
+                                name="{!q.Question_Number__c}"
        							value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_1__c + ']-1')}" 
                                 onclick="{!c.handleAnswer}"  />
   							<label for="r1">{!q.QuestionType__r.Response_Text_1__c}</label>
@@ -354,6 +354,18 @@
                     </td>
                         
                     </tr>
+
+                    <tr id="{!(q.Question_Number__c+'-4r')}" style="display:none;margin-left: auto; margin-right: auto; padding: 10px; border-bottom: thin solid lightgray; height: 3 rem;">
+                        <td colspan="4" width="100%"><lightning:textarea 
+                            aura:id="{!(q.Question_Number__c+'-4')}"
+                            id="{!(q.Question_Number__c+'-4')}"
+                            name="{!(q.Question_Number__c+'-4')}"
+                            value="{!(q.Question_Number__c+'-4 Test value')}"
+                            placeholder="Explain selection..."
+                            class="textareawide"
+                            /></td>
+                    </tr>
+
                     <!-- end deskstop -->
                         
                      </aura:set>    

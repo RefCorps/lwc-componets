@@ -67,7 +67,11 @@ public class RefereeAssessment {
         String pEvalueeId, 
         String pQuestionnaireId) {
         
-        System.debug('in getResponses');    
+        System.debug('in RefereeAssessment.getResponses'  +
+            '\n\tpEvaluatorId=' + pEvaluatorId +
+            '\n\rpEvalueeId=' + pEvalueeId +
+            '\n\tpQuestionnaireId=' + pQuestionnaireId
+        );    
             
         RefereeAssessment ra = new RefereeAssessment();
         
@@ -90,7 +94,7 @@ public class RefereeAssessment {
 
         System.debug('Select from Evaluation_Responses__c follows');
         selectedresp = [SELECT 
-              Evaluator_User_Id__r.name,
+              Evaluator_Id__r.name,
               Evaluee_Id__r.Name,
               Questionnaire_DateTime__c,            
               Questionnaire_Id__c,          
@@ -104,7 +108,7 @@ public class RefereeAssessment {
               Evaluation_Rating_Text__c,
               Evaluator_Comment__c
               FROM Evaluation_Responses__c
-              where evaluator_user_id__c =: pEvaluatorId and evaluee_id__c =: pEvalueeId and Questionnaire_Id__c =: pQuestionnaireId    
+              where evaluator_id__c =: pEvaluatorId and evaluee_id__c =: pEvalueeId and Questionnaire_Id__c =: pQuestionnaireId    
               order by question_number__c   ];       
         
         String EvaluationTypeIn = selectedresp[0].Evaluation_Type__c;
@@ -182,7 +186,7 @@ public class RefereeAssessment {
                     Synopsis = synopsistxt[0];
                     SynopsisHeading = synopsisheadingtxt[0];
                     Preface = prefacetxt[0];
-                    EvaluatorName = er.Evaluator_User_Id__r.name;
+                    EvaluatorName = er.Evaluator_Id__r.name;
                     EvalueeName = er.Evaluee_Id__r.name;
                     System.debug(EvalueeName);
                     EvaluationLocation = er.Evaluation_Location__c;

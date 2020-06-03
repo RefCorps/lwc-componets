@@ -11,3 +11,14 @@
 .THIS .slds-input-height {
      font-size: 100%;
 }
+.THIS .comment-hidden {
+    display:none;
+}
+.THIS .comment-open {
+    display:block;
+}
+.THIS .textareawide {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+}
