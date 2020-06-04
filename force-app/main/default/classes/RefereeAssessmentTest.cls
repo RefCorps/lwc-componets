@@ -4,7 +4,9 @@
     public static void testSetGlobalValues() {
     
     /*
-     * RefereeAssessment methods may take parameters or global values     
+        RefereeAssessment.cls RefereeAssesssmentVF() returns data through global values identified below.
+        This test will confirm the values are all present and accessible.
+
      */  
     System.debug('=================================================================================================');
     System.debug('RefereeAssessmentTest - Global tests to confirm global values appear within code');    
@@ -61,6 +63,212 @@
         
     }    
     
+@IsTest(SeeAllData=true)
+public static void testgetResponsesVF() {
+
+    /*
+        getResponsesVF - this method is AuraEnabled and is primarily used to test and resend existing assessments.
+        Method Signature:
+            void  getResponsesVF() 
+
+        To preform this test we'll pull an existing record and load it to the globals available for testing (tst...)
+        before calling the method
+
+        The results of this test will appear in the global values
+            public static String EvaluatorId {get; set;}
+            public static String EvalueeId {get; set;}    
+            public static String QuestionnaireId {get; set;}  
+            
+            public static String EvaluatorId {get; set;}
+            public static String EvalueeId {get; set;}    
+            public static String QuestionnaireId {get; set;}  
+            public static String EvaluatorName {get; set;}
+            public static String EvalueeName {get; set;}
+            public static String EvaluationLocation {get; set;}
+            public static DateTime EvaluationDate {get; set;}
+            public static String fmtEvaluationDate {get; set;}
+            public static String EvaluatorComment {get; set;}
+            public static String PositionEvaluated {get; set;}
+
+            public static Evaluation_Questions__c Synopsis {get; set;} 
+            public static Evaluation_Questions__c SynopsisHeading {get; set;} 
+            public static Evaluation_Questions__c Preface {get; set;} 
+            
+            public static List<Evaluation_Responses__c> responses {get; set;}
+
+        Under normal operation these globals are gathered through getResponsesVF() for display 
+        through RefereeAssessment.page 
+
+    */
+    System.debug('=================================================================================================');
+    System.debug('Begin testgetResponsesVF');
+
+    Exception unexpectedException;
+    try {
+
+        // Select a recently completed assessment from Evaluation_ResponsesAbstract__c - the returned evaluator id, evaluee id, 
+        // and questionnaire Id will be used to complete parameters for getResponses 
+        Evaluation_ResponsesAbstract__c[] er = [SELECT Evaluator_Id__c, Evaluee_Id__c, Questionnaire_Id__c, Evaluation_type__c 
+                FROM  Evaluation_ResponsesAbstract__c order by CreatedDate desc];
+        System.debug('testgetResponsesVF - there are ' + er.size() + ' entries in Evaluation ResponsesAbstract - working with the first entry');
+        if(er.size() > 0)
+        {
+            String pEvaluatorId = er[0].Evaluator_Id__c;
+            String pEvalueeId = er[0].Evaluee_Id__c;
+            String pQuestionnaireId = er[0].Questionnaire_Id__c;
+            System.debug('testgetResponsesVF: ' +
+                        '\npEvaluatorId=' + pEvaluatorId +
+                        '\npEvalueeId=' + pEvalueeId +
+                        '\npQuestionnaireId=' + pQuestionnaireId );
+            // In normal use the app would pass as parameters - for testing they are passed as global values            
+            RefereeAssessment.tstEvaluatorId = pEvaluatorId;
+            RefereeAssessment.tstEvalueeId = pEvalueeId;
+            RefereeAssessment.tstQuestionnaireId = pQuestionnaireId;
+            
+            RefereeAssessment.getResponsesVF();
+
+            System.debug('testgetResponsesVF Rows returned = ' + RefereeAssessment.respCount);
+            System.debug('testgetResponsesVF Evaluator: ' + RefereeAssessment.EvaluatorName);
+            System.debug('testgetResponsesVF Evaluee: ' + RefereeAssessment.EvalueeName);
+            System.debug('testgetResponsesVF Position Evaluated: ' + RefereeAssessment.PositionEvaluated);
+            System.debug('testgetResponsesVF Evaluation Location: ' + RefereeAssessment.EvaluationLocation);
+            System.debug('testgetResponsesVF Evaluation Date: ' + RefereeAssessment.fmtEvaluationDate);
+            
+            List<Evaluation_Responses__c> responses = RefereeAssessment.responses;
+            System.debug('testgetResponsesVF  total responses to be formatted for report = ' + responses.size());
+
+        } else {
+            System.assert(er.size() > 0, 'testgetResponsesVF - no test data available');
+        }                   
+
+    } catch (Exception err) {
+        System.debug('testgetResponsesVF err: ' + err.getMessage());
+        System.debug('testgetResponsesVF stacktrace: ' + err.getStackTraceString());
+        unexpectedException = err;
+    }
+    System.assertEquals(null, unexpectedException, 'testgetResponsesVF - Unexcepted to failure - review log');   
+    System.debug('Completed testgetResponsesVF - testing getResponses returned expected results');
+
+}
+
+
+    @IsTest(SeeAllData=true)
+    public static void testObjectAvailablity() { 
+
+    /*
+        RefereeAssessment was created to support the generation of PDF reports in support of EvaluationQuestionsController.
+        There are five object that all begin with 'Evaluation_'
+        This will check to see if they are there and in some cases will check for data.
+
+     */
+
+     System.debug('=================================================================================================');
+     System.debug('Begin testObjectAvailablity');
+     String Evaluation_ResponsesAbstract = 'Evaluation_ResponsesAbstract__c';
+     String Evaluation_Responses = 'Evaluation_Responses__c';
+     String Evaluation_Questions = 'Evaluation_Questions__c';
+     String Evaluation_Properties = 'Evaluation_Properties__c';
+     String 	Evaluation_QuestionTypeResp = 'Evaluation_QuestionTypeResp__c';
+     
+     Exception expectedException;
+     try {
+
+         // Objects used by the method must be present to complete test
+         // the following confirms objects are available 
+         boolean existsEvaluation_ResponsesAbstract = false;
+         boolean existsEvaluation_Responses = false;
+         boolean existsEvaluation_Questions = false;
+         boolean existsEvaluation_Properties = false;
+         boolean existsEvaluation_QuestionTypeResp = false;
+         
+         FieldDefinition[] erafields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                                        where EntityDefinition.QualifiedApiName =: Evaluation_ResponsesAbstract];
+         
+         integer fcnt = erafields.size();
+         if(fcnt == 0) {
+             existsEvaluation_ResponsesAbstract = false;
+         } else {
+             existsEvaluation_ResponsesAbstract = true;
+         }           
+         
+         FieldDefinition[] erfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                                       where EntityDefinition.QualifiedApiName =: Evaluation_Responses];
+         
+         fcnt = erfields.size();
+         if(fcnt == 0) {
+             existsEvaluation_Responses = false;
+         } else {
+             existsEvaluation_Responses = true;
+         }           
+         
+         FieldDefinition[] eqfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                                       where EntityDefinition.QualifiedApiName =: Evaluation_Questions];
+         
+         fcnt = eqfields.size();
+         if(fcnt == 0) {
+             existsEvaluation_Questions = false;
+         } else {
+             existsEvaluation_Questions = true;
+         }           
+         
+         FieldDefinition[] epfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                                       where EntityDefinition.QualifiedApiName =: Evaluation_Properties];
+         
+         fcnt = epfields.size();
+         if(fcnt == 0) {
+             existsEvaluation_Properties = false;
+         } else {
+             existsEvaluation_Properties = true;
+         }           
+         
+         FieldDefinition[] eqtfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                                       where EntityDefinition.QualifiedApiName =: Evaluation_QuestionTypeResp];
+         
+         fcnt = eqtfields.size();
+         if(fcnt == 0) {
+             existsEvaluation_QuestionTypeResp = false;
+         } else {
+             existsEvaluation_QuestionTypeResp = true;
+         }           
+         
+         // If any object is missing throw a fatal error and end this test
+         if(!existsEvaluation_ResponsesAbstract) {
+             System.assertNotEquals(true, existsEvaluation_ResponsesAbstract, 'testObjectAvailablity: missing object Evaluation Responses Abstract ');
+         }            
+         if(!existsEvaluation_Responses) {
+             System.assertNotEquals(true, existsEvaluation_Responses, 'testObjectAvailablity: missing object Evaluation Responses');
+         }                
+         
+         if(!existsEvaluation_Questions) {
+             System.assertNotEquals(true, existsEvaluation_Responses, 'testObjectAvailablity: missing object Evaluation Questions');
+         }
+         
+         if(!existsEvaluation_Properties) {
+             System.assertNotEquals(true, existsEvaluation_Properties, 'testObjectAvailablity: missing object Evaluation Properties');
+         }
+         
+         if(!existsEvaluation_QuestionTypeResp) {
+             System.assertNotEquals(true, existsEvaluation_QuestionTypeResp, 'testObjectAvailablity: missing object Evaluation QuestionTypeResp');
+         }
+
+         Evaluation_Properties__c[] ep = [select Id from Evaluation_Properties__c];
+         System.assert(0 != ep.size(),'testObjectAvailablity - Evaluation Properties is empty - add properties');
+                     
+         Evaluation_Questions__c[] eq = [select Id from Evaluation_Questions__c];
+         System.assert(0 != eq.size(),'testObjectAvailablity - Evaluation Questions is empty - add questions');
+
+         Evaluation_QuestionTypeResp__c[] eqtr = [select Id from Evaluation_QuestionTypeResp__c];
+         System.assert(0 != eqtr.size(),'testObjectAvailablity - Evaluation QuestionTypeResp is empty - add response types');
+         
+         System.debug('testGetResponses - all objects found continue test');
+
+     } catch (Exception err) {
+         
+     }
+     System.debug('testObjectAvailablity complete');
+ 
+    }
+
     @IsTest(SeeAllData=true)
     public static void testGetResponses() {
         
@@ -77,13 +285,14 @@
             List containing rows based upon object Evaluation_Responses__c
 
         Test should:
-        1.  Randomly locate a completed assessment of evaluation_type__c REFEREE - Evaluation ResponsesAbstract
+        1.  Locate a recently completed assessment of evaluation_type__c REFEREE - Evaluation ResponsesAbstract
         2.  Count associated responses - Evaluation Responses
         3.  Count questions based upon the type REFEREE
         4.  The returned list count should match the count of questions
         5.  The responses in the returned list should match defined responses - Evaluation_QuestionTypeResponse
 
-         */   
+         */
+
         System.debug('=================================================================================================');
         System.debug('Begin RefereeAssessmentTest - testing getResponses');
         
@@ -91,59 +300,10 @@
         Exception expectedException;
         try {
 
-            // Objects used by the method must be present to complete test
-            // the following confirms objects are available 
-            boolean existsEvaluation_ResponsesAbstract = false;
-            boolean existsEvaluation_Responses = false;
-            boolean existsEvaluation_Questions = false;
-            
-            FieldDefinition[] erafields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
-                                           where EntityDefinition.QualifiedApiName = 'Evaluation_ResponsesAbstract__c'];
-            
-            integer fcnt = erafields.size();
-            if(fcnt == 0) {
-                existsEvaluation_ResponsesAbstract = false;
-            } else {
-                existsEvaluation_ResponsesAbstract = true;
-            }           
-            
-            FieldDefinition[] erfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
-                                          where EntityDefinition.QualifiedApiName = 'Evaluation_Responses__c'];
-            
-            fcnt = erfields.size();
-            if(fcnt == 0) {
-                existsEvaluation_Responses = false;
-            } else {
-                existsEvaluation_Responses = true;
-            }           
-            
-            FieldDefinition[] eqfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
-                                          where EntityDefinition.QualifiedApiName = 'Evaluation_Questions__c'];
-            
-            fcnt = eqfields.size();
-            if(fcnt == 0) {
-                existsEvaluation_Questions = false;
-            } else {
-                existsEvaluation_Questions = true;
-            }           
-            
-            // If any object is missing throw a fatal error and end this test
-            if(!existsEvaluation_ResponsesAbstract) {
-                System.assertNotEquals(true, existsEvaluation_ResponsesAbstract, 'testGetResponses: missing object Evaluation Responses Abstract ');
-            }            
-            if(!existsEvaluation_Responses) {
-                System.assertNotEquals(true, existsEvaluation_Responses, 'testGetResponses: missing object Evaluation Responses');
-            }                
-            
-            if(!existsEvaluation_Questions) {
-                System.assertNotEquals(true, existsEvaluation_Responses, 'testGetResponses: missing object Evaluation Questions');
-            }
-            
-            System.debug('testGetResponses - all objects found continue test');
-            
-            // Randomly select a completed test - the returned evaluator id, evaluee id, and questionnaire Id will be
-            // used to complete parameters for getResponses 
-            Evaluation_ResponsesAbstract__c[] er = [SELECT Evaluator_User_Id__c, Evaluee_Id__c, Questionnaire_Id__c, Evaluation_type__c from  Evaluation_ResponsesAbstract__c];
+            // Select a recently completed assessment from Evaluation_ResponsesAbstract__c - the returned evaluator id, evaluee id, 
+            // and questionnaire Id will be used to complete parameters for getResponses 
+            Evaluation_ResponsesAbstract__c[] er = [SELECT Evaluator_User_Id__c, Evaluee_Id__c, Questionnaire_Id__c, Evaluation_type__c 
+                    FROM  Evaluation_ResponsesAbstract__c order by CreatedDate desc];
             System.debug('testGetResponses - there are ' + er.size() + ' entries in Evaluation ResponsesAbstract - working with the first entry');
             if(er.size() > 0)
             {
@@ -151,7 +311,11 @@
                 String pEvalueeId = er[0].Evaluee_Id__c;
                 String pQuestionnaireId = er[0].Questionnaire_Id__c;
                 String erEvaluationType = er[0].evaluation_type__c; 
-                System.debug('testGetResponses:\npEvaluatorId='+pEvaluatorId+'\npEvalueeId='+pEvalueeId+'\npQuestionnaireId='+pQuestionnaireId+'\nerEvaluationType='+ erEvaluationType);
+                System.debug('testGetResponses: ' +
+                    '\npEvaluatorId=' + pEvaluatorId +
+                    '\npEvalueeId=' + pEvalueeId +
+                    '\npQuestionnaireId=' + pQuestionnaireId +
+                    '\nerEvaluationType=' + erEvaluationType);
                     
                 // Select count of responses associated with Questionnaire_Id__c found in Evaluation ResponsesAbstract
                 integer erqidcnt = [SELECT count() FROM evaluation_responses__c WHERE Questionnaire_Id__c =: pQuestionnaireId];
@@ -203,6 +367,7 @@
         This method is called from within EvaluationQuestionsController method generateRefAssessmentRPT.  The returned 
         ContentDocumentLink contains ContentDocumentId.  ContentDocumentId is used to select the document that will
         be sent to the evaluee via direct messsaging.
+        NOTE - YOU CANNOT TEST .getContent FROM WITHIN A TEST METHOD - TESTS SIMULATE DOCUMENTS OR I'VE HAD TO BY-PASS TO COMPLETE TESTS
         Method Signature:
              ContentDocumentLink createFile(
                 Id parentId, 
@@ -217,6 +382,7 @@
 		upon the returned ContentDocumentLink.
 
         */
+
         System.debug('=================================================================================================');
         System.debug('Begin RefereeAssessmentTest - testing createFile');
         
@@ -224,11 +390,10 @@
         
         RefereeAssessment ra = new RefereeAssessment();
         
-        System.debug('testCreateFile Test 1 - Test will replicate logic in method');
+        System.debug('testCreateFile Test 1 - Test will replicate file creation and storage logic in method');
         
-        //user[] useracct = [SELECT AccountId from USER where id =: UserId];
-        //String parentId = UserId;
-        Account acc = [SELECT Id FROM Account WHERE Id = '0016A00000K77C4QAJ'];  // TODO:  WORKS BUT NEED MORE INFO
+        String AppAcct = EvaluationQuestionsController.getProp('AppName');
+        Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct];  // TODO:  WORKS BUT NEED MORE INFO
         String parentId = acc.Id;
 
         DateTime dtn = DateTime.now();
@@ -300,32 +465,150 @@
     }
     
     @IsTest(SeeAllData=true)
-    public static void testSendDirectMessageNoData(){
+    public static void testSendDirectMessageNoContentDocumentId(){
         
-	System.debug('=================================================================================================');
-	System.debug('Begin testSendDirectMessageNoData');
+        /*
+            SendDirectMessage - this method creates and sends a chatter based direct message with an attachment
+            Method Signature:
+                void SendDirectMessage(
+                    String EvalueeId,     - must be a contactId - message will be directed to this person's email and message box 
+                    String EvalRptFileId) - this is the ContentDocumentLink Id of a document - in this case a PDF Assessment
+
+            This will will use a known user's contact ID and a blank ContentDocumentLink Id
+
+        */
+        System.debug('=================================================================================================');
+        System.debug('Begin testSendDirectMessageNoContentDocumentId ');
         
+        // Nomrally suggest randomly selecting a Referee ID - for now use developer's Id - regardless this will fail so no harm
+        Contact c = [SELECT id, name from contact where name like 'Michael Miller' limit 1];    
         RefereeAssessment ra = new RefereeAssessment();
-        string UserId = UserInfo.getUserId();
-        String EvalueeId = UserId; 
-        String EvalRptFileId = '';
+        String EvalueeId = c.Id; 
+        String EvalRptFileId = '';  // Alternately you could place any Id that is not a document
         Exception expectedException;
-        
+        System.debug('testSendDirectMessageNoContentDocumentId submitting p1=' + EvalueeId + ' p2=' + EvalRptFileId);
         try {
-            // should return false 
             ra.SendDirectMessage(EvalueeId, EvalRptFileId);
-            // System.assertNotEquals(true, rtr,'SendDirectMessage should return false');    
         } catch (Exception err) {
-            System.debug('testSendDirectMessageNoData err: ' + err);
+            System.debug('testSendDirectMessageNoData err: ' + err.getMessage());
             expectedException = err;
         } 
-           
-        system.assertEquals(null, expectedException, 'testSendDirectMessageNoData should not throw exception');
+        System.assertNotEquals(null, expectedException, 'testSendDirectMessageNoData should have thrown an exception related to document lookup');
         System.debug('testSendDirectMessageNoData completed');
 
     }
-            
     
+    @IsTest(SeeAllData=true)
+    public static void testSendDirectMessageBadEvalueeId(){
+        
+        /*
+            SendDirectMessage - this method creates and sends a chatter based direct message with an attachment
+            Method Signature:
+                void SendDirectMessage(
+                    String EvalueeId,     - must be a contactId - message will be directed to this person's email and message box 
+                    String EvalRptFileId) - this is the ContentDocumentLink Id of a document - in this case a PDF Assessment
+
+            This will will use a bad EvalueId (User Id in place of Contact ID) and a blank ContentDocumentLink Id - the method 
+            will throw an ApplicationException tied to a bad or missing Id
+
+        */
+
+        System.debug('=================================================================================================');
+        System.debug('Begin testSendDirectMessageBadEvalueeId');
+    
+        RefereeAssessment ra = new RefereeAssessment();
+        String EvalueeId = UserInfo.getUserId();
+        String EvalRptFileId = '';
+        Exception expectedException;
+        System.debug('testSendDirectMessageBadEvalueeId submitting p1=' + EvalueeId + ' p2=' + EvalRptFileId);
+        try {
+            ra.SendDirectMessage(EvalueeId, EvalRptFileId);
+        } catch (Exception err) {
+            System.debug('testSendDirectMessageBadEvalueeId err: ' + err.getMessage());
+            expectedException = err;
+        } 
+        System.assertNotEquals(null, expectedException, 'testSendDirectMessageBadEvalueeId exception have thrown an exception related to the evaluee Id');
+        System.debug('testSendDirectMessageBadEvalueeId completed');
+
+    }
+
+   @IsTest(SeeAllData=true)
+    public static void testSendDirectMessage(){
+        
+        /*
+            SendDirectMessage - this method creates and sends a chatter based direct message with an attachment
+            Method Signature:
+                void SendDirectMessage(
+                    String EvalueeId,     - must be a contactId - message will be directed to this person's email and message box 
+                    String EvalRptFileId) - this is the ContentDocumentLink Id of a document - in this case a PDF Assessment
+
+            For this test we'll create a valid attachment document and send with known test user
+
+        */
+        System.debug('=================================================================================================');
+        System.debug('Begin testSendDirectMessage');
+        Exception unexpectedException;
+        try {
+
+            String EvalueeId = '';
+            String EvalRptFileId = '';
+
+            System.debug('testSendDirectMessage - Step 1 obtain a known contact to use as EvlaueeId');
+                
+            Contact c = [SELECT id, name from contact where name like 'Michael Miller' limit 1];  // TODO: make Name a prop
+            EvalueeId = c.Id;
+            System.assert(String.isNotEmpty(EvalueeId), 'testSendDirectMessage unable to get a contact Id for our test user');
+
+            System.debug('testSendDirectMessage - Step 2 create a test document to send using method createFile');
+
+            String AppAcct = EvaluationQuestionsController.getProp('AppName');
+            Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct];  // TODO:  WORKS BUT NEED MORE INFO
+            String parentId = acc.Id;
+
+            ContentDocumentLink cdl = New ContentDocumentLink();
+        
+            Id linkedId = parentId;
+
+            DateTime dtn = DateTime.now();
+            String DT = dtn.format('yyyyMMddHHmmsss');
+            String filename = 'TestSendDirectMsgDocument' + DT + '.txt';
+
+            String testbody = 'Test SendDirectMessage content created ' + DT;
+            Blob body = Blob.valueOf(testbody);
+            String contentType = 'text/plain';
+
+            RefereeAssessment ra = new RefereeAssessment();
+
+            System.debug('parentId = ' + parentId);
+            System.debug('linkedId = ' + linkedId);
+            System.debug('filename = ' + fileName);
+            System.debug('body = ' + body);
+            System.debug('contenttype = ' + contentType);
+            cdl = ra.createFile(parentId, linkedId, fileName, body, contentType);
+            
+            EvalRptFileId = cdl.ContentDocumentId;
+            System.assert(String.isNotEmpty(EvalRptFileId), 'testSendDirectMessage unable to get a ContentDocumentId for our test user');
+
+            System.debug('testSendDirectMessage - Step 3 call ');
+
+            ConnectAPI.FeedElement fi_rtr = ra.SendDirectMessage(EvalueeId, EvalRptFileId);
+
+            String rtrbody = fi_rtr.Body.toString();
+            
+            System.debug('testSendDirectMessage - returned body: [' + rtrbody + ']');
+            System.assert(!rtrbody.contains(testbody),'testSendDirectMessage the returned FeedElement does not contain the message body');
+
+            //ConnectApi.ChatterFeeds.
+
+        } catch (Exception err) {
+            System.debug('testSendDirectMessage err: ' + err);
+            unexpectedException = err;
+        }
+        system.assertEquals(null, unexpectedException, 'testSendDirectMessage - unexcepted fail');
+
+        System.debug('Completed testSendDirectMessage - testing createFile');
+        }
+
     @IsTest(SeeAllData=true)
     public static void testGenerateRefAssessmentRPT() {
   

@@ -1,35 +1,12 @@
 public class RefereeAssessment {
-    
-    public static String EvaluatorId {get; set;}
-    public static String EvalueeId {get; set;}    
-    public static String QuestionnaireId {get; set;}
-    
-    public string ResponseIn {get; set;}
-    
-    public static Evaluation_Questions__c Synopsis {get; set;} 
-    public static Evaluation_Questions__c SynopsisHeading {get; set;} 
-    public static Evaluation_Questions__c Preface {get; set;} 
-    public static String EvaluatorName {get; set;}
-    public static String EvalueeName {get; set;}
-    public static String EvaluationLocation {get; set;}
-    public static DateTime EvaluationDate {get; set;}
-    public static String fmtEvaluationDate {get; set;}
-    public static String EvaluatorComment {get; set;}
-    public static String PositionEvaluated {get; set;}
-    
-    public String recipientEmail { get; set; }  // Send to this email
-    
-    public static String htmlrpt {get; set;}
-    
-    public static integer respCount {get; set;}
-    
-    public static List<Evaluation_Responses__c> responses {get; set;}
 
-    // =================================================================
-    
     /*
-        THIS IS THE ENTRY POINT FROM RefereeAssessment.vfp
-        THE FLOW IS A FOLLOWS        
+        RefereeAssesssment was created to support RefereeAssessment.vfp, a 
+        Visual Force Page that outputs a PDF Document in a format similar to 
+        the originial Referee Assessment (Asst. Evaluation) document.  
+        
+        The RefereeAssessment.vfp entry point is getResponseVF [action="{!getResponsesVF}"].
+        
         EvaluationQuestionsController.apxc INVOKES THE FOLLOWING 
             PageReference pageReferenceForPDF = Page.RefereeAssessment;   <<< THIS IS RefereeAssessment.vfp
             pageReferenceForPDF.getParameters().put('pEvaluatorId',pEvaluatorId);
@@ -37,12 +14,48 @@ public class RefereeAssessment {
             pageReferenceForPDF.getParameters().put('pQuestionnaireId',pQuestionnaireId);
             Blob body = pageReferenceForPDF.getContent();   
 
-        EvaluationQuestionController WILL CALL RefereeAssessment.ContentDocumentLink MOVE CONTENT TO FILES
+        EvaluationQuestionController will call RefereeAssessment method createFile (creates and stores file)
+            ContentDocumentLink rptfile = ra.createFile(parentId, linkedId, fileName, body, contentType);
+        EvaluationQuestionController WILL CALL RefereeAssessment method SendDirectMessage (sends file to Evaluee)
+            ra.SendDirectMessage(pEvalueeId, rptfile.ContentDocumentId ); 
+    
     */
+
+    // THE FOLLOWING GLOBAL VALUES ARE USED WITHIN RefereeAssessment.vfp
+    public static String EvaluatorId {get; set;}
+    public static String EvalueeId {get; set;}    
+    public static String QuestionnaireId {get; set;}  
+    public static String EvaluatorName {get; set;}
+    public static String EvalueeName {get; set;}
+    public static String EvaluationLocation {get; set;}
+    public static DateTime EvaluationDate {get; set;}
+    public static String fmtEvaluationDate {get; set;}
+    public static String EvaluatorComment {get; set;}
+    public static String PositionEvaluated {get; set;}
+
+    public static Evaluation_Questions__c Synopsis {get; set;} 
+    public static Evaluation_Questions__c SynopsisHeading {get; set;} 
+    public static Evaluation_Questions__c Preface {get; set;} 
+    
+    public static List<Evaluation_Responses__c> responses {get; set;}
+    
+    public static integer respCount {get; set;}
+
+    //public String recipientEmail { get; set; }  // Send to this email replaced by DirectMessage
+    //public static String htmlrpt {get; set;}
+    //public string ResponseIn {get; set;}
+
+    // THE FOLLOWING WERE CREATED TO SUPPORT APEX TESTING AS AN ALTERNATIVE TO PARAMS
+    public static String tstEvaluatorId {get; set;}
+    public static String tstEvalueeId {get; set;}    
+    public static String tstQuestionnaireId {get; set;}  
+
+    // =================================================================
+ 
     @AuraEnabled
     public static void  getResponsesVF() {
         
-        System.debug('in RefereeAssessment.apxc getResponseVF');
+        System.debug(LoggingLevel.INFO,'in RefereeAssessment.apxc getResponseVF');
         
         RefereeAssessment ra = new RefereeAssessment();
         
@@ -51,13 +64,35 @@ public class RefereeAssessment {
         String pEvalueeId = pg.getParameters().get('pEvalueeId');
         String pQuestionnaireId = pg.getParameters().get('pQuestionnaireId');
         
-        System.debug('pEvaluatorId: ' + pEvaluatorId);
-        System.debug('pEvalueeId: ' + pEvalueeId);
-        System.debug('pQuestionnaireId: ' + pQuestionnaireId);
+        
+        // THERE ARE TWO WAYS TO SET VALUES 1) Parameters 2) 'tst' Globals (used for apex testing)
+        // If there are no values this will fail
+        if(String.isEmpty(pEvaluatorId)) {
+            if(String.isNotEmpty(tstEvaluatorId))
+                pEvaluatorId = tstEvaluatorId;
+        }    
+        if(String.isEmpty(pEvalueeId)) {
+            if(String.isNotEmpty(tstEvalueeId))
+                pEvalueeId = tstEvalueeId;
+        }
+        if(String.isEmpty(pQuestionnaireId)) {
+            if(String.isNotEmpty(tstQuestionnaireId))
+                pQuestionnaireId = tstQuestionnaireId;
+        }
+        System.debug(LoggingLevel.DEBUG,'pEvaluatorId: ' + pEvaluatorId);
+        System.debug(LoggingLevel.DEBUG,'pEvalueeId: ' + pEvalueeId);
+        System.debug(LoggingLevel.DEBUG,'pQuestionnaireId: ' + pQuestionnaireId);
+
+        if(String.isEmpty(pEvaluatorId)) 
+            throw new applicationException('RefereeAssessment error - missing pEvaluatorId value');
+        if(String.isEmpty(pEvalueeId))
+            throw new applicationException('RefereeAssessment error - missing pEvalueeId value');
+        if(String.isEmpty(pQuestionnaireId))
+            throw new applicationException('RefereeAssessment error - missing pQuestionnaireId value');
         
         ra.getResponses(pEvaluatorId, pEvalueeId, pQuestionnaireId);
-        
-        System.debug('out getResponseVF');
+ 
+        System.debug(LoggingLevel.INFO,'out getResponseVF');
     }    
     
     // =================================================================
@@ -67,7 +102,7 @@ public class RefereeAssessment {
         String pEvalueeId, 
         String pQuestionnaireId) {
         
-        System.debug('in RefereeAssessment.getResponses'  +
+        System.debug(LoggingLevel.INFO,'in RefereeAssessment.getResponses'  +
             '\n\tpEvaluatorId=' + pEvaluatorId +
             '\n\rpEvalueeId=' + pEvalueeId +
             '\n\tpQuestionnaireId=' + pQuestionnaireId
@@ -92,7 +127,7 @@ public class RefereeAssessment {
         List<Evaluation_Responses__c> selectedresp = new List<Evaluation_Responses__c>();
         List<Evaluation_Responses__c> editedresp = new List<Evaluation_Responses__c>();
 
-        System.debug('Select from Evaluation_Responses__c follows');
+        System.debug(LoggingLevel.DEBUG,'Select from Evaluation_Responses__c follows');
         selectedresp = [SELECT 
               Evaluator_Id__r.name,
               Evaluee_Id__r.Name,
@@ -113,7 +148,7 @@ public class RefereeAssessment {
         
         String EvaluationTypeIn = selectedresp[0].Evaluation_Type__c;
         
-        System.debug('Select from Evaluation_Questions__c follows');
+        System.debug(LoggingLevel.DEBUG,'Select from Evaluation_Questions__c follows');
             
         prefacetxt = [SELECT Name, 
                Evaluation_Type__c, 
@@ -170,12 +205,12 @@ public class RefereeAssessment {
                order by question_number__c];        
           //         
             
-        //RefereeAssessment.respCount = selectedresp.size();
-        //System.debug('Rows returned = ' + RefereeAssessment.respCount);
+        RefereeAssessment.respCount = selectedresp.size();
+        System.debug(LoggingLevel.DEBUG,'Rows returned = ' + RefereeAssessment.respCount);
         boolean match = false;
         for (Evaluation_Questions__c q : selectedquestions ) {
             match = false;
-            //System.debug('check ' + q.Question_Number__c + '  ' + q.Question_Text__c);
+            System.debug(LoggingLevel.DEBUG,'check ' + q.Question_Number__c + '  ' + q.Question_Text__c);
             for (Evaluation_Responses__c er : selectedresp ) {
                 //if(q.Question_Number__c.contains('_0'))
                 // there shouldn't be any group headers in responses
@@ -204,7 +239,7 @@ public class RefereeAssessment {
                 continue;
             else {
                 Evaluation_Responses__c r = new Evaluation_Responses__c();
-                //System.debug('no match ' + q.Question_Number__c + '  ' + q.Question_Text__c);
+                System.debug(LoggingLevel.DEBUG,'no match ' + q.Question_Number__c + '  ' + q.Question_Text__c);
                 r.Question_Text__c = q.Question_Text__c;
                 r.Question_Number__c = q.Question_Number__c;
                 r.Question_Type__c = q.QuestionType__r.Name;
@@ -220,7 +255,7 @@ public class RefereeAssessment {
         }
         RefereeAssessment.responses = editedresp;
         
-        System.debug('out getResponses return size=' + RefereeAssessment.responses.size());
+        System.debug(LoggingLevel.INFO,'out getResponses return size=' + RefereeAssessment.responses.size());
         
         //sleep(5000);
         //ra.GeneratePDF();
@@ -233,7 +268,7 @@ public class RefereeAssessment {
        
     public ContentDocumentLink createFile(Id parentId, Id linkedId, String fileName, Blob body, String contentType) {
 
-        System.debug('createFile ' + filename + ' ' + contentType);
+        System.debug(LoggingLevel.INFO,'createFile ' + filename + ' ' + contentType);
         // insert a version of the file - if no ContentDocumentId, then it creates a new ContentDocument
         ContentVersion cv = new ContentVersion();
         cv.ContentLocation = 'S'; // S = within Salesforce, E = External
@@ -243,7 +278,7 @@ public class RefereeAssessment {
         //cv.OwnerId = linkedId; // owner exception
         //cv.firstPublishLocationId= linkedId;
         insert cv;
-        System.debug('createFile ContentVersion id = ' + cv.Id);
+        System.debug(LoggingLevel.DEBUG,'createFile ContentVersion id = ' + cv.Id);
 
         // insert a ContentDocumentLink with the file version
         cv = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id =: cv.Id LIMIT 1];
@@ -255,7 +290,7 @@ public class RefereeAssessment {
         //cdl.Visibility = 'SharedUsers'; // share exception
         insert cdl;
         
-        System.debug('createFile ContentDocumentLink id = ' + cdl.Id + '  ContentDocument id = ' + cdl.ContentDocumentId);
+        System.debug(LoggingLevel.INFO,'createFile ContentDocumentLink id = ' + cdl.Id + '  ContentDocument id = ' + cdl.ContentDocumentId);
         
         return cdl;
     }
@@ -263,105 +298,124 @@ public class RefereeAssessment {
     
     // =====================================================================
 
-    public void SendDirectMessage(String EvalueeId, String EvalRptFileId) {
+    public ConnectApi.FeedElement SendDirectMessage(String EvalueeId, String EvalRptFileId) {
         
-     System.debug('SendDirectMessage: EvalueeId=' + EvalueeId + '  EvalRptFileId=' + EvalRptFileId);   
-        
-     String TestDMAddress = EvaluationQuestionsController.getProp('TestDMAddress');   
-        if(String.isNotEmpty(TestDMAddress)) {
-            EvalueeId = TestDMAddress;
-            System.debug('Using test user Id ' + TestDMAddress);
-        }
-        
+     System.debug(LoggingLevel.INFO,'SendDirectMessage: EvalueeId=' + EvalueeId + '  EvalRptFileId=' + EvalRptFileId);
+
+     // THE FOLLOWING IS TEMP OUT OF ORDER - PROP 'TestDMAddress' SHOULD BE DISABLED FOR NOW
+     //String TestDMAddress = EvaluationQuestionsController.getProp('TestDMAddress');
+     //if (String.isNotEmpty(TestDMAddress)) {
+     //    EvalueeId = TestDMAddress;
+     //    System.debug(LoggingLevel.DEBUG,'Using test user Id ' + TestDMAddress);
+     //}
+     // ==================================
+
      user[] u = [select name, id from user where contactid =: EvalueeId];
-     if(u.size() < 1) {
-        System.debug('NO USER INFO FOUND');
-         return;
-     }   
+     if(u.size() == 0) {
+         System.debug(LoggingLevel.ERROR,'SendDirectMessage - 0 user data found - throwing error');
+         throw new applicationException('SendDirectMessage - EvaluedId lookup failed probable cause is EvalueeId contact Id: [' + EvalueeId + ']');
+     }
      String rUserId = u[0].Id;
-     System.debug('rUserId = ' + rUserId);   
-        
-// DIRECT FEED
+     System.debug(LoggingLevel.DEBUG,'rUserId = ' + rUserId);
 
-// Define the FeedItemInput object to pass to postFeedElement
-ConnectApi.FeedItemInput feedItemInput = new ConnectApi.FeedItemInput();
- 
-ConnectApi.TextSegmentInput textSegmentInput = new ConnectApi.TextSegmentInput();
-textSegmentInput.text = 'Testing direct messages from RefereeAssessment using networkid lookup.';
-textSegmentInput.text = EvaluationQuestionsController.getProp('DMText'); 
-        
-// The MessageBodyInput object holds the text in the post
-ConnectApi.MessageBodyInput messageBodyInput = new ConnectApi.MessageBodyInput();
-messageBodyInput.messageSegments = new List<ConnectApi.MessageSegmentInput>();
-messageBodyInput.messageSegments.add(textSegmentInput);
-feedItemInput.body = messageBodyInput;
- 
-// The FeedElementCapabilitiesInput object holds the capabilities of the feed item.
-// For this feed item, we define a direct message capability to hold the member(s) and the subject.
-// select NetworkId, NetworkUserId, UserType FROM NetworkUserHistoryRecent where networkuserid = '0056A000002Hx5HQAS'
-// group by NetworkId, NetworkUserId,  UserType 
+     String AppAcct = EvaluationQuestionsController.getProp('AppName');
+     System.debug(LoggingLevel.DEBUG,'SendDirectMessage - Lookup Account Id for ' + AppAcct);
+     Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct];  // TODO:  WORKS BUT NEED MORE INFO
+     String parentId = acc.Id;
+     System.debug(LoggingLevel.DEBUG,'SendDirectMessage - using Account Id = ' + parentId + ' to location contentdocument ' + EvalRptFileId);
+     
+     String querystmt = 'SELECT ContentDocument.title, Id,LinkedEntityId,ContentDocumentId,IsDeleted,SystemModstamp ';
+     querystmt = querystmt + 'FROM ContentDocumentLink WHERE LinkedEntityId = \'' + parentId + '\' AND ContentDocumentId = \'' + EvalRptFileId + '\'';
+     System.debug(LoggingLevel.DEBUG,'SendDirectMessage - query\n' + querystmt);
+     ContentDocumentLink[] cdl = Database.query(querystmt);
+     System.debug(LoggingLevel.DEBUG,'SendDirectMessage - Lookup document, rows = ' + cdl.size());           
+     if(cdl.size() == 0) {
+        System.debug(LoggingLevel.ERROR,'SendDirectMessage - document lookup failed probable cause is EvalRptFileId: [' + EvalRptFileId + ']');
+        throw new applicationException('SendDirectMessage - document lookup failed probable cause is EvalRptFileId: [' + EvalRptFileId + ']');
+     }
+     //System.assert(cdl.size() > 0, 'SendDirectMessage - could not locate document for ' + u[0].Name);
+     
+     // DIRECT FEED
 
-String UserNetworkID = null;
-String MemberId = null;
-NetworkMember[] nm =  [SELECT id, memberid, networkid FROM NetworkMember WHERE memberid =: rUserId]; 
-        if(nm.size() > 0) {
-    UserNetworkID = nm[0].networkid;            
-    MemberId = nm[0].memberid;
-        }
-        
-System.debug('UserNetworkID = ' + UserNetworkID);
-System.debug('MemberID = ' + MemberId);            
-List<String> memberIds = new List<String>();
-System.debug('Adding memberId ' + rUserId);        
-memberIds.add(MemberId);
-// memberIds.add(UserNetworkID);
-// memberIds.add('0056A000002Hx5HQAS');
-// memberIds.add('005B0000001rIN6');
- 
-ConnectApi.DirectMessageCapabilityInput dmInput = new ConnectApi.DirectMessageCapabilityInput();
-dmInput.subject = 'Referee Assessment';
-dmInput.membersToAdd = memberIds;
+     // Define the FeedItemInput object to pass to postFeedElement
+     ConnectApi.FeedItemInput feedItemInput = new ConnectApi.FeedItemInput();
 
-//============
-List<String> fileIds = new List<String>();
-// fileIds.add('069e0000001VDzmAAG');
-fileIds.add(EvalRptFileId);  //  RA_0507-1335-231-PJ20204106074109.pdf
-//fileIds.add('069xx00000000QT');
-//fileIds.add('069xx00000000Qn');
-//fileIds.add('069xx00000000Qi');
-//fileIds.add('069xx00000000Qd');
+     ConnectApi.TextSegmentInput textSegmentInput = new ConnectApi.TextSegmentInput();
+     textSegmentInput.text = 'Testing direct messages from RefereeAssessment using networkid lookup.';
+     textSegmentInput.text = EvaluationQuestionsController.getProp('DMText');
 
-ConnectApi.FilesCapabilityInput filesInput = new ConnectApi.FilesCapabilityInput();
-filesInput.items = new List<ConnectApi.FileIdInput>();
+     // The MessageBodyInput object holds the text in the post
+     ConnectApi.MessageBodyInput messageBodyInput = new ConnectApi.MessageBodyInput();
+     messageBodyInput.messageSegments = new List < ConnectApi.MessageSegmentInput > ();
+     messageBodyInput.messageSegments.add(textSegmentInput);
+     feedItemInput.body = messageBodyInput;
 
-for (String fileId : fileIds) {
-    ConnectApi.FileIdInput idInput = new ConnectApi.FileIdInput();
-    idInput.id = fileId;
-    filesInput.items.add(idInput);
-}
+     // The FeedElementCapabilitiesInput object holds the capabilities of the feed item.
+     // For this feed item, we define a direct message capability to hold the member(s) and the subject.
+     // select NetworkId, NetworkUserId, UserType FROM NetworkUserHistoryRecent where networkuserid = '0056A000002Hx5HQAS'
+     // group by NetworkId, NetworkUserId,  UserType 
 
-ConnectApi.FeedElementCapabilitiesInput feedElementCapabilitiesInput = new ConnectApi.FeedElementCapabilitiesInput();
-feedElementCapabilitiesInput.files = filesInput;
+     String UserNetworkID = null;
+     String MemberId = null;
+     NetworkMember[] nm = [SELECT id, memberid, networkid FROM NetworkMember WHERE memberid =: rUserId];
+     if (nm.size() > 0) {
+         UserNetworkID = nm[0].networkid;
+         MemberId = nm[0].memberid;
+     }
 
-feedItemInput.capabilities = feedElementCapabilitiesInput;            
-// ===============
+     System.debug(LoggingLevel.DEBUG,'UserNetworkID = ' + UserNetworkID);
+     System.debug(LoggingLevel.DEBUG,'MemberID = ' + MemberId);
+     List < String > memberIds = new List < String > ();
+     System.debug(LoggingLevel.DEBUG,'Adding memberId ' + rUserId);
+     memberIds.add(MemberId);
+     // memberIds.add(UserNetworkID);
+     // memberIds.add('0056A000002Hx5HQAS');
+     // memberIds.add('005B0000001rIN6');
 
-            
-//ConnectApi.FeedElementCapabilitiesInput feedElementCapabilitiesInput = new ConnectApi.FeedElementCapabilitiesInput();
-feedElementCapabilitiesInput.directMessage = dmInput;
- 
-feedItemInput.capabilities = feedElementCapabilitiesInput;
- 
-// Post the feed item. 
-// 0DB6A00000010V7WAI
+     ConnectApi.DirectMessageCapabilityInput dmInput = new ConnectApi.DirectMessageCapabilityInput();
+     dmInput.subject = 'Referee Assessment';
+     dmInput.membersToAdd = memberIds;
 
-ConnectApi.FeedElement feedElement = ConnectApi.ChatterFeeds.postFeedElement(UserNetworkID, feedItemInput);
-              //
-            
-        system.debug('out GenerateChatterMessage');
+     //============
+     List < String > fileIds = new List < String > ();
+     // fileIds.add('069e0000001VDzmAAG');
+     fileIds.add(EvalRptFileId); //  RA_0507-1335-231-PJ20204106074109.pdf
+     //fileIds.add('069xx00000000QT');
+     //fileIds.add('069xx00000000Qn');
+     //fileIds.add('069xx00000000Qi');
+     //fileIds.add('069xx00000000Qd');
+
+     ConnectApi.FilesCapabilityInput filesInput = new ConnectApi.FilesCapabilityInput();
+     filesInput.items = new List < ConnectApi.FileIdInput > ();
+
+     for (String fileId: fileIds) {
+         ConnectApi.FileIdInput idInput = new ConnectApi.FileIdInput();
+         idInput.id = fileId;
+         filesInput.items.add(idInput);
+     }
+
+     ConnectApi.FeedElementCapabilitiesInput feedElementCapabilitiesInput = new ConnectApi.FeedElementCapabilitiesInput();
+     feedElementCapabilitiesInput.files = filesInput;
+
+     feedItemInput.capabilities = feedElementCapabilitiesInput;
+     // ===============
+
+
+     //ConnectApi.FeedElementCapabilitiesInput feedElementCapabilitiesInput = new ConnectApi.FeedElementCapabilitiesInput();
+     feedElementCapabilitiesInput.directMessage = dmInput;
+
+     feedItemInput.capabilities = feedElementCapabilitiesInput;
+
+     // Post the feed item. 
+     // 0DB6A00000010V7WAI
+
+     ConnectApi.FeedElement feedElement = ConnectApi.ChatterFeeds.postFeedElement(UserNetworkID, feedItemInput);
+     System.debug(LoggingLevel.INFO,'out SendDirectMessage');
+
+     return feedElement;
         
     }
 
-    
+    public class applicationException extends Exception {}
     
 }

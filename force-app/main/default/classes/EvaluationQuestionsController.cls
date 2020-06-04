@@ -12,9 +12,9 @@ public with sharing class EvaluationQuestionsController {
     @AuraEnabled 
     public static List<User> fetchEvaluator(){
        string UserId = UserInfo.getUserId();
-       // USE USER ID SINCE SOME USERS MAY NOT HAVE A CONTACT - WAY IT WON'T FAIL - THE ID WILL BE BLANK
+       // USE USER ID SINCE SOME USERS MAY NOT HAVE A CONTACT - WAY IT WON'T FAIL - THE CONTANTID WILL BE BLANK
        List<User> evaluator = [select name, contactid from user where id =: UserId ];
-       //System.debug(evaluator); 
+       //System.debug(LoggingLevel.DEBUG,evaluator); 
        return evaluator;
     }
 
@@ -22,7 +22,7 @@ public with sharing class EvaluationQuestionsController {
     @AuraEnabled 
     public static DateTime getQuestionnaireTS() {
         DateTime dt = DateTime.now();
-        //System.debug(dt);
+        //System.debug(LoggingLevel.DEBUG,dt);
         return dt;
     }
 
@@ -35,12 +35,12 @@ public with sharing class EvaluationQuestionsController {
     public static String getProp(String prop) {
         String value = '';
         String searchquery = 'select Name, Value__c from Evaluation_Properties__c where isActive__c = true and name = \'' + prop + '\'';
-        //System.debug('getProp query: ' + searchquery);
+        //System.debug(LoggingLevel.DEBUG,'getProp query: ' + searchquery);
         List<Evaluation_Properties__c> props = Database.query(searchquery);
         if(props.size() > 0) {
             value = (String) props[0].get('Value__c');
         }
-        //System.debug('getProp returning ' + value);
+        //System.debug(LoggingLevel.DEBUG,'getProp returning ' + value);
         return value;
     }
     
@@ -79,12 +79,12 @@ public with sharing class EvaluationQuestionsController {
         String strLastNDays = EvaluationQuestionsController.getProp('LastNDays');
         if(!String.isEmpty(strLastNDays)) {
             //strLastNDays = strLastNDays.replaceAll('[^\\0123456789]','');
-            //System.debug('strLastNDays=' + strLastNDays.trim());
+            //System.debug(LoggingLevel.DEBUG,'strLastNDays=' + strLastNDays.trim());
             integer n = integer.valueOf(strLastNDays);
             if(n > 0)
                 lastNDays = n;
         }
-        System.debug('lastNDays='+lastNDays);
+        System.debug(LoggingLevel.INFO,'myRecentRegattas lastNDays='+lastNDays);
         
         String regattatype = EvaluationQuestionsController.getProp('RegattaType');
         // REFEREE DOES NOT EXECUTE SELECT AGAINST EVALUATION PROPERTIES - NO ERRORS EITHER
@@ -103,12 +103,12 @@ public with sharing class EvaluationQuestionsController {
                 searchquery = searchquery + 'and Participation_Regatta__r.Regatta_Type__c = \'' + regattatype+'\' ';
         }
         searchquery = searchquery + 'ORDER BY Participation_Regatta__r.Start_Date__c DESC';
-        System.debug(searchquery);
+        System.debug(LoggingLevel.DEBUG,'myRecentRegattas searchquery:\n' + searchquery);
         //
         List <sObject> regattalist = new List <sObject>();
         regattalist = Database.query(searchquery);
         integer sz = regattalist.size();
-        System.debug('regattalist size = ' + sz);
+        System.debug(LoggingLevel.DEBUG,'myRecentRegattas regattalist size = ' + sz);
         for(integer i = 0 ; i < sz; i++)
         {
             String dateFormatString = 'yyyy-MM-dd';
@@ -116,7 +116,7 @@ public with sharing class EvaluationQuestionsController {
             String rdatetime = ((Datetime) regattalist[i].getSObject('Participation_Regatta__r').get('Start_Date__c')).format(dateFormatString);
             String renddatetime = ((Datetime) regattalist[i].getSObject('Participation_Regatta__r').get('End_Date__c')).format(dateFormatString);
             String rid = (String)(String) regattalist[i].get('Participation_Regatta__c');
-            System.debug(rname + ' - ' + rdatetime + ' / ' + renddatetime + ', ' + rid);
+            System.debug(LoggingLevel.DEBUG,'myRecentRegattas ' + rname + ' - ' + rdatetime + ' / ' + renddatetime + ', ' + rid);
             myRegattasList.add(new RecordsData(rname + ' - ' + rdatetime + ' / ' + renddatetime , rid));
         }
         return myRegattasList;
@@ -135,12 +135,12 @@ public with sharing class EvaluationQuestionsController {
         searchquery = searchquery + 'where Participation_Regatta__c = \'' + regattaId + '\' ';
         searchquery = searchquery + 'and Participant__c != \'' + myId + '\' ';
         
-        System.debug(searchquery);
+        System.debug(LoggingLevel.DEBUG,'myRecentRegattas searchquery:\n' + searchquery);
         //
         List <String> contactIds = new List <String>();
         //List<user> userlist = Database.query(searchquery);
         List<Regatta_Participation__c> participantlist = Database.query(searchquery);
-        //System.debug(userlist.size());
+        //System.debug(LoggingLevel.DEBUG,userlist.size());
         //for (User u : userlist) {
         //    contactIds.add(u.contactid);
         //}
@@ -153,7 +153,7 @@ public with sharing class EvaluationQuestionsController {
         for(integer i = 0; i < sz; i++) {
             String pname = ((String) participants[i].get('name'))  + ' - ' + ((String) participants[i].get('email'))  + ' - ' + ((String) participants[i].get('Referee_Rank__c'))  ;
             String pid = (String) participants[i].get('Id');
-            //System.debug(pname + ', ' + pid);
+            //System.debug(LoggingLevel.DEBUG,pname + ', ' + pid);
             regattaParticipants.add(new RecordsData(pname, pid));
         }
         return regattaParticipants;
@@ -170,7 +170,7 @@ public with sharing class EvaluationQuestionsController {
         searchquery = searchquery + 'where Participation_Regatta__c = \'' + regattaId + '\' ';
         searchquery = searchquery + 'and Regatta_Participant_User__c != \'' + myId + '\' ';
         searchquery = searchquery + 'order by Regatta_Participant_User__r.User_Referee_Rank__c, Regatta_Participant_User__r.name';
-        //System.debug(searchquery);
+        //System.debug(LoggingLevel.DEBUG,searchquery);
         //
         List <sObject> plist = new List <sObject>();
         plist = Database.query(searchquery);
@@ -178,7 +178,7 @@ public with sharing class EvaluationQuestionsController {
         for(integer i = 0; i < sz; i++) {
             String pname = ((String) plist[i].getSObject('Regatta_Participant_User__r').get('name')) + ' - ' + ((String) plist[i].getSObject('Regatta_Participant_User__r').get('User_Referee_Rank__c'))  ;
             String pid = (String) plist[i].get('Regatta_Participant_User__c');
-            //System.debug(pname + ', ' + pid);
+            //System.debug(LoggingLevel.DEBUG,pname + ', ' + pid);
             regattaParticipants.add(new RecordsData(pname, pid));
             
         }
@@ -216,7 +216,7 @@ public with sharing class EvaluationQuestionsController {
         String QuestionnaireDateTime;
         String QuestionnaireId;
         
-        System.debug('insertResponses:\n' + responseString);
+        System.debug(LoggingLevel.DEBUG,'insertResponses:\n' + responseString);
         String[] responses = responseString.split('\n'); 
         
         /* USED TO TEST DELAYED RESPONSES
@@ -269,7 +269,7 @@ public with sharing class EvaluationQuestionsController {
                        QuestionType__r.Response_Text_3__c
                        from Evaluation_Questions__c WHERE Question_Number__c =: EvaluationQuestionNum ];
                 
-                System.debug('Common values: ' + 
+                System.debug(LoggingLevel.DEBUG,'insertResponses Common values: ' + 
                 '\n\tEvaluatorUserId='+ EvaluatorUserId + 
                 '\n\tEvaluatorContactId=' + EvaluatorContactId + 
                 '\n\tEvalueeId=' + EvalueeId + 
@@ -280,17 +280,17 @@ public with sharing class EvaluationQuestionsController {
                                 
                 er.Evaluation_Date__c = date.valueOf(EvaluationDate);
                 
-                //system.debug('String QuestionnaireDatetime = '+ QuestionnaireDateTime );
+                //system.debug(logginglevel.debug,'String QuestionnaireDatetime = '+ QuestionnaireDateTime );
                 // THIS WAS A VERY TRICKY ONE - NORMAL PARSE AND VALUEOF DID NOT WORK
                 er.Questionnaire_DateTime__c = (DateTime) JSON.deserialize('"' + QuestionnaireDateTime + '"', DateTime.class);
-                //system.debug('Parsed QuestionnaireDatetime = ' + er.Questionnaire_DateTime__c);
+                //system.debug(logginglevel.debug,'Parsed QuestionnaireDatetime = ' + er.Questionnaire_DateTime__c);
                 
-                System.debug('genQuestionnaireID using [' + er.Questionnaire_DateTime__c + '] ' + EvalueeId);
+                System.debug(LoggingLevel.DEBUG,'insertResponses genQuestionnaireID using [' + er.Questionnaire_DateTime__c + '] ' + EvalueeId);
                 if(String.isEmpty(QuestionnaireId)) {
                     QuestionnaireId = genQuestionnaireID(er.Questionnaire_DateTime__c, EvalueeId);
                 } 
                 er.Questionnaire_Id__c = QuestionnaireId;
-                System.debug('genQuestionnaireID = [' + er.Questionnaire_Id__c + '] ');
+                System.debug(LoggingLevel.DEBUG,'insertResponses genQuestionnaireID = [' + er.Questionnaire_Id__c + '] ');
                 
                 if(EvaluationLocation == null || EvaluationLocation.length() == 0)
                     er.Evaluation_Location__c = 'Location omitted';
@@ -320,7 +320,7 @@ public with sharing class EvaluationQuestionsController {
                 er.Evaluator_Id__c = Id.valueOf(EvaluatorContactId);
                 er.Evaluee_Id__c = Id.valueOf(EvalueeId);
 
-               System.debug('Inserting Response:' + 
+               System.debug(LoggingLevel.DEBUG,'Inserting Response:' + 
                                  '\n\tQuestion_Id__c: ' + er.Question_Id__c +
                                  '\n\tQuestion_Number__c: ' + er.Question_Number__c + 
                                  '\n\tQuestion_Text__c: ' +  er.Question_Text__c +
@@ -335,7 +335,7 @@ public with sharing class EvaluationQuestionsController {
                 
             }  // end if resp.contains('~')  
         }  // end end responses for loop
-        System.debug('Insert responses to Evaluation Responses complete - Insert to Evaluation ResponsesAbstract follows');
+        System.debug(LoggingLevel.DEBUG,'Insert responses to Evaluation Responses complete - Insert to Evaluation ResponsesAbstract follows');
         
         rr.Questionnaire_DateTime__c = (DateTime) JSON.deserialize('"' + QuestionnaireDateTime + '"', DateTime.class);
         rr.Questionnaire_Id__c = QuestionnaireId;
@@ -347,7 +347,7 @@ public with sharing class EvaluationQuestionsController {
         rr.Evaluation_Type__c = EvaluationType;
         insert rr;
         
-        System.debug('Inserted of Questionnaire Id ' + QuestionnaireId + ' completed');
+        System.debug(LoggingLevel.DEBUG,'Insert to Evaluation ResponsesAbstract of Questionnaire Id ' + QuestionnaireId + ' completed');
             
         String rtr = EvaluatorContactId + ';' + EvalueeId + ';' + QuestionnaireId + ';' + EvaluationType;   
          
@@ -356,10 +356,10 @@ public with sharing class EvaluationQuestionsController {
         } catch(Exception err) {
             String errMsg = err.getMessage();
             String errTrace = err.getStackTraceString();
-            System.debug('insertResponses Error: ' + errMsg);
-            System.debug('insertResponses StackTrace:\n' + errTrace);
+            System.debug(LoggingLevel.ERROR,'insertResponses Error: ' + errMsg);
+            System.debug(LoggingLevel.ERROR,'insertResponses StackTrace:\n' + errTrace);
             
-             System.debug('insertResponses Exception Last Inserted Response Prior to error:' + 
+             System.debug(LoggingLevel.DEBUG,'insertResponses Exception Last Inserted Response Prior to error:' + 
                                  '\n\tQuestion_Id__c: ' + erlast.Question_Id__c +
                                  '\n\tQuestion_Number__c: ' + erlast.Question_Number__c + 
                                  '\n\tQuestion_Text__c: ' +  erlast.Question_Text__c +
@@ -393,7 +393,7 @@ public with sharing class EvaluationQuestionsController {
         
         // TODO: SELECT BASED UPON WHO THE REQUESTOR IS
         String searchquery = 'Select Questionnaire_DateTime__c, Questionnaire_Id__c, Evaluator_Id__r.name,  Evaluee_Id__r.name,  Evaluation_Type__c, Evaluation_Location__c, Evaluator_User_Id__c, Evaluator_Id__c from Evaluation_ResponsesAbstract__c';
-        //System.debug(searchquery);
+        //System.debug(LoggingLevel.DEBUG,searchquery);
         
         List <sObject> evaluationlist = new List <sObject>();
         evaluationlist = Database.query(searchquery);
@@ -412,7 +412,7 @@ public with sharing class EvaluationQuestionsController {
             String rid = evaluatorId + ';' + evalueeId + ';' + questionnaireId;
             String eval = evaluee + ' ' + evaluationType  + ' \n@ ' + evaluationlocation + ' \nby '  +  evaluator;
             
-            //System.debug(eval + ' ' + rid);
+            //System.debug(LoggingLevel.DEBUG,eval + ' ' + rid);
             evaluations.add(new RecordsData(eval, rid));
         }
         return evaluations;
@@ -428,9 +428,9 @@ public with sharing class EvaluationQuestionsController {
                                                 String pEvaluee, String pLocation, String pPosition ) {
 
      try {                                              
-        //System.debug('in EvaluationQuestionsController generateRefAssessmentRPT');
+        //System.debug(LoggingLevel.DEBUG,'in EvaluationQuestionsController generateRefAssessmentRPT');
         if( String.isEmpty(pEvaluee) || String.isEmpty(pLocation) || String.isEmpty(pPosition) ) {
-           //System.debug('generateRefAssessmentRPT pulling missing data from Evaluation_ResponsesAbstract__c');
+           //System.debug(LoggingLevel.DEBUG,'generateRefAssessmentRPT pulling missing data from Evaluation_ResponsesAbstract__c');
            Evaluation_ResponsesAbstract__c rr = [select evaluee_id__c, evaluee_id__r.name, evaluation_type__c, evaluation_location__c from Evaluation_ResponsesAbstract__c 
                                             where questionnaire_id__c =: pQuestionnaireId limit 1];    
            pEvaluee = rr.evaluee_id__r.name;
@@ -445,26 +445,27 @@ public with sharing class EvaluationQuestionsController {
         
         RefereeAssessment ra = new RefereeAssessment();
 
-        System.debug('generateRefAssessment EvaluatorId: ' + pEvaluatorId);
-        System.debug('generateRefAssessment EvalueeId: ' + pEvalueeId);
+        System.debug(LoggingLevel.DEBUG,'generateRefAssessment EvaluatorId: ' + pEvaluatorId);
+        System.debug(LoggingLevel.DEBUG,'generateRefAssessment EvalueeId: ' + pEvalueeId);
         
-        System.debug('generateRefAssessment Evaluee: ' + pEvaluee);
-        System.debug('generateRefAssessment Position: ' + pPosition);
-        System.debug('generateRefAssessment Location: ' + pLocation);
-        System.debug('generateRefAssessment QuestionnaireId: ' + pQuestionnaireId);
+        System.debug(LoggingLevel.DEBUG,'generateRefAssessment Evaluee: ' + pEvaluee);
+        System.debug(LoggingLevel.DEBUG,'generateRefAssessment Position: ' + pPosition);
+        System.debug(LoggingLevel.DEBUG,'generateRefAssessment Location: ' + pLocation);
+        System.debug(LoggingLevel.DEBUG,'generateRefAssessment QuestionnaireId: ' + pQuestionnaireId);
        
         DateTime dt = DateTime.now();
         String dateStr = dt.format('MMdd-HHmm-SS');
-        
-        Account acc = [SELECT Id FROM Account WHERE Id = '0016A00000K77C4QAJ'];  // TODO:  WORKS BUT NEED MORE INFO
+       
+        String AppAcct = EvaluationQuestionsController.getProp('AppName');
+        Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct];  // TODO:  WORKS BUT NEED MORE INFO
         String parentId = acc.Id;
                                                     
         Contact c = [select Id, email, OwnerId from contact where id =: pEvalueeId ];
         String linkedId = c.OwnerId;
         String evaluee_email = c.Email;
         
-       // System.debug('RefereeAssessment ouputPDF');
-        //         System.debug('generateRefAssessment QuestionnaireId: ' + pQuestionnaireId);
+       // System.debug(LoggingLevel.DEBUG,'RefereeAssessment ouputPDF');
+        //         System.debug(LoggingLevel.DEBUG,'generateRefAssessment QuestionnaireId: ' + pQuestionnaireId);
 
         // FormatFileNameFromProps(String Evaluee, String Location, String Position, String Id) 
         String filename = FormatFileNameFromProps(pEvaluee, pLocation, pPosition, pQuestionnaireId);
@@ -479,24 +480,25 @@ public with sharing class EvaluationQuestionsController {
         pageReferenceForPDF.getParameters().put('pEvalueeId',pEvalueeId);
         pageReferenceForPDF.getParameters().put('pQuestionnaireId',pQuestionnaireId);
         
-        //System.debug('RefereeAssessment getContentAsPDF follows');    
+        //System.debug(LoggingLevel.DEBUG,'RefereeAssessment getContentAsPDF follows');    
         // Blob body = pageReferenceForPDF.getContentAsPDF(); 
         Blob body = pageReferenceForPDF.getContent();   
         
         String contentType = 'application/pdf';
         
-        //System.debug('RefereeAssessment createFile follows'); 
+        //System.debug(LoggingLevel.DEBUG,'RefereeAssessment createFile follows'); 
         ContentDocumentLink rptfile = ra.createFile(parentId, linkedId, fileName, body, contentType);
         
-         ra.SendDirectMessage(pEvalueeId, rptfile.ContentDocumentId ); 
+        System.debug(LoggingLevel.DEBUG,'generateRefAssessmentRPT - SendDirectMessage p1=' + pEvalueeId + ' p2=' + rptfile.ContentDocumentId);
+        ra.SendDirectMessage(pEvalueeId, rptfile.ContentDocumentId ); 
          
-        //System.debug('RefereeAssessment file saved now create email'); 
+        //System.debug(LoggingLevel.DEBUG,'RefereeAssessment file saved now create email'); 
      } catch (Exception err) {
-         System.debug(err.getCause());
-         System.debug(err.getMessage());
-         System.debug(err.getStackTraceString());
+         System.debug(LoggingLevel.ERROR,'generateRefAssessmentRPT error: ' + err.getCause());
+         System.debug(LoggingLevel.ERROR,err.getMessage());
+         System.debug(LoggingLevel.ERROR,err.getStackTraceString());
      }
-       // System.debug('Referee Assessment completed');   
+         System.debug(LoggingLevel.DEBUG,'Referee Assessment completed');   
         
     } 
     
@@ -521,21 +523,21 @@ public with sharing class EvaluationQuestionsController {
         Blob b = Crypto.GenerateAESKey(128);
         String h = EncodingUtil.ConvertTohex(b);
         String guid = h.SubString(0,8)+ '-' + h.SubString(8,12) + '-' + h.SubString(12,16) + '-' + h.SubString(16,20) + '-' + h.substring(20);
-        //system.debug(guid);
+        //system.debug(logginglevel.debug,guid);
         return guid;
     }
     */
     
     public static String genQuestionnaireID(DateTime Questionnaire_DateTime, String EvalueeId)
     {
-            //System.debug('Questionnaire_DateTime = ' + Questionnaire_DateTime.formatGMT('yyyymmddhhmmss'));
-            //System.debug('EvalueeId = ' + EvalueeId);
+            //System.debug(LoggingLevel.DEBUG,'Questionnaire_DateTime = ' + Questionnaire_DateTime.formatGMT('yyyymmddhhmmss'));
+            //System.debug(LoggingLevel.DEBUG,'EvalueeId = ' + EvalueeId);
         
             List<Contact> c = [SELECT Name FROM Contact where id =: EvalueeId];
             String Evaluee = c[0].Name;
             String strQuestionnaireDT = Questionnaire_DateTime.formatGMT('yyyymmddhhmmss');
             string QuestionnaireID = Evaluee.substring(0,1) + Evaluee.substringafterlast(' ').substring(0,1) + strQuestionnaireDT;
-            //System.debug(QuestionnaireID);
+            //System.debug(LoggingLevel.DEBUG,QuestionnaireID);
             return QuestionnaireID;
     }
   
@@ -543,14 +545,14 @@ public with sharing class EvaluationQuestionsController {
     public static String StringTS() {
         Long ts = DateTime.now().getTime();
         String sts = ts + '';
-        //System.debug(sts);
+        //System.debug(LoggingLevel.DEBUG,sts);
         return sts;
     }
     */
     
     public static String FormatFileNameFromProps(String Evaluee, String Location, String Position, String ID) {
         
-        System.debug('FormatFileNameFromProps evaluee=' + evaluee + ' loc=' + Location + ' Pos=' + Position  + ' Id=' + Id );
+        System.debug(LoggingLevel.DEBUG,'FormatFileNameFromProps evaluee=' + evaluee + ' loc=' + Location + ' Pos=' + Position  + ' Id=' + Id );
         
         /*
         $D = Date - YYYYMMDD
@@ -566,7 +568,7 @@ public with sharing class EvaluationQuestionsController {
        String filename = '';
        String fmt = getProp('FileNameFormat');
         if(String.isEmpty(fmt)) {
-            //System.debug('No FileNameFormat found');
+           System.debug(LoggingLevel.WARN,'No FileNameFormat found');
            return filename;
         }
        //String[] fmtelems = fmt.split(';'); 
@@ -619,7 +621,7 @@ public with sharing class EvaluationQuestionsController {
         if(!filename.contains('.pdf'))
             filename = filename + '.pdf';
             
-       //System.debug(filename); 
+       System.debug(LoggingLevel.DEBUG,'FormatFileNameFromProps filename = ' + filename); 
        return filename;
     }
  
