@@ -86,7 +86,6 @@
     },
     
     checkBrowser: function(component) {
-       
     },
     
     // PROCESS ANSWERS FOLLOWING A RESPONSE CLICK
@@ -111,7 +110,6 @@
             var testval =  cval.get("v.value");
             alert("test val="+ testval);
            }
-
        }
 */       
        var responses = component.get("v.responses");

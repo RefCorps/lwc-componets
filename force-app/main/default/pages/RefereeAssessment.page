@@ -48,7 +48,6 @@ $( document ).ready(function() {
                     <tr><td><apex:outputLabel value="{!Synopsis.Question_Text__c}" escape="false" /></td></tr>
             </table>
             </div>
-            
                         
            <apex:pageBlockTable value="{!responses}" var="evalq" rules="rows" align="center"  columns="3" columnsWidth="70%,10%,20%">
                     

@@ -52,13 +52,12 @@
              }else if (state === "ERROR") {
                 console.log('Error');
             }
-       
+
         });
         $A.enqueueAction(action);
 	},
     
     getProps: function(component) {
-        
     	//alert("in getProps - component.get follows");
         var action = component.get("c.getProps");
         var self = this;
