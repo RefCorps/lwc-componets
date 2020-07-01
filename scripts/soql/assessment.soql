@@ -1,0 +1,9 @@
+/*
+
+Sample SOQL queries related to Referee Assessment
+
+*/
+
+;
+
+SELECT Evaluator_Id__r.name, Evaluator_Id__c, Evaluee_Id__r.Name, Evaluee_Id__c, Questionnaire_DateTime__c	FROM Evaluation_Responses__c;
