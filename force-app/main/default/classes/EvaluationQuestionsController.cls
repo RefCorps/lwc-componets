@@ -7,13 +7,17 @@ public with sharing class EvaluationQuestionsController {
      * 
      */ 
     
-    public static String testEvaluatorId {get; set;}
-    public static String testEvalueeId {get; set;}    
-    public static String testEvaluatorName {get; set;}
-    public static String testEvalueeName {get; set;}
+    //public static String testEvaluatorId {get; set;}
+    //public static String testEvalueeId {get; set;}    
+    //public static String testEvaluatorName {get; set;}
+    //public static String testEvalueeName {get; set;}
     public static Contact testEvaluatorcontact {get; set;}
     public static Contact testEvalueecontact {get; set;}
+    public static Regatta__c testEvalregatta {get; set;}
     public static Regatta_Participation__c[] testRegattaParticipation {get; set;}
+    public static Evaluation_Responses__c[] testEvaluationResponses {get; set;}
+    public static Evaluation_ResponsesAbstract__c[] testEvaluationResponsesAbstract {get; set;} 
+    public static String testPropFileNameFormat {get; set;}
     
     // GET THE LOGGED IN USER ID - THIS WILL BE THE EVALUATOR
     // NOTE THAT THE RETURN IS A LIST BUT IN REALITY THERE WILL BE ONE USER
@@ -80,9 +84,6 @@ public with sharing class EvaluationQuestionsController {
     public static List<RecordsData> myRecentRegattas(String myId, Integer lastNDays) {
         
         List<RecordsData> myRegattasList = new List<RecordsData>();
-        
-     	   
-        
         
         // AT THIS POINT IF THE USER DOES NOT HAVE ACCESS TO EVALUATION PROPERTIES 
         // THIS METHOD WILL IGNORE PROPS
@@ -151,6 +152,7 @@ public with sharing class EvaluationQuestionsController {
         List <String> contactIds = new List <String>();
         //List<user> userlist = Database.query(searchquery);
         List<Regatta_Participation__c> participantlist;
+        
         if(Test.isRunningTest()) {
             System.debug('myRecentRegattas >> in test setting participantlist to test list');
 
@@ -236,7 +238,7 @@ public with sharing class EvaluationQuestionsController {
         String EvaluatorUserId;
         String EvaluatorContactId;
         String EvalueeId;
-        String evaluationtype;
+        String EvaluationType;
         String EvaluationLocation;
         String EvaluationDate;
         String EvaluatorComment;
@@ -267,7 +269,7 @@ public with sharing class EvaluationQuestionsController {
            else if(resp.contains('evalueeid')) {
                 EvalueeId = resp.substring(resp.indexOf('=')+1); }
             else if(resp.contains('evaluationtype')) {
-                evaluationtype = resp.substring(resp.indexOf('=')+1); }
+                EvaluationType = resp.substring(resp.indexOf('=')+1); }
             else if(resp.contains('evaluationlocation')) {
                 EvaluationLocation = resp.substring(resp.indexOf('=')+1); }
             else if(resp.contains('evaluationdate')) {
@@ -283,6 +285,8 @@ public with sharing class EvaluationQuestionsController {
                 String[] rrsp = rsp[1].split('-');
                 String EvaluationRating = rrsp[1];
                   
+                System.debug(LoggingLevel.DEBUG,'insertResponses - lookup Question_Number__c ' + EvaluationQuestionNum);
+
                 // THIS WAS CREATED TO REDUCE TRAFFIC BETWEEN CLIENT AND SERVER 
                 // TODO:  REVIEW EFFECTIVENESS
                 Evaluation_Questions__c[] EvaluationQuestionId = [SELECT id,
@@ -295,12 +299,15 @@ public with sharing class EvaluationQuestionsController {
                        QuestionType__r.Response_Text_2__c, 
                        QuestionType__r.Response_Text_3__c
                        from Evaluation_Questions__c WHERE Question_Number__c =: EvaluationQuestionNum ];
-                
+
+                System.debug(LoggingLevel.DEBUG,'insertResponses - Questions returned = ' + EvaluationQuestionId.size());   
+
                 System.debug(LoggingLevel.DEBUG,'insertResponses Common values: ' + 
                 '\n\tEvaluatorUserId='+ EvaluatorUserId + 
                 '\n\tEvaluatorContactId=' + EvaluatorContactId + 
                 '\n\tEvalueeId=' + EvalueeId + 
-                '\n\tEvaluationQuestionNum=' + EvaluationQuestionNum + 
+                '\n\tEvaluationQuestionNum=' + EvaluationQuestionNum +
+                '\n\tEvaluationType=' + EvaluationType + 
                 '\n\tEvaluationRating=' + EvaluationRating);
 
                 Evaluation_Responses__c er = new Evaluation_Responses__c();
@@ -359,9 +366,9 @@ public with sharing class EvaluationQuestionsController {
                                  );
                 erlast = er;
 
-                 if(Test.isRunningTest()) {
+                if(Test.isRunningTest()) {
                       System.debug('insertResponses - In test skipping actual insert');
-                 } else {
+                } else {
                     insert er;
                 }
                 
@@ -378,11 +385,20 @@ public with sharing class EvaluationQuestionsController {
         rr.Evaluator_Id__c = EvaluatorContactId; 
         rr.Evaluation_Type__c = EvaluationType;
 
+        System.debug(LoggingLevel.DEBUG,'Evaluation ResponsesAbstract:' + 
+        '\n\tQuestionnaire_Id__c: ' + rr.Questionnaire_Id__c +
+        '\n\tEvaluation_Date__c: ' + rr.Evaluation_Date__c +
+        '\n\tEvaluation_Location__c: ' + rr.Evaluation_Location__c +
+        '\n\tEvalation_User_Id__c: ' + rr.Evaluator_User_Id__c +
+        '\n\tEvaluator_Id__c: ' + rr.Evaluator_Id__c +
+        '\n\rEvaluation_Type__c: ' + rr.Evaluation_Type__c 
+        );
+
         if(Test.isRunningTest()) {
             System.debug('insertResponses - In test skipping actual insert');
-       } else {
+        } else {
             insert rr;
-       }
+        }
         System.debug(LoggingLevel.DEBUG,'Insert to Evaluation ResponsesAbstract of Questionnaire Id ' + QuestionnaireId + ' completed');
             
         String rtr = EvaluatorContactId + ';' + EvalueeId + ';' + QuestionnaireId + ';' + EvaluationType;   
@@ -427,6 +443,22 @@ public with sharing class EvaluationQuestionsController {
         
         List<RecordsData> evaluations = new List<RecordsData>();
         
+        if(Test.isRunningTest()) {
+            System.debug('In getEvaluationsList build test response');
+            String evaluatorId = testEvaluatorContact.Id;
+            String evalueeId = testEvalueeContact.Id;
+            String questionnaireId = genQuestionnaireID(testEvalregatta.Start_Date__c, evalueeId);
+            String evaluee = testEvalueeContact.Name;
+            String evaluationType = 'CHIEF JUDGE';
+            String evaluationlocation = testEvalregatta.Name;
+            String evaluator = testEvaluatorContact.Name;
+            String rid = evaluatorId + ';' + evalueeId + ';' + questionnaireId;
+            String eval = evaluee + ' ' + evaluationType  + ' \n@ ' + evaluationlocation + ' \nby '  +  evaluator;
+            evaluations.add(new RecordsData(eval, rid));
+            System.debug('getEvaluationsList test response returning ' + evaluations.size() + ' records');
+            return evaluations;
+        }        
+
         // TODO: SELECT BASED UPON WHO THE REQUESTOR IS
         String searchquery = 'Select Questionnaire_DateTime__c, Questionnaire_Id__c, Evaluator_Id__r.name,  Evaluee_Id__r.name,  Evaluation_Type__c, Evaluation_Location__c, Evaluator_User_Id__c, Evaluator_Id__c from Evaluation_ResponsesAbstract__c';
         //System.debug(LoggingLevel.DEBUG,searchquery);
@@ -495,18 +527,26 @@ public with sharing class EvaluationQuestionsController {
         String AppAcct = EvaluationQuestionsController.getProp('AppName');
         Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct];  // TODO:  WORKS BUT NEED MORE INFO
         String parentId = acc.Id;
-                                                    
-        Contact c = [select Id, email, OwnerId from contact where id =: pEvalueeId ];
-        String linkedId = c.OwnerId;
-        String evaluee_email = c.Email;
-        
-       // System.debug(LoggingLevel.DEBUG,'RefereeAssessment ouputPDF');
+                
+        String linkedId = '';
+        String evaluee_email = '';
+        if(Test.isRunningTest()) {
+            System.debug('generateRefAssessmentRPT - using test data');
+            linkedId = testEvalueecontact.OwnerId;
+            evaluee_email = testEvalueecontact.Email;
+        } else {
+            Contact c = [select Id, email, OwnerId from contact where id =: pEvalueeId ];
+            linkedId = c.OwnerId;
+            evaluee_email = c.Email;
+        }
+        // System.debug(LoggingLevel.DEBUG,'RefereeAssessment ouputPDF');
         //         System.debug(LoggingLevel.DEBUG,'generateRefAssessment QuestionnaireId: ' + pQuestionnaireId);
 
         // FormatFileNameFromProps(String Evaluee, String Location, String Position, String Id) 
         String filename = FormatFileNameFromProps(pEvaluee, pLocation, pPosition, pQuestionnaireId);
-        if(filename.length() < 1)
-            fileName = 'RA_' + dateStr + '-' + pQuestionnaireId + '.pdf';
+        System.debug(LoggingLevel.DEBUG,'generateRefAssessment filename from props: ' + filename);
+        //if(filename.length() < 1) // DEFINED DEFAULT FORMAT 'RA_$PA_$EL_$D_$ID'
+        //    fileName = 'RA_' + dateStr + '-' + pQuestionnaireId + '.pdf';
                                                     
         // begin test 
         // test 1 - same result no data
@@ -518,8 +558,14 @@ public with sharing class EvaluationQuestionsController {
         
         //System.debug(LoggingLevel.DEBUG,'RefereeAssessment getContentAsPDF follows');    
         // Blob body = pageReferenceForPDF.getContentAsPDF(); 
-        Blob body = pageReferenceForPDF.getContent();   
-        
+        Blob body;
+        if(Test.isRunningTest()) {
+            String testbody = 'EvaluationQuestionsConroller Test Content';
+            body = Blob.valueOf(testbody); 
+        } else {
+            body = pageReferenceForPDF.getContent();   
+        }
+       
         String contentType = 'application/pdf';
         
         //System.debug(LoggingLevel.DEBUG,'RefereeAssessment createFile follows'); 
@@ -568,9 +614,13 @@ public with sharing class EvaluationQuestionsController {
     {
             //System.debug(LoggingLevel.DEBUG,'Questionnaire_DateTime = ' + Questionnaire_DateTime.formatGMT('yyyymmddhhmmss'));
             //System.debug(LoggingLevel.DEBUG,'EvalueeId = ' + EvalueeId);
-        
-            List<Contact> c = [SELECT Name FROM Contact where id =: EvalueeId];
-            String Evaluee = c[0].Name;
+            String Evaluee = '';
+            if(Test.isRunningTest()) {
+                Evaluee = testEvalueecontact.Name;
+            } else {
+                List<Contact> c = [SELECT Name FROM Contact where id =: EvalueeId];
+                Evaluee = c[0].Name;
+            }
             String strQuestionnaireDT = Questionnaire_DateTime.formatGMT('yyyymmddhhmmss');
             string QuestionnaireID = Evaluee.substring(0,1) + Evaluee.substringafterlast(' ').substring(0,1) + strQuestionnaireDT;
             //System.debug(LoggingLevel.DEBUG,QuestionnaireID);
@@ -603,10 +653,18 @@ public with sharing class EvaluationQuestionsController {
         */
        String filename = '';
        String fmt = getProp('FileNameFormat');
-        if(String.isEmpty(fmt)) {
-           System.debug(LoggingLevel.WARN,'No FileNameFormat found');
-           return filename;
+       if(Test.isRunningTest() && String.isNotBlank(testPropFileNameFormat) ) {
+           System.debug(LoggingLevel.DEBUG,'FormatFileNameFromProps running test with ' + testPropFileNameFormat);
+           if(testPropFileNameFormat.contains('NOPROP'))
+                fmt = '';
+            else
+                fmt = testPropFileNameFormat;
+       } 
+       if(String.isEmpty(fmt)) {
+           System.debug(LoggingLevel.WARN,'No FileNameFormat found using default');
+           fmt = 'RA_$PA_$EL_$D_$ID';
         }
+        System.debug(LoggingLevel.DEBUG,'FormatFileNameFromProps format=' + fmt);
        //String[] fmtelems = fmt.split(';'); 
         
        DateTime dtn = DateTime.now();
@@ -664,6 +722,7 @@ public with sharing class EvaluationQuestionsController {
     // =================================================================
     // OBJECTS USED
     
+    /*
     public class MyRegatta {
         public String Id;
         public String RegattaName;
@@ -674,6 +733,7 @@ public with sharing class EvaluationQuestionsController {
             this.StartDate = sdate;
         }
     }
+    */
     
     public class RecordsData {
         @AuraEnabled public String label;

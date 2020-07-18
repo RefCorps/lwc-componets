@@ -283,7 +283,7 @@
             evalregatta = [select id, name, Start_Date_Test__c, START_DATE__C 
                            from regatta__c where id =: testregatta.id limit 1];
         }
- 
+        EvaluationQuestionsController.testEvalregatta = evalregatta.clone();
         System.debug('Loaded regatta ' + evalregatta.Name);
 
         System.debug('Run using Id ' + evaluatorusr.Id);
@@ -382,7 +382,7 @@
         
         System.debug('=================================================================================================');
     }
-    
+ 
     public static String getTimeBasedId() {
         Long ts = DateTime.now().getTime();
         String timeBasedVal = ts + '';
@@ -542,57 +542,57 @@
 			Return:
 				List based upon User object.  Fields will be limited to name & contactid
          */
-		System.debug('=================================================================================================');
+        System.debug('=================================================================================================');
         System.debug('Begin testfetchEvaluator');
-        
-        if(evaluatoruser == null) {
+
+        if (evaluatoruser == null) {
             System.debug('evaluatoruser is null');
             LoadTestUserData();
         }
         System.debug('Running as ' + evaluatoruser.name);
-        System.runAs ( evaluatoruser ) { 
-        
-        Exception unexpectedException;
-        try {
-            
-            // TEST 1 - Basic functionality
-            List<User> user = EvaluationQuestionsController.fetchEvaluator();
-            Integer cnt = user.size();
-            System.debug('cnt = ' + cnt);
-            System.assertEquals(1, cnt, 'Fetch must return just 1 user.  Fetch returned ' + cnt + ' users');
-            
-            // Pull comparison data
-            string UserId = UserInfo.getUserId();
-       		List<User> testuser = [select name, contactid from user where id =: UserId ];
-            String currusername = user[0].name;
-            String testusername = testuser[0].name;
-            System.debug('testuser name = ' + testusername);
-            System.debug('curruser name = ' + currusername);
-            System.assertEquals(currusername, testusername, 'testfetchEvaluator - local data does not match data from method');
-			            
-			// TEST 2 - For this test set user based upon a user with contact data and rank - 
-            // Typically admin/system users do not have contact data - this test will simply confirm the absence of a contactid
-            // NOTE these users cannot be used - currently RefCorp objects typically use contactid to point to users in place of user id
-             
-            List<User> refuser = [select id, name, contactid from user where User_Referee_Rank__c = 'Referee'];
-            System.assertNotEquals(0, refuser.size());
-            System.runAs(refuser[0]) {
-                List<User> user2 = EvaluationQuestionsController.fetchEvaluator();
-                Integer cnt2 = user2.size();
-                System.debug('cnt2 = ' + cnt2);
-                System.assertEquals(1, cnt2, 'Fetch must return just 1 user of type Referee.  Fetch returned ' + cnt + ' users');
-                System.assertEquals(user[0].contactid, testuser[0].contactid, 'testfetchEvaluator - local contactid does not match data from method');
+        System.runAs(evaluatoruser) {
+
+            Exception unexpectedException;
+            try {
+
+                // TEST 1 - Basic functionality
+                List < User > user = EvaluationQuestionsController.fetchEvaluator();
+                Integer cnt = user.size();
+                System.debug('cnt = ' + cnt);
+                System.assertEquals(1, cnt, 'Fetch must return just 1 user.  Fetch returned ' + cnt + ' users');
+
+                // Pull comparison data
+                string UserId = UserInfo.getUserId();
+                List < User > testuser = [select name, contactid from user where id =: UserId];
+                String currusername = user[0].name;
+                String testusername = testuser[0].name;
+                System.debug('testuser name = ' + testusername);
+                System.debug('curruser name = ' + currusername);
+                System.assertEquals(currusername, testusername, 'testfetchEvaluator - local data does not match data from method');
+
+                // TEST 2 - For this test set user based upon a user with contact data and rank - 
+                // Typically admin/system users do not have contact data - this test will simply confirm the absence of a contactid
+                // NOTE these users cannot be used - currently RefCorp objects typically use contactid to point to users in place of user id
+
+                List < User > refuser = [select id, name, contactid from user where User_Referee_Rank__c = 'Referee'];
+                System.assertNotEquals(0, refuser.size());
+                System.runAs(refuser[0]) {
+                    List < User > user2 = EvaluationQuestionsController.fetchEvaluator();
+                    Integer cnt2 = user2.size();
+                    System.debug('cnt2 = ' + cnt2);
+                    System.assertEquals(1, cnt2, 'Fetch must return just 1 user of type Referee.  Fetch returned ' + cnt + ' users');
+                    System.assertEquals(user[0].contactid, testuser[0].contactid, 'testfetchEvaluator - local contactid does not match data from method');
+                }
+
+            } catch (Exception err) {
+                System.debug('testfetchEvaluator err: ' + err);
+                unexpectedException = err;
             }
-            
-        } catch (Exception err) {
-            System.debug('testfetchEvaluator err: ' + err);
-            unexpectedException = err;
-        }    
-        system.assertEquals(null, unexpectedException, 'testfetchEvaluator unexpected Exception');
-        
-        System.debug('testfetchEvaluator completed');
+            system.assertEquals(null, unexpectedException, 'testfetchEvaluator unexpected Exception');
+
+            System.debug('testfetchEvaluator completed');
+        }
     }
-    }    
 
 // =====================================================================================    
     @IsTest(SeeAllData=true) 
@@ -1280,9 +1280,7 @@
                     // insert er;
                     
                 }  // end if resp.contains('~')  
-                
-                
-                
+                 
             }  // end end responses for loop
             
             System.debug('testInsertResponse - at this point our test string would have resulted in 1 Evaluation ResponsesAsbstract record and ' + insertCnt + ' records in Evaluation Responses');
@@ -1306,31 +1304,32 @@
     @IsTest
     public static void testGlobals() {
         
-    /* SIMPLY TEST GETTERS AND SETTERS */    
-    System.debug('=================================================================================================');
-    System.debug('Begin testGlobals');    
-    // TODO: Evaluating need for these - redundant     
-     System.assertEquals(null,EvaluationQuestionsController.EvaluatorName);
-    System.assertEquals(null,EvaluationQuestionsController.EvalueeName);
-    System.assertEquals(null,EvaluationQuestionsController.EvaluationLocation);
-    System.assertEquals(null,EvaluationQuestionsController.EvaluatorComment);
-    System.assertEquals(null,EvaluationQuestionsController.PositionEvaluated);
-    
-    // set globals     
-    EvaluationQuestionsController.EvaluatorName = 'test';
-    EvaluationQuestionsController.EvalueeName = 'test';
-    EvaluationQuestionsController.EvaluationLocation = 'test';
-    EvaluationQuestionsController.EvaluatorComment = 'test';
-    EvaluationQuestionsController.PositionEvaluated = 'test';
+        /* SIMPLY TEST GETTERS AND SETTERS */    
+        System.debug('=================================================================================================');
+        System.debug('Begin testGlobals');    
+        // TODO: Evaluating need for these - redundant     
+        System.assertEquals(null,EvaluationQuestionsController.EvaluatorName);
+        System.assertEquals(null,EvaluationQuestionsController.EvalueeName);
+        System.assertEquals(null,EvaluationQuestionsController.EvaluationLocation);
+        System.assertEquals(null,EvaluationQuestionsController.EvaluationDate);
+        System.assertEquals(null,EvaluationQuestionsController.EvaluatorComment);
+        System.assertEquals(null,EvaluationQuestionsController.PositionEvaluated);
+        
+        // set globals     
+        EvaluationQuestionsController.EvaluatorName = 'test';
+        EvaluationQuestionsController.EvalueeName = 'test';
+        EvaluationQuestionsController.EvaluationLocation = 'test';
+        EvaluationQuestionsController.EvaluatorComment = 'test';
+        EvaluationQuestionsController.PositionEvaluated = 'test';
 
-    // confirm globals are set
-    System.assertEquals('test',EvaluationQuestionsController.EvaluatorName);
-    System.assertEquals('test',EvaluationQuestionsController.EvalueeName);
-    System.assertEquals('test',EvaluationQuestionsController.EvaluationLocation);
-    System.assertEquals('test',EvaluationQuestionsController.EvaluatorComment);
-    System.assertEquals('test',EvaluationQuestionsController.PositionEvaluated);
+        // confirm globals are set
+        System.assertEquals('test',EvaluationQuestionsController.EvaluatorName);
+        System.assertEquals('test',EvaluationQuestionsController.EvalueeName);
+        System.assertEquals('test',EvaluationQuestionsController.EvaluationLocation);
+        System.assertEquals('test',EvaluationQuestionsController.EvaluatorComment);
+        System.assertEquals('test',EvaluationQuestionsController.PositionEvaluated);
 
-    System.debug('testGlobals completed');    
+        System.debug('testGlobals completed');    
     }
     
 // =====================================================================================    
@@ -1347,6 +1346,12 @@
 		*/
         System.debug('=================================================================================================');
         System.debug('Begin testGetEvaluationsList');
+
+        if (evaluatoruser == null) {
+            System.debug('evaluatoruser is null');
+            LoadTestRegattaParticipantData();
+        }
+
         integer one = 1;
         Exception unexpectedException;
         try {
@@ -1357,8 +1362,9 @@
 				System.assert(e.value.contains(';'),'testGetEvaluastionsList - value looks invalid cannot complete test'); 
 				String[] v = e.value.split(';');
                 System.debug('testGetEvaluationsList testing for responses with Id = ' + v[2]);
-                Evaluation_Responses__c[] er = [select questionnaire_id__c from evaluation_responses__c where questionnaire_id__c =: v[2]];
-                System.assertNotEquals(0,er.size(),'testGetEvaluationsList - no matching responses found for id ' + v[2]);
+                // Since the responses are no longer inserted we can only validate a return that was preloaded 
+                //Evaluation_Responses__c[] er = [select questionnaire_id__c from evaluation_responses__c where questionnaire_id__c =: v[2]];
+                //System.assertNotEquals(0,er.size(),'testGetEvaluationsList - no matching responses found for id ' + v[2]);
             }
             // System.assertEquals(1, one);
         } catch (Exception err) {
@@ -1373,7 +1379,7 @@
     @IsTest(SeeAllData=true)
     public static void testGenerateRefAssessmentRPT() {
 
-		/*
+        /*
         	generateRefAssessmentRPT - this is the entry point for creating a new or duplicate PDF assessment this may be
 			called from Aura components evaluationquestionHelper.js or RefereeAssessmentRptHelp.js 
 			This test will follow the same logic used to manually recreate a PDF file
@@ -1388,72 +1394,79 @@
 		*/
         System.debug('=================================================================================================');
         System.debug('Begin testGenerateRefAssessmentRPT');
+
+        if (evaluatoruser == null) {
+            System.debug('evaluatoruser is null');
+            LoadTestRegattaParticipantData();
+        }
+
         Exception expectedException;
-        try{
-            
-            // TEST 1 - Get a valid entry from Evaluation_ResponsesAbstract using getEvaluationsList
-            List<EvaluationQuestionsController.RecordsData> el = EvaluationQuestionsController.getEvaluationsList();
-            String UserId = UserInfo.getUserId();
-            String pEvaluatorId = UserId;
-            String pEvalueeId = UserId; 
-            String pQuestionnaireId = 'RF12345678'; 
-            String pEvaluee = 'Foo Bar'; 
-            String pLocation = 'NA'; 
-            String pPosition = 'NA';
-            
-            for(EvaluationQuestionsController.RecordsData e : el) {
-				System.debug('testGetEvaluationsList\n\tlabel=' + e.label + '\n\tvalue=' + e.value);
-				// confirm presence of evaluation responses
-				System.assert(e.value.contains(';'),'testGetEvaluastionsList - value looks invalid cannot complete test'); 
-				String[] v = e.value.split(';');
-                String[] l = e.label.split('\n');
-                System.debug('testGetEvaluationsList testing for responses with Id = ' + v[2]);
-                Evaluation_Responses__c[] er = [select questionnaire_id__c from evaluation_responses__c where questionnaire_id__c =: v[2]];
-                System.assertNotEquals(0,er.size(),'testGetEvaluationsList - no matching responses found for id ' + v[2]);
-                
-                pEvaluatorId = v[0];
-                pEvalueeId = v[1];
-                pQuestionnaireId = v[2];
-                pEvaluee = l[0];
-                String[] et =  EvaluationQuestionsController.getEvaluationTypes();
-                for(String t : et) {
-                    if(pEvaluee.contains(t)) {
-                		pPosition = t.trim();
-                        pEvaluee = pEvaluee.replace(pPosition,'').trim();
+        try {
+            System.runAs(evaluatoruser) {
+                System.debug('testGenerateRefAssessmentRPT Test 1 - get entry using getEvaluationsList');
+                // TEST 1 - Get a valid entry from Evaluation_ResponsesAbstract using getEvaluationsList
+                List < EvaluationQuestionsController.RecordsData > el = EvaluationQuestionsController.getEvaluationsList();
+                String UserId = UserInfo.getUserId();
+                String pEvaluatorId = evalueecontact.Id; // UserId;
+                String pEvalueeId =  evalueecontact.Id;  // UserId;
+                String pQuestionnaireId = 'RF12345678';
+                String pEvaluee = 'Foo Bar';
+                String pLocation = 'NA';
+                String pPosition = 'NA';
+
+                for (EvaluationQuestionsController.RecordsData e: el) {
+                    System.debug('testGetEvaluationsList\n\tlabel=' + e.label + '\n\tvalue=' + e.value);
+                    // confirm presence of evaluation responses
+                    System.assert(e.value.contains(';'), 'testGetEvaluastionsList - value looks invalid cannot complete test');
+                    String[] v = e.value.split(';');
+                    String[] l = e.label.split('\n');
+                    // Since the responses are no longer inserted we can only validate a return that was preloaded 
+                    //System.debug('testGetEvaluationsList testing for responses with Id = ' + v[2]);
+                    //Evaluation_Responses__c[] er = [select questionnaire_id__c from evaluation_responses__c where questionnaire_id__c =: v[2]];
+                    //System.assertNotEquals(0, er.size(), 'testGetEvaluationsList - no matching responses found for id ' + v[2]);
+
+                    pEvaluatorId = v[0];
+                    pEvalueeId = v[1];
+                    pQuestionnaireId = v[2];
+                    pEvaluee = l[0];
+                    String[] et = EvaluationQuestionsController.getEvaluationTypes();
+                    for (String t: et) {
+                        if (pEvaluee.contains(t)) {
+                            pPosition = t.trim();
+                            pEvaluee = pEvaluee.replace(pPosition, '').trim();
+                        }
                     }
+                    pLocation = l[1].replace('@ ', ''); // @ Head of the South 2019 - 2019-11-09 / 2019-11-09 
+                    break;
                 }
-                pLocation = l[1].replace('@ ',''); // @ Head of the South 2019 - 2019-11-09 / 2019-11-09 
-                break;
-            }
-            // EVALUATE TEST ENTRY
-            System.debug('testGenerateRefAssessmentRPT submitting: ' +
-            	'\n\tpEvaluatorId ' + pEvaluatorId + 
-                '\n\tpEvalueeId ' + pEvalueeId + 
-                '\n\tpQuestionnaireId ' + pQuestionnaireId + 
-                '\n\tpEvaluee ' + pEvaluee + 
-                '\n\tpLocation ' + pLocation + 
-                '\n\tpPosition ' + pPosition
-            );
-            
-            // Test 2 - Evaluate the ability to generate a filename
-            String filename = EvaluationQuestionsController.FormatFileNameFromProps(pEvaluee,pLocation,pPosition,pQuestionnaireId); 
-            System.assertNotEquals(0, filename.length(),'testGenerateRefAssessmentRPT - filename appears invalid unable to continue');
-            System.debug('testGenerateRefAssessmentRPT filename will be ' + filename);
-            
-            // Test 3 - This will request a PDF report beginning to end
-            // NOT SURE WHAT WILL HAPPEN HERE - REMEMBER NOTHING WILL BE RETURNED
-        	EvaluationQuestionsController.generateRefAssessmentRPT(pEvaluatorId, pEvalueeId, pQuestionnaireId, 
-                                                pEvaluee, pLocation, pPosition );
-            
+                // EVALUATE TEST ENTRY
+                System.debug('testGenerateRefAssessmentRPT submitting: ' +
+                    '\n\tpEvaluatorId ' + pEvaluatorId +
+                    '\n\tpEvalueeId ' + pEvalueeId +
+                    '\n\tpQuestionnaireId ' + pQuestionnaireId +
+                    '\n\tpEvaluee ' + pEvaluee +
+                    '\n\tpLocation ' + pLocation +
+                    '\n\tpPosition ' + pPosition
+                );
+
+                // Test 2 - Evaluate the ability to generate a filename
+                String filename = EvaluationQuestionsController.FormatFileNameFromProps(pEvaluee, pLocation, pPosition, pQuestionnaireId);
+                System.assertNotEquals(0, filename.length(), 'testGenerateRefAssessmentRPT - filename appears invalid unable to continue');
+                System.debug('testGenerateRefAssessmentRPT filename will be ' + filename);
+
+                // Test 3 - Test will not create valid PDF since test cannot perform pageReferenceForPDF.getContent(); 
+                EvaluationQuestionsController.generateRefAssessmentRPT(pEvaluatorId, pEvalueeId, pQuestionnaireId,
+                    pEvaluee, pLocation, pPosition);
+
+                System.debug('testGenerateRefAssessmentRPT - all tests finished');    
+            } // end user
         } catch (Exception err) {
             System.debug('testGenerateRefAssessmentRPT err: ' + err.getMessage());
             expectedException = err;
-        }    
+        }
         system.assertEquals(null, expectedException, 'testGenerateRefAssessmentRPT_SOQLFail');
         System.debug('testGenerateRefAssessmentRPT complete');
     }
-    
-    
 // =====================================================================================    
     @IsTest(SeeAllData=true)
     public static void testGenerateRefAssessmentRPT_SOQLFail() {
@@ -1500,13 +1513,17 @@
         System.debug('=================================================================================================');
         System.debug('Begin testGenQuestionnaireID');
         
+        if (evaluatoruser == null) {
+            System.debug('evaluatoruser is null');
+            LoadTestRegattaParticipantData();
+        }
+
 		System.debug('testGenQuestionnaireID - create a faux questionnaire timestamp');        
         DateTime Questionnaire_DateTime = EvaluationQuestionsController.getQuestionnaireTS();
-        System.debug('testGenQuestionnaireID - get the ID of a referee from the Db');        
-        
-        Contact c = [select id, name from contact where Referee_Rank__c = 'REFEREE' LIMIT 1];
-        String EvalueeId = c.Id;
-        String Evaluee = c.Name;
+        // System.debug('testGenQuestionnaireID - get the ID of a referee from the Db');        
+        // Contact c = [select id, name from contact where Referee_Rank__c = 'REFEREE' LIMIT 1];
+        String EvalueeId = evalueecontact.Id;  // c.Id;
+        String Evaluee = evalueecontact.Name; // c.Name;
         
         System.debug('testGenQuestionnaireID - now get a questionnaireId value using the controller method');
         String questionnaireId = EvaluationQuestionsController.genQuestionnaireID(Questionnaire_DateTime, EvalueeId);
@@ -1565,7 +1582,33 @@
             String fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','STARTER','JD123456789');
             integer len = fn.length();
             System.assertNotEquals(0, len,'There is an issue with props - check filename format');
-            
+           
+            // TEST 3 - Test format combinations
+            EvaluationQuestionsController.testPropFileNameFormat = 'Testprop1_$EL_$D_$L_$PN';
+            fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','STARTER','JD123456789');
+            len = fn.length();
+            System.assertNotEquals(0, len,'There is an issue with props - check filename format');
+            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+
+            EvaluationQuestionsController.testPropFileNameFormat = 'Testprop2_$EI_$DT_$PA_$ID';
+            fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','JUDGE AT START','JD123456789');
+            len = fn.length();
+            System.assertNotEquals(0, len,'There is an issue with props - check filename format');
+            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+
+            EvaluationQuestionsController.testPropFileNameFormat = 'Testprop3_$EN_$DT_$ID';
+            fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','STARTER','JD123456789');
+            len = fn.length();
+            System.assertNotEquals(0, len,'There is an issue with props - check filename format');
+            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+
+            EvaluationQuestionsController.testPropFileNameFormat = 'Testprop4_$EN_$PA_$DT';
+            fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','REFEREE','JD123456789');
+            len = fn.length();
+            System.assertNotEquals(0, len,'There is an issue with props - check filename format');
+            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+
+
         } catch (Exception err) {
             System.debug('testFormatFileNameFromProps err: ' + err);
             unExpectedException = err;
@@ -1574,5 +1617,26 @@
         System.debug('testFormatFileNameFromProps completed');
     }
     
-    
+     @IsTest(SeeAllData= true)
+    public static void testFormatFileNameNoProp() {
+        System.debug('=================================================================================================');
+        System.debug('Begin testFormatFileNameNoProp');
+        Exception unExpectedException;
+        try {
+
+            EvaluationQuestionsController.testPropFileNameFormat = 'NOPROP';
+            String fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','REFEREE','JD123456789');
+            Integer len = fn.length();
+            System.assertNotEquals(0, len,'There is an issue with the default prop or data - check filename format');
+            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+
+        } catch (Exception err) {
+            System.debug('testFormatFileNameFromProps err: ' + err);
+            unExpectedException = err;
+        }    
+        system.assertEquals(null, unExpectedException, 'testFormatFileNameFromProps exception');
+        System.debug('testFormatFileNameFromProps completed');
+
+    }
+
 }
