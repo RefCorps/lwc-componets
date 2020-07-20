@@ -1124,7 +1124,6 @@
 
         //Create ContentDocumentLink 
         System.debug('testCreateFile insert to ContentDocumentLink - LinkedEntityId = ' + parentId);
-
         cv = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id =: cv.Id limit 1];
         ContentDocumentLink cdlt1 = New ContentDocumentLink();
         cdlt1.ContentDocumentId = cv.ContentDocumentId;
@@ -1185,12 +1184,21 @@
         System.debug('=================================================================================================');
         System.debug('Begin testSendDirectMessageNoContentDocumentId ');
 
+        if (evalueecontact == null) {
+            System.debug('evalueecontact is null');
+            LoadTestUserData();
+        }
+        System.debug('Get user Id next');
+        //User evaluatorusr = [Select id from User where Id =: evaluatoruser.id];
+
+
         // Nomrally suggest randomly selecting a Referee ID - for now use developer's Id - regardless this will fail so no harm
-        Contact c = [SELECT id, name from contact where name like 'Michael Miller'
-            limit 1
-        ];
+        //Contact c = [SELECT id, name from contact where name like 'Michael Miller'
+        //    limit 1
+        //];
         RefereeAssessment ra = new RefereeAssessment();
-        String EvalueeId = c.Id;
+        
+        String EvalueeId = evalueecontact.Id;
         String EvalRptFileId = ''; // Alternately you could place any Id that is not a document
         Exception expectedException;
         System.debug('testSendDirectMessageNoContentDocumentId submitting p1=' + EvalueeId + ' p2=' + EvalRptFileId);
@@ -1254,63 +1262,73 @@
         System.debug('=================================================================================================');
         System.debug('Begin testSendDirectMessage');
         Exception unexpectedException;
-        try {
+        if (evalueecontact == null) {
+            System.debug('evalueecontact is null');
+            LoadTestUserData();
+        }
 
-            String EvalueeId = '';
-            String EvalRptFileId = '';
+        System.runAs(portalAccountOwner) {
 
-            System.debug('testSendDirectMessage - Step 1 obtain a known contact to use as EvlaueeId');
+            try {
 
-            Contact c = [SELECT id, name from contact where name like 'Michael Miller'
-                limit 1
-            ]; // TODO: make Name a prop
-            EvalueeId = c.Id;
-            System.assert(String.isNotEmpty(EvalueeId), 'testSendDirectMessage unable to get a contact Id for our test user');
+                String EvalueeId = '';
+                String EvalRptFileId = '';
 
-            System.debug('testSendDirectMessage - Step 2 create a test document to send using method createFile');
+                System.debug('testSendDirectMessage - Step 1 obtain a known contact to use as EvlaueeId');
 
-            String AppAcct = EvaluationQuestionsController.getProp('AppName');
-            Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct]; // TODO:  WORKS BUT NEED MORE INFO
-            String parentId = acc.Id;
 
-            ContentDocumentLink cdl = New ContentDocumentLink();
 
-            Id linkedId = parentId;
+                //Contact c = [SELECT id, name from contact where name like 'Michael Miller'
+                //    limit 1
+                //]; // TODO: make Name a prop
+                EvalueeId = evalueecontact.Id;  // c.Id;
+                System.assert(String.isNotEmpty(EvalueeId), 'testSendDirectMessage unable to get a contact Id for our test user');
 
-            DateTime dtn = DateTime.now();
-            String DT = dtn.format('yyyyMMddHHmmsss');
-            String filename = 'TestSendDirectMsgDocument' + DT + '.txt';
+                System.debug('testSendDirectMessage - Step 2 create a test document to send using method createFile');
 
-            String testbody = 'Test SendDirectMessage content created ' + DT;
-            Blob body = Blob.valueOf(testbody);
-            String contentType = 'text/plain';
+                String AppAcct = EvaluationQuestionsController.getProp('AppName');
+                Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct]; // TODO:  WORKS BUT NEED MORE INFO
+                String parentId = acc.Id;
 
-            RefereeAssessment ra = new RefereeAssessment();
+                ContentDocumentLink cdl = New ContentDocumentLink();
 
-            System.debug('parentId = ' + parentId);
-            System.debug('linkedId = ' + linkedId);
-            System.debug('filename = ' + fileName);
-            System.debug('body = ' + body);
-            System.debug('contenttype = ' + contentType);
-            cdl = ra.createFile(parentId, linkedId, fileName, body, contentType);
+                Id linkedId = parentId;
 
-            EvalRptFileId = cdl.ContentDocumentId;
-            System.assert(String.isNotEmpty(EvalRptFileId), 'testSendDirectMessage unable to get a ContentDocumentId for our test user');
+                DateTime dtn = DateTime.now();
+                String DT = dtn.format('yyyyMMddHHmmsss');
+                String filename = 'TestSendDirectMsgDocument' + DT + '.txt';
 
-            System.debug('testSendDirectMessage - Step 3 call ');
+                String testbody = 'Test SendDirectMessage content created ' + DT;
+                Blob body = Blob.valueOf(testbody);
+                String contentType = 'text/plain';
 
-            ConnectAPI.FeedElement fi_rtr = ra.SendDirectMessage(EvalueeId, EvalRptFileId);
+                RefereeAssessment ra = new RefereeAssessment();
 
-            String rtrbody = fi_rtr.Body.toString();
+                System.debug('parentId = ' + parentId);
+                System.debug('linkedId = ' + linkedId);
+                System.debug('filename = ' + fileName);
+                System.debug('body = ' + body);
+                System.debug('contenttype = ' + contentType);
+                cdl = ra.createFile(parentId, linkedId, fileName, body, contentType);
 
-            System.debug('testSendDirectMessage - returned body: [' + rtrbody + ']');
-            System.assert(!rtrbody.contains(testbody), 'testSendDirectMessage the returned FeedElement does not contain the message body');
+                EvalRptFileId = cdl.ContentDocumentId;
+                System.assert(String.isNotEmpty(EvalRptFileId), 'testSendDirectMessage unable to get a ContentDocumentId for our test user');
 
-            //ConnectApi.ChatterFeeds.
+                System.debug('testSendDirectMessage - Step 3 call ');
 
-        } catch (Exception err) {
-            System.debug('testSendDirectMessage err: ' + err);
-            unexpectedException = err;
+                ConnectAPI.FeedElement fi_rtr = ra.SendDirectMessage(EvalueeId, EvalRptFileId);
+
+                String rtrbody = fi_rtr.Body.toString();
+
+                System.debug('testSendDirectMessage - returned body: [' + rtrbody + ']');
+                System.assert(!rtrbody.contains(testbody), 'testSendDirectMessage the returned FeedElement does not contain the message body');
+
+                //ConnectApi.ChatterFeeds.
+
+            } catch (Exception err) {
+                System.debug('testSendDirectMessage err: ' + err);
+                unexpectedException = err;
+            }
         }
         system.assertEquals(null, unexpectedException, 'testSendDirectMessage - unexcepted fail');
 
@@ -1323,14 +1341,20 @@
         System.debug('=================================================================================================');
         System.debug('in testGenerateRefAssessmentRPT');
 
+        if (rQuestionnaireId == null) {
+            System.debug('evaluatoruser is null');
+            LoadEvalResponses();
+        }
+        Exception unExpectedException;
+    System.runAs(portalAccountOwner) {
+
         System.debug('testGenerateRefAssessmentRPT - Step 1 - pull data from a previous assessment Db for our test');
         Evaluation_ResponsesAbstract__c[] era = [SELECT Evaluator_Id__c, Evaluator_Id__r.Name,
             Evaluee_Id__c, Evaluee_Id__r.Name,
             Evaluation_Location__c,
             Questionnaire_Id__c,
             Evaluation_type__c
-            from Evaluation_ResponsesAbstract__c order by Questionnaire_DateTime__c desc
-        ];
+            from Evaluation_ResponsesAbstract__c  Evaluation_ResponsesAbstract__c where Questionnaire_Id__c =: rQuestionnaireId];
 
         System.debug('testGenerateRefAssessmentRPT - records available ' + era.size());
         if (era.size() == 0) {
@@ -1399,7 +1423,7 @@
         System.debug('testGenerateRefAssessmentRPT - ContentDocumentLink returned by createFile = ' + rptfile.ContentDocumentId);
 
         System.debug('testGenerateRefAssessmentRPT - Step 5 - now create a message with the document');
-        Exception unExpectedException;
+
         try {
             ra.SendDirectMessage(pEvalueeId, rptfile.ContentDocumentId);
         } catch (Exception err) {
@@ -1423,6 +1447,9 @@
             System.debug('----------------------------------------------');
             unExpectedException = err;
         }
+
+    }
+
         system.assertEquals(null, unExpectedException, 'testGenerateRefAssessmentRPT should not throw exception');
 
         System.debug('testGenerateRefAssessmentRPT Referee Assessment completed');
