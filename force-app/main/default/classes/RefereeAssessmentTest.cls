@@ -6,7 +6,8 @@
     static User evalueeuser;
 	static Regatta__c evalregatta;
     static Regatta_Participation__c[] regattaparticipation;
-    
+    static User adminuser;
+
     static String rEvaluatorContactId;
     static String rEvalueeId;
     static String rQuestionnaireId;
@@ -82,20 +83,18 @@
             LocaleSidKey='en_US',
             TimeZoneSidKey='America/New_York'
         );
-        Database.insert(portalAccountOwner1);
+        Database.SaveResult portalAccountOwner =  Database.insert(portalAccountOwner1);
+        /*
+            OwnerId is the ID of the user that created the account, e.g., Jules, Doug, Kendal
+            For testing we'll use our systme user 'Admin Evaltest'
+        */
+        System.debug('OwnerId will be = ' + portalAccountOwner.Id);
+        adminuser = portalAccountOwner1;
+        System.debug('Admin user: ' + adminuser.name);
 
-        portalAccountOwner = portalAccountOwner1;
         System.debug('runAs portalAccountOwner1');
-
-        System.runAs(portalAccountOwner) {
-            /*
-            Account portalAccount1 = new Account(
-                Name = 'EvalTestAccount',
-                OwnerId = portalAccountOwner1.Id
-            );
-            Database.insert(portalAccount1);
-            */
-
+        System.runAs(portalAccountOwner1) {
+ 
             System.debug('Create Contact 1');
             Contact contact1 = new Contact(
                 FirstName = fname1,
@@ -103,7 +102,7 @@
                 // AccountId =  portalAccount1.Id, //'0016A00000K77C4QAJ',
                 Email = System.now().millisecond() + email1,
                 MEMBERSHIP_LEVEL__C = 'Basic',
-                OWNERID = '005e00000060aLjAAI',
+                OWNERID = portalAccountOwner.Id, //'005e00000060aLjAAI',
                 REFEREE_RANK__C = rank1,
                 REFEREE_STATUS__C = 'Active',
                 REGION__C = region1,
@@ -174,7 +173,7 @@
                 // AccountId =  portalAccount1.Id, //'0016A00000K77C4QAJ',
                 Email = System.now().millisecond() + email2,
                 MEMBERSHIP_LEVEL__C = 'Basic',
-                OWNERID = '005e00000060aLjAAI',
+                OWNERID = portalAccountOwner.Id,
                 REFEREE_RANK__C = rank2,
                 REFEREE_STATUS__C = 'Active',
                 REGION__C = region2,
@@ -249,6 +248,7 @@
         if (evaluatoruser == null) {
             System.debug('evaluatoruser is null');
             LoadTestUserData();
+            LoadEvalObjsData();
         }
         System.debug('Get user Id next');
         User evaluatorusr = [Select id from User where Id =: evaluatoruser.id];
@@ -257,12 +257,8 @@
         System.RunAs(evaluatorusr) {
            Regatta__c testregatta = new Regatta__c(
 
-                Start_Date_Test__c = Date.today().AddDays(-2),
-                End_Date_Test__c = Date.today().AddDays(-2),
-
-                START_DATE__C = DateTime.Now().AddDays(-2),
-                END_DATE__C = DateTime.Now().AddDays(-2),
-
+                Start_Date_Time__c = Date.today().AddDays(-2),
+                End_Date_Time__c = Date.today().AddDays(-2),
                 NAME = 'Eval Invite',
                 REGATTA_CITY__C = 'Sarasota',
                 REGATTA_COUNTRY__C = 'United States',
@@ -282,7 +278,7 @@
             );
             Database.insert(testregatta);
 
-            evalregatta = [select id, name, Start_Date_Test__c, START_DATE__C 
+            evalregatta = [select id, name, Start_Date_Time__c
                            from regatta__c where id =: testregatta.id limit 1];
         }
         EvaluationQuestionsController.testEvalregatta = evalregatta.clone();
@@ -373,7 +369,7 @@
         Integer p =  [select count() from regatta_participation__c where Participation_Regatta__c =: evalregatta.id];
         
         regattaparticipation = [SELECT Participation_Regatta__c, Participation_Regatta__r.name, 
-                                Participation_Regatta__r.Start_Date__c, Participation_Regatta__r.End_Date__c 
+                                Participation_Regatta__r.Start_Date_Time__c, Participation_Regatta__r.End_Date_Time__c 
                                 FROM Regatta_Participation__c WHERE Participation_Regatta__c =: evalregatta.id];
         
         System.debug('Participants [' + p + '] loaded to regatta');
@@ -404,7 +400,7 @@
         System.debug('LoadEvalResponses test0 evaluee Id'+ ee0.Id + ' / ' + evalueecontact.Id );        
 
         //System.RunAs(evaluatorusr) {
-        System.RunAs(portalAccountOwner) {
+        System.RunAs(adminuser) {
 
             String querystmt01 = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
             System.debug('LoadEvalResponses test01 ' + querystmt01);
@@ -423,9 +419,9 @@
             responseString = responseString + 'evaluatorcontactid=' + evaluatorcontact.Id + '\n';
             responseString = responseString + 'evalueeid=' + evalueecontact.Id + '\n';
             responseString = responseString + 'evaluationtype=CHIEF JUDGE\n';
-            responseString = responseString + 'questionnairedatetime=' + evalregatta.START_DATE__C.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'') + '\n';
+            responseString = responseString + 'questionnairedatetime=' + evalregatta.START_DATE_TIME__C.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'') + '\n';
             responseString = responseString + 'evaluationlocation=' + evalregatta.name + '\n';
-            responseString = responseString + 'evaluationdate=' + evalregatta.START_DATE__C.format('yyyy-MM-dd') + '\n';
+            responseString = responseString + 'evaluationdate=' + evalregatta.START_DATE_TIME__C.format('yyyy-MM-dd') + '\n';
             responseString = responseString + 'evaluatorcomment=test evaluation\n';
             responseString = responseString + 'CJ1_1~CJ1_1^Personal equipment  [Meets Standard]-1\n';
             responseString = responseString + 'CJ1_2~CJ1_2^Position setup  [Meets Standard]-1\n';
@@ -667,6 +663,162 @@
         System.debug('-------------------------------------------------------------------------');
     }
 
+    @IsTest(SeeAllData = true)
+    public static void testObjectAvailablity() {
+
+        /*
+            RefereeAssessment was created to support the generation of PDF reports in support of EvaluationQuestionsController.
+            There are five object that all begin with 'Evaluation_'
+            This will check to see if they are there and in some cases will check for data.
+
+         */
+
+        System.debug('=================================================================================================');
+        System.debug('Begin testObjectAvailablity');
+        String Evaluation_ResponsesAbstract = 'Evaluation_ResponsesAbstract__c';
+        String Evaluation_Responses = 'Evaluation_Responses__c';
+        String Evaluation_Questions = 'Evaluation_Questions__c';
+        String Evaluation_Properties = 'Evaluation_Properties__c';
+        String Evaluation_QuestionTypeResp = 'Evaluation_QuestionTypeResp__c';
+
+        Exception expectedException;
+        try {
+
+            // Objects used by the method must be present to complete test
+            // the following confirms objects are available 
+            boolean existsEvaluation_ResponsesAbstract = false;
+            boolean existsEvaluation_Responses = false;
+            boolean existsEvaluation_Questions = false;
+            boolean existsEvaluation_Properties = false;
+            boolean existsEvaluation_QuestionTypeResp = false;
+
+            FieldDefinition[] erafields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                where EntityDefinition.QualifiedApiName =: Evaluation_ResponsesAbstract
+            ];
+
+            integer fcnt = erafields.size();
+            if (fcnt == 0) {
+                existsEvaluation_ResponsesAbstract = false;
+            } else {
+                existsEvaluation_ResponsesAbstract = true;
+            }
+
+            FieldDefinition[] erfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                where EntityDefinition.QualifiedApiName =: Evaluation_Responses
+            ];
+
+            fcnt = erfields.size();
+            if (fcnt == 0) {
+                existsEvaluation_Responses = false;
+            } else {
+                existsEvaluation_Responses = true;
+            }
+
+            FieldDefinition[] eqfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                where EntityDefinition.QualifiedApiName =: Evaluation_Questions
+            ];
+
+            fcnt = eqfields.size();
+            if (fcnt == 0) {
+                existsEvaluation_Questions = false;
+            } else {
+                existsEvaluation_Questions = true;
+            }
+
+            FieldDefinition[] epfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                where EntityDefinition.QualifiedApiName =: Evaluation_Properties
+            ];
+
+            fcnt = epfields.size();
+            if (fcnt == 0) {
+                existsEvaluation_Properties = false;
+            } else {
+                existsEvaluation_Properties = true;
+            }
+
+            FieldDefinition[] eqtfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+                where EntityDefinition.QualifiedApiName =: Evaluation_QuestionTypeResp
+            ];
+
+            fcnt = eqtfields.size();
+            if (fcnt == 0) {
+                existsEvaluation_QuestionTypeResp = false;
+            } else {
+                existsEvaluation_QuestionTypeResp = true;
+            }
+
+            // If any object is missing throw a fatal error and end this test
+            if (!existsEvaluation_ResponsesAbstract) {
+                System.assertNotEquals(true, existsEvaluation_ResponsesAbstract, 'testObjectAvailablity: missing object Evaluation Responses Abstract ');
+            }
+            if (!existsEvaluation_Responses) {
+                System.assertNotEquals(true, existsEvaluation_Responses, 'testObjectAvailablity: missing object Evaluation Responses');
+            }
+
+            if (!existsEvaluation_Questions) {
+                System.assertNotEquals(true, existsEvaluation_Responses, 'testObjectAvailablity: missing object Evaluation Questions');
+            }
+
+            if (!existsEvaluation_Properties) {
+                System.assertNotEquals(true, existsEvaluation_Properties, 'testObjectAvailablity: missing object Evaluation Properties');
+            }
+
+            if (!existsEvaluation_QuestionTypeResp) {
+                System.assertNotEquals(true, existsEvaluation_QuestionTypeResp, 'testObjectAvailablity: missing object Evaluation QuestionTypeResp');
+            }
+            /*
+            Evaluation_Properties__c[] ep = [select Id from Evaluation_Properties__c];
+            System.assert(0 != ep.size(), 'testObjectAvailablity - Evaluation Properties is empty - add properties');
+
+            Evaluation_Questions__c[] eq = [select Id from Evaluation_Questions__c];
+            System.assert(0 != eq.size(), 'testObjectAvailablity - Evaluation Questions is empty - add questions');
+
+            Evaluation_QuestionTypeResp__c[] eqtr = [select Id from Evaluation_QuestionTypeResp__c];
+            System.assert(0 != eqtr.size(), 'testObjectAvailablity - Evaluation QuestionTypeResp is empty - add response types');
+            */
+            System.debug('testGetResponses - all objects found continue test');
+
+        } catch (Exception err) {
+
+        }
+        System.debug('testObjectAvailablity complete');
+    }
+   
+    @isTest
+    public static void LoadEvalObjsData() {
+
+        System.debug('Begin loadEvalObjsData');
+        if (evaluatoruser == null) {
+            System.debug('evaluatoruser is null');
+            LoadTestRegattaParticipantData();
+        }
+        System.runAs(adminuser) {
+            Evaluation_Properties__c[] ep = [select Id from Evaluation_Properties__c];
+            if (ep.size() == 0) {
+                System.debug('loadEvalObjsData - loading Evaluation Properties from Static Resources');
+                List < sObject > epload = Test.loadData(Evaluation_Properties__c.sObjectType, 'Evaluation_Properties_Data');
+                ep = [select Id from Evaluation_Properties__c];
+                System.debug('loadEvalObjsData Properties epload size = ' + ep.size());
+            }
+            Evaluation_QuestionTypeResp__c[] eqtr = [select Id from Evaluation_QuestionTypeResp__c];
+            if (eqtr.size() == 0) {
+                System.debug('loadEvalObjsData - loading Evaluation QuestionTypeResp from Static Resources');
+                List < sObject > eqtrload = Test.loadData(Evaluation_QuestionTypeResp__c.sObjectType, 'Evaluation_QuestionTypeResp_Data');
+                eqtr = [select Id from Evaluation_QuestionTypeResp__c];
+                System.debug('loadEvalObjsData eqtrload size = ' + eqtr.size());
+            }
+
+            Evaluation_Questions__c[] eq = [select Id from Evaluation_Questions__c];
+            if (eq.size() == 0) {
+                System.debug('loadEvalObjsData - loading Evaluation Questions from Static Resources');
+                List < sObject > eqload = Test.loadData(Evaluation_Questions__c.sObjectType, 'Evaluation_Questions_Data');
+                eq = [select Id from Evaluation_Questions__c];
+                System.debug('loadEvalObjsData Questions eqload size = ' + eq.size());
+            }
+        }
+        System.debug('loadEvalObjsData completed');
+    }
+    
 
     public static String getTimeBasedId() {
         Long ts = DateTime.now().getTime();
@@ -845,127 +997,7 @@
     }
 
 
-    @IsTest(SeeAllData = true)
-    public static void testObjectAvailablity() {
-
-        /*
-            RefereeAssessment was created to support the generation of PDF reports in support of EvaluationQuestionsController.
-            There are five object that all begin with 'Evaluation_'
-            This will check to see if they are there and in some cases will check for data.
-
-         */
-
-        System.debug('=================================================================================================');
-        System.debug('Begin testObjectAvailablity');
-        String Evaluation_ResponsesAbstract = 'Evaluation_ResponsesAbstract__c';
-        String Evaluation_Responses = 'Evaluation_Responses__c';
-        String Evaluation_Questions = 'Evaluation_Questions__c';
-        String Evaluation_Properties = 'Evaluation_Properties__c';
-        String Evaluation_QuestionTypeResp = 'Evaluation_QuestionTypeResp__c';
-
-        Exception expectedException;
-        try {
-
-            // Objects used by the method must be present to complete test
-            // the following confirms objects are available 
-            boolean existsEvaluation_ResponsesAbstract = false;
-            boolean existsEvaluation_Responses = false;
-            boolean existsEvaluation_Questions = false;
-            boolean existsEvaluation_Properties = false;
-            boolean existsEvaluation_QuestionTypeResp = false;
-
-            FieldDefinition[] erafields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
-                where EntityDefinition.QualifiedApiName =: Evaluation_ResponsesAbstract
-            ];
-
-            integer fcnt = erafields.size();
-            if (fcnt == 0) {
-                existsEvaluation_ResponsesAbstract = false;
-            } else {
-                existsEvaluation_ResponsesAbstract = true;
-            }
-
-            FieldDefinition[] erfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
-                where EntityDefinition.QualifiedApiName =: Evaluation_Responses
-            ];
-
-            fcnt = erfields.size();
-            if (fcnt == 0) {
-                existsEvaluation_Responses = false;
-            } else {
-                existsEvaluation_Responses = true;
-            }
-
-            FieldDefinition[] eqfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
-                where EntityDefinition.QualifiedApiName =: Evaluation_Questions
-            ];
-
-            fcnt = eqfields.size();
-            if (fcnt == 0) {
-                existsEvaluation_Questions = false;
-            } else {
-                existsEvaluation_Questions = true;
-            }
-
-            FieldDefinition[] epfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
-                where EntityDefinition.QualifiedApiName =: Evaluation_Properties
-            ];
-
-            fcnt = epfields.size();
-            if (fcnt == 0) {
-                existsEvaluation_Properties = false;
-            } else {
-                existsEvaluation_Properties = true;
-            }
-
-            FieldDefinition[] eqtfields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
-                where EntityDefinition.QualifiedApiName =: Evaluation_QuestionTypeResp
-            ];
-
-            fcnt = eqtfields.size();
-            if (fcnt == 0) {
-                existsEvaluation_QuestionTypeResp = false;
-            } else {
-                existsEvaluation_QuestionTypeResp = true;
-            }
-
-            // If any object is missing throw a fatal error and end this test
-            if (!existsEvaluation_ResponsesAbstract) {
-                System.assertNotEquals(true, existsEvaluation_ResponsesAbstract, 'testObjectAvailablity: missing object Evaluation Responses Abstract ');
-            }
-            if (!existsEvaluation_Responses) {
-                System.assertNotEquals(true, existsEvaluation_Responses, 'testObjectAvailablity: missing object Evaluation Responses');
-            }
-
-            if (!existsEvaluation_Questions) {
-                System.assertNotEquals(true, existsEvaluation_Responses, 'testObjectAvailablity: missing object Evaluation Questions');
-            }
-
-            if (!existsEvaluation_Properties) {
-                System.assertNotEquals(true, existsEvaluation_Properties, 'testObjectAvailablity: missing object Evaluation Properties');
-            }
-
-            if (!existsEvaluation_QuestionTypeResp) {
-                System.assertNotEquals(true, existsEvaluation_QuestionTypeResp, 'testObjectAvailablity: missing object Evaluation QuestionTypeResp');
-            }
-
-            Evaluation_Properties__c[] ep = [select Id from Evaluation_Properties__c];
-            System.assert(0 != ep.size(), 'testObjectAvailablity - Evaluation Properties is empty - add properties');
-
-            Evaluation_Questions__c[] eq = [select Id from Evaluation_Questions__c];
-            System.assert(0 != eq.size(), 'testObjectAvailablity - Evaluation Questions is empty - add questions');
-
-            Evaluation_QuestionTypeResp__c[] eqtr = [select Id from Evaluation_QuestionTypeResp__c];
-            System.assert(0 != eqtr.size(), 'testObjectAvailablity - Evaluation QuestionTypeResp is empty - add response types');
-
-            System.debug('testGetResponses - all objects found continue test');
-
-        } catch (Exception err) {
-
-        }
-        System.debug('testObjectAvailablity complete');
-    }
-
+ 
     @IsTest(SeeAllData = true)
     public static void testGetResponses() {
 
@@ -1093,6 +1125,8 @@
 
         Exception unexpectedException;
 
+        LoadEvalObjsData();
+
         RefereeAssessment ra = new RefereeAssessment();
 
         System.debug('testCreateFile Test 1 - Test will replicate file creation and storage logic in method');
@@ -1115,56 +1149,59 @@
         System.debug('body = ' + bodyt1);
 
         //
-        ContentVersion cv = new ContentVersion();
-        cv.ContentLocation = 'S';
-        cv.Title = 'Test Document';
-        cv.PathOnClient = filename;
-        cv.VersionData = Blob.valueOf(bodyt1);
-        Insert cv;
+        System.RunAs(adminuser) {
+            ContentVersion cv = new ContentVersion();
+            cv.ContentLocation = 'S';
+            cv.Title = 'Test Document';
+            cv.PathOnClient = filename;
+            cv.VersionData = Blob.valueOf(bodyt1);
+            Insert cv;
 
-        //Create ContentDocumentLink 
-        System.debug('testCreateFile insert to ContentDocumentLink - LinkedEntityId = ' + parentId);
-        cv = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id =: cv.Id limit 1];
-        ContentDocumentLink cdlt1 = New ContentDocumentLink();
-        cdlt1.ContentDocumentId = cv.ContentDocumentId;
-        cdlt1.LinkedEntityId = parentId; //acc.Id;
-        cdlt1.shareType = 'V';
-        Insert cdlt1;
-        System.debug('testCreateFile  - ContentDocumentId = ' + cdlt1.ContentDocumentId);
-
-        System.debug('testCreateFile Test 1 completed ContentDocumentLink ');
-
-        System.debug('testCreateFile Test 2 - This test will confirm logic in method');
-
-        ContentDocumentLink cdlt2 = New ContentDocumentLink();
-        //parentId = UserId;
-
-        Id linkedId = parentId;
-
-        dtn = DateTime.now();
-        DT = dtn.format('yyyyMMddHHmmsss');
-        filename = 'Test2Document' + DT + '.txt';
-
-        String testbody = 'Test2 Content';
-        Blob body = Blob.valueOf(testbody);
-        String contentType = 'text/plain';
-
-        try {
-            System.debug('parentId = ' + parentId);
-            System.debug('linkedId = ' + linkedId);
-            System.debug('filename = ' + fileName);
-            System.debug('body = ' + body);
-            System.debug('contenttype = ' + contentType);
-            cdlt2 = ra.createFile(parentId, linkedId, fileName, body, contentType);
-
-            System.debug('Test 2 completed - ContentDocumentId = ' + cdlt2.ContentDocumentId);
-
-        } catch (Exception err) {
-            System.debug('testCreateFile err: ' + err);
-            unexpectedException = err;
+            //Create ContentDocumentLink 
+            System.debug('testCreateFile insert to ContentDocumentLink - LinkedEntityId = ' + parentId);
+            cv = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id =: cv.Id limit 1];
+            ContentDocumentLink cdlt1 = New ContentDocumentLink();
+            cdlt1.ContentDocumentId = cv.ContentDocumentId;
+            cdlt1.LinkedEntityId = parentId; //acc.Id;
+            cdlt1.shareType = 'V';
+            Insert cdlt1;
+            System.debug('testCreateFile  - ContentDocumentId = ' + cdlt1.ContentDocumentId);
         }
-        system.assertEquals(null, unexpectedException, 'testCreateFile - unexcepted fail');
+            System.debug('testCreateFile Test 1 completed ContentDocumentLink ');
 
+            System.debug('testCreateFile Test 2 - This test will confirm logic in method');
+
+        System.RunAs(adminuser) {
+
+            ContentDocumentLink cdlt2 = New ContentDocumentLink();
+            //parentId = UserId;
+
+            Id linkedId = parentId;
+
+            dtn = DateTime.now();
+            DT = dtn.format('yyyyMMddHHmmsss');
+            filename = 'Test2Document' + DT + '.txt';
+
+            String testbody = 'Test2 Content';
+            Blob body = Blob.valueOf(testbody);
+            String contentType = 'text/plain';
+
+            try {
+                System.debug('parentId = ' + parentId);
+                System.debug('linkedId = ' + linkedId);
+                System.debug('filename = ' + fileName);
+                System.debug('body = ' + body);
+                System.debug('contenttype = ' + contentType);
+                cdlt2 = ra.createFile(parentId, linkedId, fileName, body, contentType);
+
+                System.debug('Test 2 completed - ContentDocumentId = ' + cdlt2.ContentDocumentId);
+
+            } catch (Exception err) {
+                System.debug('testCreateFile err: ' + err);
+                unexpectedException = err;
+            }
+            system.assertEquals(null, unexpectedException, 'testCreateFile - unexcepted fail');
+        }
         System.debug('Completed RefereeAssessmentTest - testing createFile');
     }
 
@@ -1264,10 +1301,10 @@
         Exception unexpectedException;
         if (evalueecontact == null) {
             System.debug('evalueecontact is null');
-            LoadTestUserData();
+            LoadTestRegattaParticipantData();
         }
 
-        System.runAs(portalAccountOwner) {
+        System.runAs(adminuser) {
 
             try {
 
@@ -1275,8 +1312,6 @@
                 String EvalRptFileId = '';
 
                 System.debug('testSendDirectMessage - Step 1 obtain a known contact to use as EvlaueeId');
-
-
 
                 //Contact c = [SELECT id, name from contact where name like 'Michael Miller'
                 //    limit 1
@@ -1346,7 +1381,7 @@
             LoadEvalResponses();
         }
         Exception unExpectedException;
-    System.runAs(portalAccountOwner) {
+    System.runAs(adminuser) {
 
         System.debug('testGenerateRefAssessmentRPT - Step 1 - pull data from a previous assessment Db for our test');
         Evaluation_ResponsesAbstract__c[] era = [SELECT Evaluator_Id__c, Evaluator_Id__r.Name,

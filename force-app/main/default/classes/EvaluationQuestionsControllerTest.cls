@@ -14,7 +14,10 @@
     static User evalueeuser;
 	static Regatta__c evalregatta;
     static Regatta_Participation__c[] regattaparticipation;
-    
+    static User adminuser;
+
+    static String rQuestionnaireId;
+
     public static testMethod void LoadTestUserData(){
 
         /*
@@ -83,17 +86,17 @@
             LocaleSidKey='en_US',
             TimeZoneSidKey='America/New_York'
         );
-        Database.insert(portalAccountOwner1);
+        Database.SaveResult portalAccountOwner = Database.insert(portalAccountOwner1);
+         /*
+            OwnerId is the ID of the user that created the account, e.g., Jules, Doug, Kendal
+            For testing we'll use our systme user 'Admin Evaltest'
+        */
+        System.debug('OwnerId will be = ' + portalAccountOwner.Id);
+        adminuser = portalAccountOwner1;
+        System.debug('Admin user: ' + adminuser.name);
 
         System.debug('runAs portalAccountOwner1');
         System.runAs(portalAccountOwner1) {
-            /*
-            Account portalAccount1 = new Account(
-                Name = 'EvalTestAccount',
-                OwnerId = portalAccountOwner1.Id
-            );
-            Database.insert(portalAccount1);
-            */
 
             System.debug('Create Contact 1');
             Contact contact1 = new Contact(
@@ -102,7 +105,7 @@
                 // AccountId =  portalAccount1.Id, //'0016A00000K77C4QAJ',
                 Email = System.now().millisecond() + email1,
                 MEMBERSHIP_LEVEL__C = 'Basic',
-                OWNERID = '005e00000060aLjAAI',
+                OWNERID = portalAccountOwner.Id, // '005e00000060aLjAAI',
                 REFEREE_RANK__C = rank1,
                 REFEREE_STATUS__C = 'Active',
                 REGION__C = region1,
@@ -173,7 +176,7 @@
                 // AccountId =  portalAccount1.Id, //'0016A00000K77C4QAJ',
                 Email = System.now().millisecond() + email2,
                 MEMBERSHIP_LEVEL__C = 'Basic',
-                OWNERID = '005e00000060aLjAAI',
+                OWNERID = portalAccountOwner.Id,
                 REFEREE_RANK__C = rank2,
                 REFEREE_STATUS__C = 'Active',
                 REGION__C = region2,
@@ -247,6 +250,7 @@
         if (evaluatoruser == null) {
             System.debug('evaluatoruser is null');
             LoadTestUserData();
+            LoadEvalObjsData();
         }
         System.debug('Get user Id next');
         User evaluatorusr = [Select id from User where Id =: evaluatoruser.id];
@@ -255,11 +259,11 @@
         System.RunAs(evaluatorusr) {
            Regatta__c testregatta = new Regatta__c(
 
-                Start_Date_Test__c = Date.today().AddDays(-2),
-                End_Date_Test__c = Date.today().AddDays(-2),
+                Start_Date_Time__c = Date.today().AddDays(-2),
+                End_Date_Time__c = Date.today().AddDays(-2),
 
-                START_DATE__C = DateTime.Now().AddDays(-2),
-                END_DATE__C = DateTime.Now().AddDays(-2),
+                //START_DATE_TIME__C = DateTime.Now().AddDays(-2),
+                //END_DATE_TIME__C = DateTime.Now().AddDays(-2),
 
                 NAME = 'Eval Invite',
                 REGATTA_CITY__C = 'Sarasota',
@@ -280,7 +284,7 @@
             );
             Database.insert(testregatta);
 
-            evalregatta = [select id, name, Start_Date_Test__c, START_DATE__C 
+            evalregatta = [select id, name, Start_Date_Time__c 
                            from regatta__c where id =: testregatta.id limit 1];
         }
         EvaluationQuestionsController.testEvalregatta = evalregatta.clone();
@@ -370,8 +374,10 @@
 
         Integer p =  [select count() from regatta_participation__c where Participation_Regatta__c =: evalregatta.id];
         
-        regattaparticipation = [SELECT Participation_Regatta__c, Participation_Regatta__r.name, 
-                                Participation_Regatta__r.Start_Date__c, Participation_Regatta__r.End_Date__c 
+        regattaparticipation = [SELECT Participation_Regatta__c, 
+                                Participation_Regatta__r.name, 
+                                Participation_Regatta__r.Start_Date_Time__c, 
+                                Participation_Regatta__r.End_Date_Time__c 
                                 FROM Regatta_Participation__c WHERE Participation_Regatta__c =: evalregatta.id];
         
         System.debug('Participants [' + p + '] loaded to regatta');
@@ -382,22 +388,293 @@
         
         System.debug('=================================================================================================');
     }
+   
+    @IsTest(SeeAllData=true)    
+    public static void LoadEvalResponses() {
+
+        System.debug('--------------------------------------------------------------------------------');
+        System.debug('Begin LoadEvalResponses');
+
+        if (evaluatoruser == null) {
+            System.debug('LoadEvalResponses evaluatoruser is null.  Run LoadTestRegattaParticipantData');
+            LoadTestRegattaParticipantData();
+        }
+        User evaluatorusr = [Select id from User where Id =: evaluatoruser.id];
+
+        String querystmt0 = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
+        System.debug('LoadEvalResponses test0 ' + querystmt0);
+        Contact ee0 = Database.query(querystmt0);
+        System.debug('LoadEvalResponses test0 evaluee Id'+ ee0.Id + ' / ' + evalueecontact.Id );        
+
+        //System.RunAs(evaluatorusr) {
+        System.RunAs(adminuser) {
+
+            String querystmt01 = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
+            System.debug('LoadEvalResponses test01 ' + querystmt01);
+            Contact ee01 = Database.query(querystmt01);
+            System.debug('LoadEvalResponses test0 evaluee Id'+ ee01.Id + ' / ' + evalueecontact.Id );        
+
+            System.debug('LoadEvalResponses evaluatorname=' + evaluatorcontact.name);
+            System.debug('LoadEvalResponses evaluatoruserid=' + evaluatoruser.Id);
+
+            // The following is TEST DATA captured from a live test each part is delimited by a line return
  
-    public static String getTimeBasedId() {
-        Long ts = DateTime.now().getTime();
-        String timeBasedVal = ts + '';
-        System.debug('timeBaseVal='+timeBasedVal);
-        return timeBasedVal;
+            // CHANGE DATA TO LOCAL DATA FOR TEST IN OTHER APPS  
+            String responseString = '';
+            responseString = responseString + 'evaluatorname=' + evaluatorcontact.name + '\n';
+            responseString = responseString + 'evaluatoruserid=' + evaluatoruser.Id + '\n';
+            responseString = responseString + 'evaluatorcontactid=' + evaluatorcontact.Id + '\n';
+            responseString = responseString + 'evalueeid=' + evalueecontact.Id + '\n';
+            responseString = responseString + 'evaluationtype=CHIEF JUDGE\n';
+            responseString = responseString + 'questionnairedatetime=' + evalregatta.START_DATE_TIME__C.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'') + '\n';
+            responseString = responseString + 'evaluationlocation=' + evalregatta.name + '\n';
+            responseString = responseString + 'evaluationdate=' + evalregatta.START_DATE_TIME__C.format('yyyy-MM-dd') + '\n';
+            responseString = responseString + 'evaluatorcomment=test evaluation\n';
+            responseString = responseString + 'CJ1_1~CJ1_1^Personal equipment  [Meets Standard]-1\n';
+            responseString = responseString + 'CJ1_2~CJ1_2^Position setup  [Meets Standard]-1\n';
+            responseString = responseString + 'CJ1_3~CJ1_3^Awareness of regatta; specific procedures, schedules, and crews  [Not Observed]-3\n';
+            responseString = responseString + 'CJ5_4~CJ5_4^Overall Evaluation  [Fully Competent]-1';
+            System.debug('testInsertResponses Test data appears as:\n' + responseString);
+
+            String EvaluatorUserId;
+            String EvaluatorContactId;
+            String EvalueeId;
+            String EvaluationType;
+            String EvaluationLocation;
+            String EvaluationDate;
+            String EvaluatorComment;
+            String QuestionnaireDateTime;
+            String QuestionnaireId;
+
+            System.debug('testInsertResponses:\n' + responseString);
+            String[] responses = responseString.split('\n');
+
+            Evaluation_Responses__c erlast = new Evaluation_Responses__c();
+            
+            String querystmt1 = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
+            System.debug(querystmt1);
+            Contact ee1 = Database.query(querystmt1);
+            System.debug('LoadEvalResponses test1 evaluee Id'+ ee1.Id + ' / ' + evalueecontact.Id );        
+
+
+            Integer ctr = 0;
+            try {
+
+                // begin responses for loop
+                for (String resp: responses) {
+                    if (resp.contains('evaluatoruserid')) {
+                        EvaluatorUserId = resp.substring(resp.indexOf('=') + 1);
+                    } else if (resp.contains('evaluatorcontactid')) {
+                        EvaluatorContactId = resp.substring(resp.indexOf('=') + 1);
+                    } else if (resp.contains('evalueeid')) {
+                        EvalueeId = resp.substring(resp.indexOf('=') + 1);
+                    } else if (resp.contains('evaluationtype')) {
+                        EvaluationType = resp.substring(resp.indexOf('=') + 1);
+                    } else if (resp.contains('evaluationlocation')) {
+                        EvaluationLocation = resp.substring(resp.indexOf('=') + 1);
+                    } else if (resp.contains('evaluationdate')) {
+                        EvaluationDate = resp.substring(resp.indexOf('=') + 1);
+                    } else if (resp.contains('questionnairedatetime')) {
+                        QuestionnaireDateTime = resp.substring(resp.indexOf('=') + 1);
+                    } else if (resp.contains('evaluatorcomment')) {
+                        EvaluatorComment = resp.substring(resp.indexOf('=') + 1);
+                    } else if (resp.contains('~')) {
+
+                        System.debug('testInsertRespones - parse evalueeid = ' + EvalueeId);
+
+                        String[] rsp = resp.split('~');
+                        String EvaluationQuestionNum = rsp[0];
+                        String[] rrsp = rsp[1].split('-');
+                        String EvaluationRating = rrsp[1];
+
+                        System.debug('testInsertResponses - lookup Question_Number__c ' + EvaluationQuestionNum);
+
+                        // THIS WAS CREATED TO REDUCE TRAFFIC BETWEEN CLIENT AND SERVER 
+                        // TODO:  REVIEW EFFECTIVENESS
+                        Evaluation_Questions__c[] EvaluationQuestionId = [SELECT id,
+                            Evaluation_Type__c,
+                            Question_Number__c,
+                            Question_Text__c,
+                            isRequired__c,
+                            QuestionType__r.Name,
+                            QuestionType__r.Response_Text_1__c,
+                            QuestionType__r.Response_Text_2__c,
+                            QuestionType__r.Response_Text_3__c
+                            from Evaluation_Questions__c WHERE Question_Number__c =: EvaluationQuestionNum
+                        ];
+
+                        System.debug('testInsertResponses - Questions returned = ' + EvaluationQuestionId.size());
+
+                        System.debug('testInsertResponses Common values: ' +
+                            '\n\tEvaluatorUserId=' + EvaluatorUserId +
+                            '\n\tEvaluatorContactId=' + EvaluatorContactId +
+                            '\n\tEvalueeId=' + EvalueeId +
+                            '\n\tEvaluationQuestionNum=' + EvaluationQuestionNum +
+                            '\n\tEvaluationType=' + EvaluationType +
+                            '\n\tEvaluationRating=' + EvaluationRating);
+
+                        Evaluation_Responses__c er = new Evaluation_Responses__c();
+
+                        er.Evaluation_Date__c = date.valueOf(EvaluationDate);
+
+                        //system.debug(logginglevel.debug,'String QuestionnaireDatetime = '+ QuestionnaireDateTime );
+                        // THIS WAS A VERY TRICKY ONE - NORMAL PARSE AND VALUEOF DID NOT WORK
+                        er.Questionnaire_DateTime__c = (DateTime) JSON.deserialize('"' + QuestionnaireDateTime + '"', DateTime.class);
+                        //system.debug(logginglevel.debug,'Parsed QuestionnaireDatetime = ' + er.Questionnaire_DateTime__c);
+
+                        System.debug('testInsertResponses genQuestionnaireID using [' + er.Questionnaire_DateTime__c + '] ' + EvalueeId);
+                        if (String.isEmpty(QuestionnaireId)) {
+                            QuestionnaireId = EvaluationQuestionsController.genQuestionnaireID(er.Questionnaire_DateTime__c, EvalueeId);
+                        }
+                        er.Questionnaire_Id__c = QuestionnaireId;
+                        System.debug('testInsertResponses genQuestionnaireID = [' + er.Questionnaire_Id__c + '] ');
+
+                        if (EvaluationLocation == null || EvaluationLocation.length() == 0)
+                            er.Evaluation_Location__c = 'Location omitted';
+                        else
+                            er.Evaluation_Location__c = EvaluationLocation;
+                        er.Evaluation_Type__c = EvaluationQuestionId[0].Evaluation_Type__c;
+                        er.Question_Number__c = EvaluationQuestionId[0].Question_Number__c; // EvaluationQuestionNum;
+                        er.Question_Text__c = EvaluationQuestionId[0].Question_Text__c;
+                        er.Question_Type__c = EvaluationQuestionId[0].QuestionType__r.Name;
+                        er.Question_Id__c = EvaluationQuestionId[0].ID; // EvaluationQuestionNum;
+                        er.Evaluation_Rating__c = EvaluationRating;
+                        if (EvaluationRating == '1') {
+                            er.Evaluation_Rating_Text__c = EvaluationQuestionId[0].QuestionType__r.Response_Text_1__c;
+                        }
+                        if (EvaluationRating == '2') {
+                            er.Evaluation_Rating_Text__c = EvaluationQuestionId[0].QuestionType__r.Response_Text_2__c;
+                        }
+                        if (EvaluationRating == '3') {
+                            er.Evaluation_Rating_Text__c = EvaluationQuestionId[0].QuestionType__r.Response_Text_3__c;
+                        }
+                        /*
+                        if (EvaluationQuestionId[0].QuestionType__r.Name.contains('Overall')) {
+                            er.Evaluator_Comment__c = EvaluatorComment;
+                        } else {
+                            er.Evaluator_Comment__c = '';
+                        }
+                        */
+                        er.Evaluee_Id__c = Id.valueOf(EvalueeId);
+                        er.Evaluator_User_Id__c = Id.valueOf(EvaluatorUserId);
+                        er.Evaluator_Id__c = Id.valueOf(EvaluatorContactId);
+                        
+                        Contact evaluatorcnt = [Select id from Contact where Id =: evaluatorcontact.id];
+                        System.debug('LoadEvalResponses evaluator Id '+ evaluatorcnt.Id + ' / ' + evaluatorcontact.id );
+
+                        String querystmt = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
+                        System.debug(querystmt);
+                        Contact ee = Database.query(querystmt);
+                        System.debug('LoadEvalResponses evaluee Id'+ ee.Id + ' / ' + evalueecontact.Id );        
+
+                        Integer cnt = [Select count() from Evaluation_Responses__c WHERE Questionnaire_Id__c =: er.Questionnaire_Id__c];
+                        System.debug('LoadEvalResponses - current related responses = ' + cnt);
+
+                        System.debug('testInsertResponses  Inserting Response:' +
+                            '\n\tEvaluation_Date__c: ' + er.Evaluation_Date__c + 
+                            '\n\tQuestionnaire_DateTime__c: ' +  er.Questionnaire_DateTime__c +
+                            '\n\tQuestionnaire_Id__c: ' + er.Questionnaire_Id__c +
+                            '\n\tEvaluation_Location__c: ' + er.Evaluation_Location__c +
+                            '\n\tEvaluation_Type__c: ' + er.Evaluation_Type__c +
+                            '\n\tQuestion_Number__c: ' + er.Question_Number__c +
+                            '\n\tQuestion_Text__c: ' + er.Question_Text__c +
+                            '\n\tQuestion_Type__c: ' + er.Question_Type__c +  
+                            '\n\tQuestion_Id__c: ' + er.Question_Id__c +
+                            '\n\tEvaluation_Rating__c: ' + er.Evaluation_Rating__c +
+                            '\n\tEvaluation_Rating_Text__c: ' + er.Evaluation_Rating_Text__c +
+                            '\n\tEvaluator_Comment__c: ' + er.Evaluator_Comment__c +
+                            '\n\tEvaluator_User_Id__c: ' + er.Evaluator_User_Id__c +
+                            '\n\tEvaluator_Id__c: ' +er.Evaluator_Id__c +
+                            '\n\tEvaluee_Id__c: ' + er.Evaluee_Id__c
+
+                        );
+                        erlast = er;
+                        ctr++;
+                        //if(Test.isRunningTest()) {
+                        //      System.debug('insertResponses - In test skipping actual insert');
+                        //} else {
+                            insert er;
+
+                        //}
+                        System.debug('testInsertResponses - insert ' + ctr + ' completed');
+                    } // end if resp.contains('~')  
+                } // end end responses for loop
+                System.debug('testInsertResponses - Insert responses to Evaluation Responses complete - Insert to Evaluation ResponsesAbstract follows');
+
+                Evaluation_Responses__c[] evalresps = [SELECT Question_Id__c, Question_Number__c, Question_Text__c, Question_type__c,
+                    Questionnaire_Id__c, Evaluation_Rating__c, Evaluation_Rating_Text__c, Evaluator_Comment__c
+                    FROM Evaluation_Responses__c WHERE Questionnaire_Id__c =: QuestionnaireId
+                ];
+
+                System.debug('testInsertResponses - ' + evalresps.size() + ' Evaluation_Responses__c rows associated with QuestionnaireId ' + QuestionnaireId);
+                
+                Evaluation_ResponsesAbstract__c rr = new Evaluation_ResponsesAbstract__c();
+
+                rr.Questionnaire_DateTime__c = (DateTime) JSON.deserialize('"' + QuestionnaireDateTime + '"', DateTime.class);
+                rr.Questionnaire_Id__c = QuestionnaireId;
+                rr.Evaluee_Id__c = EvalueeId;
+                rr.Evaluation_Date__c = date.valueOf(EvaluationDate);
+                rr.Evaluation_Location__c = EvaluationLocation;
+                rr.Evaluator_User_Id__c = EvaluatorUserId;
+                rr.Evaluator_Id__c = EvaluatorContactId;
+                rr.Evaluation_Type__c = EvaluationType;
+
+                System.debug('testInsertResponses Evaluation ResponsesAbstract:' +
+                    '\n\tQuestionnaire_Id__c: ' + rr.Questionnaire_Id__c +
+                    '\n\tEvaluation_Date__c: ' + rr.Evaluation_Date__c +
+                    '\n\tEvaluation_Location__c: ' + rr.Evaluation_Location__c +
+                    '\n\tEvalation_User_Id__c: ' + rr.Evaluator_User_Id__c +
+                    '\n\tEvaluator_Id__c: ' + rr.Evaluator_Id__c +
+                    '\n\rEvaluation_Type__c: ' + rr.Evaluation_Type__c
+                );
+
+                insert rr;
+
+                Evaluation_ResponsesAbstract__c[] evalabstract = [SELECT Questionnaire_Id__c, Evaluation_Date__c, Evaluation_Location__c,
+                    Evaluator_User_Id__c, Evaluator_Id__c, Evaluation_Type__c FROM Evaluation_ResponsesAbstract__c
+                    WHERE Questionnaire_Id__c =: QuestionnaireId
+                ];
+
+                rQuestionnaireId = rr.Questionnaire_Id__c;
+
+                System.debug('testInsertResponses - ' + evalabstract.size() + ' Evaluation_Responses__c rows associated with QuestionnaireId ' + QuestionnaireId);
+
+                System.debug('testInsertResponses Insert to Evaluation ResponsesAbstract of Questionnaire Id ' + QuestionnaireId + ' completed');
+
+                String rtr = EvaluatorContactId + ';' + EvalueeId + ';' + QuestionnaireId + ';' + EvaluationType;
+
+                //return rtr;    
+
+            } catch (Exception err) {
+                String errMsg = err.getMessage();
+                String errTrace = err.getStackTraceString();
+                System.debug(LoggingLevel.ERROR, 'testInsertResponses Error: ' + errMsg);
+                System.debug(LoggingLevel.ERROR, 'testInsertResponses StackTrace:\n' + errTrace);
+
+                System.debug(LoggingLevel.DEBUG, 'testInsertResponses Exception Last Inserted Response Prior to error:' +
+                    '\n\tQuestion_Id__c: ' + erlast.Question_Id__c +
+                    '\n\tQuestion_Number__c: ' + erlast.Question_Number__c +
+                    '\n\tQuestion_Text__c: ' + erlast.Question_Text__c +
+                    '\n\tQuestion_Type__c: ' + erlast.Question_Type__c +
+                    '\n\tQuestionnaire_Id__c: ' + erlast.Questionnaire_Id__c +
+                    '\n\tEvaluation_Rating__c: ' + erlast.Evaluation_Rating__c +
+                    '\n\tEvaluation_Rating_Text__c: ' + erlast.Evaluation_Rating_Text__c +
+                    '\n\tEvaluator_Comment__c: ' + erlast.Evaluator_Comment__c
+                );
+
+                throw new AuraHandledException(err.getMessage());
+            }
+         } // End RunAs
+      
+        System.debug('LoadEvalResponses completed');
+        System.debug('-------------------------------------------------------------------------');
     }
 
-
-// =====================================================================================
-    
     @IsTest(SeeAllData=true)
     public static void testObjectAvailablity() {
         /* 
            EvaluationQuestionController was created to support the data demands of evaluationquestionnaire.
-           There are five object that all begin with 'Evaluation_'
+           There are five objects that all begin with 'Evaluation_'
            This will check to see if they are there and in some cases will check for data.
         */
         System.debug('=================================================================================================');
@@ -489,15 +766,8 @@
                 System.assertNotEquals(true, existsEvaluation_QuestionTypeResp, 'testObjectAvailablity: missing object Evaluation QuestionTypeResp');
             }
 
-			Evaluation_Properties__c[] ep = [select Id from Evaluation_Properties__c];
-            System.assert(0 != ep.size(),'testObjectAvailablity - Evaluation Properties is empty - add properties');
-                        
-            Evaluation_Questions__c[] eq = [select Id from Evaluation_Questions__c];
-            System.assert(0 != eq.size(),'testObjectAvailablity - Evaluation Questions is empty - add questions');
+           
 
-            Evaluation_QuestionTypeResp__c[] eqtr = [select Id from Evaluation_QuestionTypeResp__c];
-            System.assert(0 != eqtr.size(),'testObjectAvailablity - Evaluation QuestionTypeResp is empty - add response types');
-            
             System.debug('testGetResponses - all objects found continue test');
         } catch (Exception err) {
             
@@ -505,7 +775,50 @@
         System.debug('testObjectAvailablity complete');
     }
     
-// 
+    @isTest
+    public static void LoadEvalObjsData() {
+
+        System.debug('Begin loadEvalObjsData');
+        if (evaluatoruser == null) {
+            System.debug('evaluatoruser is null');
+            LoadTestRegattaParticipantData();
+        }
+        System.runAs(adminuser) {
+            Evaluation_Properties__c[] ep = [select Id from Evaluation_Properties__c];
+            if (ep.size() == 0) {
+                System.debug('loadEvalObjsData - loading Evaluation Properties from Static Resources');
+                List < sObject > epload = Test.loadData(Evaluation_Properties__c.sObjectType, 'Evaluation_Properties_Data');
+                ep = [select Id from Evaluation_Properties__c];
+                System.debug('loadEvalObjsData Properties epload size = ' + ep.size());
+            }
+            Evaluation_QuestionTypeResp__c[] eqtr = [select Id from Evaluation_QuestionTypeResp__c];
+            if (eqtr.size() == 0) {
+                System.debug('loadEvalObjsData - loading Evaluation QuestionTypeResp from Static Resources');
+                List < sObject > eqtrload = Test.loadData(Evaluation_QuestionTypeResp__c.sObjectType, 'Evaluation_QuestionTypeResp_Data');
+                eqtr = [select Id from Evaluation_QuestionTypeResp__c];
+                System.debug('loadEvalObjsData eqtrload size = ' + eqtr.size());
+            }
+
+            Evaluation_Questions__c[] eq = [select Id from Evaluation_Questions__c];
+            if (eq.size() == 0) {
+                System.debug('loadEvalObjsData - loading Evaluation Questions from Static Resources');
+                List < sObject > eqload = Test.loadData(Evaluation_Questions__c.sObjectType, 'Evaluation_Questions_Data');
+                eq = [select Id from Evaluation_Questions__c];
+                System.debug('loadEvalObjsData Questions eqload size = ' + eq.size());
+            }
+        }
+        System.debug('loadEvalObjsData completed');
+    }
+
+    public static String getTimeBasedId() {
+        Long ts = DateTime.now().getTime();
+        String timeBasedVal = ts + '';
+        System.debug('timeBaseVal='+timeBasedVal);
+        return timeBasedVal;
+    }
+
+// =====================================================================================
+
     @IsTest(SeeAllData=true)
     public static void testForStaticResourceUsedWithPDF() {
         /*
@@ -594,44 +907,7 @@
         }
     }
 
-// =====================================================================================    
-    @IsTest(SeeAllData=true) 
-    public static void testgetQuestionnaireTS() {
-        
-         /* 
-         	getQuestionnaireTS - this method returns a system timestamp an is part of the doInit in Aura bundle evaluationquestionnaire 
-			The timesamp is assigned to all responses as a common point of reference
-			Method Signature:
-				DateTime getQuestionnaireTS() 
-			Return:
-				DateTime value
-         */
-        System.debug('=================================================================================================');
-        System.debug('Begin testgetQuestionnaireTS');
-        Exception unexpectedException;
-        try {
-            
-            // TEST 1 - Confirm datetime value is returned
-            DateTime dt = EvaluationQuestionsController.getQuestionnaireTS();
-            System.assertNotEquals(null, dt, 'Date time is null');
-            System.debug('testgetQuestionnaireTS returned a datetime value');            
-            
-            // TEST 2 - Check the time stamp across a randonly set of responses and confirm the same questionnaireId
-            Evaluation_ResponsesAbstract__c[] er = [SELECT Evaluator_Id__c, Evaluee_Id__c, Questionnaire_Id__c, Evaluation_type__c, Questionnaire_DateTime__c from  Evaluation_ResponsesAbstract__c];                  
-            Evaluation_Responses__c[] rr = [SELECT Questionnaire_DateTime__c FROM Evaluation_Responses__c WHERE Questionnaire_Id__c =: er[0].Questionnaire_Id__c];
-            System.assertNotEquals(0,rr.size(),'testgetQuestionnaireTS no respones found??');
-            for (Evaluation_Responses__c r : rr) {
-				System.assertEquals(er[0].Questionnaire_DateTime__c, r.Questionnaire_DateTime__c,'testgetQuestionnaireTS timestamps appear inconsistent');                
-            }
-            System.debug('testgetQuestionnaireTS sampled data has same timestamp');
-            
-        } catch (Exception err) {
-            System.debug('testgetQuestionnaireTS err: ' + err);
-            unexpectedException = err;
-        }    
-        system.assertEquals(null, unexpectedException, 'testgetQuestionnaireTS - Exceptions should be handled by the method');            
-        System.debug('testgetQuestionnaireTS completed');
-    }
+
     
 // =====================================================================================    
     @IsTest(SeeAllData=true) 
@@ -649,7 +925,9 @@
         System.debug('Begin testGetProps');
         Exception unexpectedException;
         try {
-            
+
+            LoadEvalObjsData();
+
             // TEST 1 - Confirm there is a Evaluation properties object - this is all pointless otherwise
             boolean existsEvaluation_Properties = false;
             FieldDefinition[] erafields = [select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
@@ -737,6 +1015,8 @@
         Exception unexpectedException;
         try {
             
+            LoadEvalObjsData();
+
             // THESE ARE CRITICAL PROPS
             
             // Test for direct message text
@@ -827,7 +1107,10 @@
 				String[] getEvaluationTypes() 
 			Return
 				A string array  containing the evaluation types defined in Evaluation Questions
-		*/ 
+        */ 
+        
+        LoadEvalObjsData();
+
         System.debug('=================================================================================================');
         System.debug('Begin testGetEvalauationTypes');
         Exception unexpectedException;
@@ -936,6 +1219,7 @@
             if (evaluatoruser == null) {
                 System.debug('evaluatoruser is null');
                 LoadTestRegattaParticipantData();
+                LoadEvalObjsData();
             }
 
             System.debug('Get user Id next');
@@ -965,7 +1249,7 @@
                 System.debug('testMyRegattas test 2 follows');
                 String qs = 'SELECT Participation_Regatta__r.name, Participant__c, Participant__r.Name ';
                 qs = qs + 'FROM Regatta_Participation__c where Participation_Regatta__r.Regatta_Type__c = \'Sprint\' ';
-                qs = qs + 'and participation_regatta__r.start_date__c = last_n_days:' + lnd + ' ORDER BY Participation_Regatta__r.Start_Date__c DESC';
+                qs = qs + 'and participation_regatta__r.start_date_time__c = last_n_days:' + lnd + ' ORDER BY Participation_Regatta__r.Start_Date_Time__c DESC';
                 Regatta_Participation__c[] rp = Database.query(qs);
                 System.debug('testMyRegattas\n' + qs);
                 if (rp.size() > 1) {
@@ -1008,7 +1292,7 @@
                     System.debug('testMyRegattas - found my regatta');
 
                     // TEST 3 - We picked our regatta - lets get the participant list
-                    System.debug('testMyRegattas - fetch participants');
+                    System.debug('testMyRegattas - test 3 - fetch participants');
                     Integer p =  [select count() from regatta_participation__c where Participation_Regatta__c =: evalregatta.id ];
                     System.debug('Total Participants = ' + p );
                     
@@ -1056,6 +1340,9 @@
         System.debug('Begin testgetQuestions');
         Exception unexpectedException;
         try {
+
+            LoadEvalObjsData();
+
             String qtype = 'REFEREE';    
             List<Evaluation_Questions__c> q = EvaluationQuestionsController.getQuestions(qtype);
             Integer cnt = q.size();
@@ -1138,9 +1425,9 @@
         responseString = responseString + 'evaluatorcontactid=' + evaluatorcontact.Id  + '\n';
         responseString = responseString + 'evalueeid=' + evalueecontact.Id  + '\n';
         responseString = responseString + 'evaluationtype=CHIEF JUDGE\n';
-        responseString = responseString + 'questionnairedatetime=' + evalregatta.START_DATE__C.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'') + '\n'; 
+        responseString = responseString + 'questionnairedatetime=' + evalregatta.START_DATE_TIME__C.formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'') + '\n'; 
         responseString = responseString + 'evaluationlocation=' + evalregatta.name + '\n';
-        responseString = responseString + 'evaluationdate=' + evalregatta.START_DATE__C.format('yyyy-MM-dd')  + '\n';
+        responseString = responseString + 'evaluationdate=' + evalregatta.START_DATE_TIME__C.format('yyyy-MM-dd')  + '\n';
         responseString = responseString + 'evaluatorcomment=test evaluation\n';
         responseString = responseString + 'CJ1_1~CJ1_1^Personal equipment  [Meets Standard]-1\n';
         responseString = responseString + 'CJ1_2~CJ1_2^Position setup  [Meets Standard]-1\n';
@@ -1280,7 +1567,9 @@
                     // insert er;
                     
                 }  // end if resp.contains('~')  
-                 
+                
+                
+                
             }  // end end responses for loop
             
             System.debug('testInsertResponse - at this point our test string would have resulted in 1 Evaluation ResponsesAsbstract record and ' + insertCnt + ' records in Evaluation Responses');
@@ -1299,7 +1588,52 @@
         System.assertEquals(null, unExpectedException, 'testInsertResponse failed - see err');
         System.debug('testInsertResponse completed');
     }
-    
+    // =====================================================================================    
+    /*
+    @IsTest(SeeAllData=true) 
+    public static void testgetQuestionnaireTS() {
+        
+        / 
+         	getQuestionnaireTS - this method returns a system timestamp an is part of the doInit in Aura bundle evaluationquestionnaire 
+			The timesamp is assigned to all responses as a common point of reference
+			Method Signature:
+				DateTime getQuestionnaireTS() 
+			Return:
+				DateTime value
+        /
+        System.debug('=================================================================================================');
+        System.debug('Begin testgetQuestionnaireTS');
+
+        if (evaluatoruser == null) {
+            System.debug('evaluatoruser is null');
+            LoadTestRegattaParticipantData();
+        }
+
+        Exception unexpectedException;
+        try {
+            
+            // TEST 1 - Confirm datetime value is returned
+            DateTime dt = EvaluationQuestionsController.getQuestionnaireTS();
+            System.assertNotEquals(null, dt, 'Date time is null');
+            System.debug('testgetQuestionnaireTS returned a datetime value');            
+            
+            // TEST 2 - Check the time stamp across a randonly set of responses and confirm the same questionnaireId
+            Evaluation_ResponsesAbstract__c[] er = [SELECT Evaluator_Id__c, Evaluee_Id__c, Questionnaire_Id__c, Evaluation_type__c, Questionnaire_DateTime__c from  Evaluation_ResponsesAbstract__c ];                  
+            Evaluation_Responses__c[] rr = [SELECT Questionnaire_DateTime__c FROM Evaluation_Responses__c WHERE Questionnaire_Id__c =: er[0].Questionnaire_Id__c];
+            System.assertNotEquals(0,rr.size(),'testgetQuestionnaireTS no respones found??');
+            for (Evaluation_Responses__c r : rr) {
+				System.assertEquals(er[0].Questionnaire_DateTime__c, r.Questionnaire_DateTime__c,'testgetQuestionnaireTS timestamps appear inconsistent');                
+            }
+            System.debug('testgetQuestionnaireTS sampled data has same timestamp');
+            
+        } catch (Exception err) {
+            System.debug('testgetQuestionnaireTS err: ' + err);
+            unexpectedException = err;
+        }    
+        system.assertEquals(null, unexpectedException, 'testgetQuestionnaireTS - Exceptions should be handled by the method');            
+        System.debug('testgetQuestionnaireTS completed');
+    }
+    */
 // =====================================================================================    
     @IsTest
     public static void testGlobals() {
@@ -1311,7 +1645,6 @@
         System.assertEquals(null,EvaluationQuestionsController.EvaluatorName);
         System.assertEquals(null,EvaluationQuestionsController.EvalueeName);
         System.assertEquals(null,EvaluationQuestionsController.EvaluationLocation);
-        System.assertEquals(null,EvaluationQuestionsController.EvaluationDate);
         System.assertEquals(null,EvaluationQuestionsController.EvaluatorComment);
         System.assertEquals(null,EvaluationQuestionsController.PositionEvaluated);
         
@@ -1328,6 +1661,10 @@
         System.assertEquals('test',EvaluationQuestionsController.EvaluationLocation);
         System.assertEquals('test',EvaluationQuestionsController.EvaluatorComment);
         System.assertEquals('test',EvaluationQuestionsController.PositionEvaluated);
+
+        // Specifically used for testing - Associated with RefereeAssessmentTest so not used here
+        System.assertEquals(null, EvaluationQuestionsController.testEvaluationResponses);
+        System.assertEquals(null, EvaluationQuestionsController.testEvaluationResponsesAbstract); 
 
         System.debug('testGlobals completed');    
     }
@@ -1347,11 +1684,10 @@
         System.debug('=================================================================================================');
         System.debug('Begin testGetEvaluationsList');
 
-        if (evaluatoruser == null) {
-            System.debug('evaluatoruser is null');
-            LoadTestRegattaParticipantData();
+        if (rQuestionnaireId == null) {
+            System.debug('rQuestionnaireId is null');
+            LoadEvalResponses();
         }
-
         integer one = 1;
         Exception unexpectedException;
         try {
@@ -1395,11 +1731,11 @@
         System.debug('=================================================================================================');
         System.debug('Begin testGenerateRefAssessmentRPT');
 
-        if (evaluatoruser == null) {
-            System.debug('evaluatoruser is null');
-            LoadTestRegattaParticipantData();
+        if (rQuestionnaireId == null) {
+            System.debug('rQuestionnaireId is null');
+            LoadEvalResponses();
         }
-
+        
         Exception expectedException;
         try {
             System.runAs(evaluatoruser) {

@@ -6,11 +6,6 @@ public with sharing class EvaluationQuestionsController {
      * NOTE:  @AuraEnabled allows the method to be accessed through a Lightning/Aura application
      * 
      */ 
-    
-    //public static String testEvaluatorId {get; set;}
-    //public static String testEvalueeId {get; set;}    
-    //public static String testEvaluatorName {get; set;}
-    //public static String testEvalueeName {get; set;}
     public static Contact testEvaluatorcontact {get; set;}
     public static Contact testEvalueecontact {get; set;}
     public static Regatta__c testEvalregatta {get; set;}
@@ -99,14 +94,14 @@ public with sharing class EvaluationQuestionsController {
         System.debug(LoggingLevel.INFO,'myRecentRegattas lastNDays='+lastNDays);
         
         String regattatype = EvaluationQuestionsController.getProp('RegattaType');
-        // REFEREE DOES NOT EXECUTE SELECT AGAINST EVALUATION PROPERTIES - NO ERRORS EITHER
-        if (String.isEmpty(regattatype))
-            return myRegattasList; // empty list
+        // REFEREE DOES NOT EXECUTE SELECT AGAINST EVALUATION PROPERTIES - NO ERRORS EITHER - depricated code follows
+        //if (String.isEmpty(regattatype)) <-- tested in EvaluationQuestionsControllerTest
+        //    return myRegattasList; // empty list
         
-        String searchquery = 'SELECT Participation_Regatta__c, Participation_Regatta__r.name, Participation_Regatta__r.Start_Date__c, Participation_Regatta__r.End_Date__c ';
+        String searchquery = 'SELECT Participation_Regatta__c, Participation_Regatta__r.name, Participation_Regatta__r.Start_Date_Time__c, Participation_Regatta__r.End_Date_Time__c ';
         searchquery = searchquery + 'FROM Regatta_Participation__c '; 
         searchquery = searchquery + 'WHERE Participant__c = \'' + myId + '\' ';
-        searchquery = searchquery + 'AND Participation_Regatta__r.Start_Date__c = LAST_N_DAYS:'+lastNDays+' '; 
+        searchquery = searchquery + 'AND Participation_Regatta__r.Start_Date_Time__c = LAST_N_DAYS:'+lastNDays+' '; 
         if(!String.isEmpty(regattatype)) {
             if(regattatype.contains('Head') && regattatype.contains('Sprint'))
                 regattatype = 'Head - Sprint Combination';  // this should solve possible issues with this type
@@ -114,7 +109,7 @@ public with sharing class EvaluationQuestionsController {
             if(!regattatype.equals('All') && rts.contains(regattatype))
                 searchquery = searchquery + 'and Participation_Regatta__r.Regatta_Type__c = \'' + regattatype+'\' ';
         }
-        searchquery = searchquery + 'ORDER BY Participation_Regatta__r.Start_Date__c DESC';
+        searchquery = searchquery + 'ORDER BY Participation_Regatta__r.Start_Date_Time__c DESC';
         System.debug(LoggingLevel.DEBUG,'myRecentRegattas searchquery:\n' + searchquery);
         //
         List <sObject> regattalist = new List <sObject>();
@@ -125,8 +120,8 @@ public with sharing class EvaluationQuestionsController {
         {
             String dateFormatString = 'yyyy-MM-dd';
             String rname = (String) regattalist[i].getSObject('Participation_Regatta__r').get('name');
-            String rdatetime = ((Datetime) regattalist[i].getSObject('Participation_Regatta__r').get('Start_Date__c')).format(dateFormatString);
-            String renddatetime = ((Datetime) regattalist[i].getSObject('Participation_Regatta__r').get('End_Date__c')).format(dateFormatString);
+            String rdatetime = ((Datetime) regattalist[i].getSObject('Participation_Regatta__r').get('Start_Date_Time__c')).format(dateFormatString);
+            String renddatetime = ((Datetime) regattalist[i].getSObject('Participation_Regatta__r').get('End_Date_Time__c')).format(dateFormatString);
             String rid = (String)(String) regattalist[i].get('Participation_Regatta__c');
             System.debug(LoggingLevel.DEBUG,'myRecentRegattas ' + rname + ' - ' + rdatetime + ' / ' + renddatetime + ', ' + rid);
             myRegattasList.add(new RecordsData(rname + ' - ' + rdatetime + ' / ' + renddatetime , rid));
@@ -153,22 +148,22 @@ public with sharing class EvaluationQuestionsController {
         //List<user> userlist = Database.query(searchquery);
         List<Regatta_Participation__c> participantlist;
         
-        if(Test.isRunningTest()) {
-            System.debug('myRecentRegattas >> in test setting participantlist to test list');
+        // if(Test.isRunningTest()) {
+        //     System.debug('myRecentRegattas >> in test setting participantlist to test list');
 
-            //String pname = ((String) testEvaluatorcontact.get('name'))  + ' - ' + ((String) testEvaluatorcontact.get('email'))  + ' - ' + ((String) testEvaluatorcontact.get('Referee_Rank__c'))  ;
-            //String pid = (String) testEvaluatorcontact.get('Id');
-            //regattaParticipants.add(new RecordsData(pname, pid));
+        //     //String pname = ((String) testEvaluatorcontact.get('name'))  + ' - ' + ((String) testEvaluatorcontact.get('email'))  + ' - ' + ((String) testEvaluatorcontact.get('Referee_Rank__c'))  ;
+        //     //String pid = (String) testEvaluatorcontact.get('Id');
+        //     //regattaParticipants.add(new RecordsData(pname, pid));
             
-            String pname = ((String) testEvalueecontact.get('name'))  + ' - ' + ((String) testEvalueecontact.get('email'))  + ' - ' + ((String) testEvalueecontact.get('Referee_Rank__c'))  ;
-            String pid = (String) testEvalueecontact.get('Id');
-            regattaParticipants.add(new RecordsData(pname, pid));
+        //     String pname = ((String) testEvalueecontact.get('name'))  + ' - ' + ((String) testEvalueecontact.get('email'))  + ' - ' + ((String) testEvalueecontact.get('Referee_Rank__c'))  ;
+        //     String pid = (String) testEvalueecontact.get('Id');
+        //     regattaParticipants.add(new RecordsData(pname, pid));
             
-            System.debug('myRecentRegattas >> test regattaParticipants size = ' + regattaParticipants.size() );
-            return regattaParticipants;
-        } else {
+        //     System.debug('myRecentRegattas >> test regattaParticipants size = ' + regattaParticipants.size() );
+        //     return regattaParticipants;
+        // } else {
         	participantlist = Database.query(searchquery);
-        }
+        //}
         //System.debug(LoggingLevel.DEBUG,userlist.size());
         //for (User u : userlist) {
         //    contactIds.add(u.contactid);
@@ -443,21 +438,21 @@ public with sharing class EvaluationQuestionsController {
         
         List<RecordsData> evaluations = new List<RecordsData>();
         
-        if(Test.isRunningTest()) {
-            System.debug('In getEvaluationsList build test response');
-            String evaluatorId = testEvaluatorContact.Id;
-            String evalueeId = testEvalueeContact.Id;
-            String questionnaireId = genQuestionnaireID(testEvalregatta.Start_Date__c, evalueeId);
-            String evaluee = testEvalueeContact.Name;
-            String evaluationType = 'CHIEF JUDGE';
-            String evaluationlocation = testEvalregatta.Name;
-            String evaluator = testEvaluatorContact.Name;
-            String rid = evaluatorId + ';' + evalueeId + ';' + questionnaireId;
-            String eval = evaluee + ' ' + evaluationType  + ' \n@ ' + evaluationlocation + ' \nby '  +  evaluator;
-            evaluations.add(new RecordsData(eval, rid));
-            System.debug('getEvaluationsList test response returning ' + evaluations.size() + ' records');
-            return evaluations;
-        }        
+        // if(Test.isRunningTest()) {
+        //     System.debug('In getEvaluationsList build test response');
+        //     String evaluatorId = testEvaluatorContact.Id;
+        //     String evalueeId = testEvalueeContact.Id;
+        //     String questionnaireId = genQuestionnaireID(testEvalregatta.Start_Date_Time__c, evalueeId);
+        //     String evaluee = testEvalueeContact.Name;
+        //     String evaluationType = 'CHIEF JUDGE';
+        //     String evaluationlocation = testEvalregatta.Name;
+        //     String evaluator = testEvaluatorContact.Name;
+        //     String rid = evaluatorId + ';' + evalueeId + ';' + questionnaireId;
+        //     String eval = evaluee + ' ' + evaluationType  + ' \n@ ' + evaluationlocation + ' \nby '  +  evaluator;
+        //     evaluations.add(new RecordsData(eval, rid));
+        //     System.debug('getEvaluationsList test response returning ' + evaluations.size() + ' records');
+        //     return evaluations;
+        // }        
 
         // TODO: SELECT BASED UPON WHO THE REQUESTOR IS
         String searchquery = 'Select Questionnaire_DateTime__c, Questionnaire_Id__c, Evaluator_Id__r.name,  Evaluee_Id__r.name,  Evaluation_Type__c, Evaluation_Location__c, Evaluator_User_Id__c, Evaluator_Id__c from Evaluation_ResponsesAbstract__c';
@@ -525,9 +520,13 @@ public with sharing class EvaluationQuestionsController {
         String dateStr = dt.format('MMdd-HHmm-SS');
        
         String AppAcct = EvaluationQuestionsController.getProp('AppName');
-        Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct];  // TODO:  WORKS BUT NEED MORE INFO
+        String searchquery = 'SELECT Id FROM Account WHERE Name = \'' +  AppAcct + '\'';
+        System.debug('generateRefAssessment - select Account Id: \n' + searchquery);
+        Account acc = Database.query(searchquery);
+        //Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct];  // TODO:  WORKS BUT NEED MORE INFO
         String parentId = acc.Id;
-                
+        System.debug('generateRefAssessmentRPT - parentId = ' + parentId);
+        
         String linkedId = '';
         String evaluee_email = '';
         if(Test.isRunningTest()) {
@@ -539,7 +538,7 @@ public with sharing class EvaluationQuestionsController {
             linkedId = c.OwnerId;
             evaluee_email = c.Email;
         }
-        // System.debug(LoggingLevel.DEBUG,'RefereeAssessment ouputPDF');
+        System.debug(LoggingLevel.DEBUG,'RefereeAssessment ouputPDF');
         //         System.debug(LoggingLevel.DEBUG,'generateRefAssessment QuestionnaireId: ' + pQuestionnaireId);
 
         // FormatFileNameFromProps(String Evaluee, String Location, String Position, String Id) 
@@ -722,7 +721,7 @@ public with sharing class EvaluationQuestionsController {
     // =================================================================
     // OBJECTS USED
     
-    /*
+    /* Depricated
     public class MyRegatta {
         public String Id;
         public String RegattaName;

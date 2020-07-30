@@ -96,6 +96,19 @@ public static String tstEvaluatorId {get; set;}
 public static String tstEvalueeId {get; set;}
 public static String tstQuestionnaireId {get; set;}
 
+public static String getProp(String prop) {
+    String value = '';
+    String searchquery = 'select Name, Value__c from Evaluation_Properties__c where isActive__c = true and name = \'' + prop + '\'';
+    //System.debug(LoggingLevel.DEBUG,'getProp query: ' + searchquery);
+    List<Evaluation_Properties__c> props = Database.query(searchquery);
+    if(props.size() > 0) {
+        value = (String) props[0].get('Value__c');
+    }
+    //System.debug(LoggingLevel.DEBUG,'getProp returning ' + value);
+    return value;
+}
+
+
 // =================================================================
 
 @AuraEnabled
@@ -367,7 +380,7 @@ public ConnectApi.FeedElement SendDirectMessage(String EvalueeId, String EvalRpt
     String rUserId = u[0].Id;
     System.debug(LoggingLevel.DEBUG, 'rUserId = ' + rUserId);
 
-    String AppAcct = EvaluationQuestionsController.getProp('AppName');
+    String AppAcct = RefereeAssessment.getProp('AppName');
     System.debug(LoggingLevel.DEBUG, 'SendDirectMessage - Lookup Account Id for ' + AppAcct);
     Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct]; // TODO:  WORKS BUT NEED MORE INFO
     String parentId = acc.Id;
@@ -391,7 +404,7 @@ public ConnectApi.FeedElement SendDirectMessage(String EvalueeId, String EvalRpt
 
     ConnectApi.TextSegmentInput textSegmentInput = new ConnectApi.TextSegmentInput();
     textSegmentInput.text = 'Testing direct messages from RefereeAssessment using networkid lookup.';
-    textSegmentInput.text = EvaluationQuestionsController.getProp('DMText');
+    textSegmentInput.text = RefereeAssessment.getProp('DMText');
 
     // The MessageBodyInput object holds the text in the post
     ConnectApi.MessageBodyInput messageBodyInput = new ConnectApi.MessageBodyInput();
