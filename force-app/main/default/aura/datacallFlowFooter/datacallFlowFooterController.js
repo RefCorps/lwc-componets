@@ -1,6 +1,7 @@
 ({
    init : function(cmp, event, helper) {
       // Figure out which buttons to display
+      // YOU ONLY NEED TO CHANGE THE LABLE IN THE COMPONENT TO GET THIS TO WORK
       var availableActions = cmp.get('v.availableActions');
       for (var i = 0; i < availableActions.length; i++) {
          if (availableActions[i] == "PAUSE") {
