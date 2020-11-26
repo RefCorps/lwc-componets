@@ -1,0 +1,143 @@
+<aura:component controller="GearImportExport"
+                implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" 
+                access="global">
+
+<!-- export attributes start  -->
+
+    <!--aura init handler, call js "loadRefGear" function on component load, and display contact data on table-->   
+    <aura:handler name="init" value="{!this}" action="{!c.loadRefGear}"/>
+    
+    <!--Declare Attribute for store Contact Records List-->  
+    <aura:attribute name="RefGearList" type="GearExchangeWorkSheet__c[]"/> 
+    <aura:attribute name="RefGearCount" type="Integer" default='0' />
+    <aura:attribute name="RefGearLoaded" type="boolean" default="false"/>
+    <aura:attribute name="importFile" type="String" default="" />
+    <!-- export attributes end-->
+    
+    <!-- Import attributes start  -->
+    <aura:attribute name="ShowModule" type="boolean" default="true"/>
+    <aura:attribute name="showFileContents" type="boolean" default="false"/>
+    <aura:attribute name="showImport" type="boolean" default="false"/>
+    <!-- Import attributes end  -->
+ 
+    <!-- TOAST TOOLS --> 
+    <aura:attribute name="isSubmitCompleted" type="boolean" default="false"/>
+    <aura:attribute name="wasSubmitSuccessful" type="boolean" default="true" />
+    <aura:attribute name="toastTheme" type="String" default="slds-notify slds-notify_toast slds-theme_success" />
+    <aura:attribute name="toastClass" type="String" default="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" />
+    <aura:attribute name="toastMessage" type="String" default="unknown status." />
+    <!-- END TOAST TOOLS -->
+
+    <!-- MODAL TOOLS -->
+    <aura:attribute name="isDownloadModalOpen" type="boolean" default="false"/>
+    <aura:attribute name="downloadConfirm" type="String" />
+
+<!-- ========================================================================================= -->     
+<!-- BEGIN TOAST SUCCESS OR FAILURE -->
+<aura:if isTrue="{!v.isSubmitCompleted}">
+  <div class="uploadcomplete" style="height:4rem">
+  <div class="slds-notify_container slds-is-relative">
+      
+    <div class="{!v.toastTheme}" role="status">
+      <span class="slds-assistive-text">success</span>
+      
+      <span class="{!v.toastClass}" title="Description of icon when needed">
+      
+      </span>
+      <div class="slds-notify__content">
+        <h2 class="slds-text-heading_small ">GearExchangeWorkSheet File {!v.toastMessage}  
+        </h2>
+      </div>
+      <div class="slds-notify__close">
+        <lightning:buttonIcon iconName="utility:close"
+                              onclick="{! c.myrefresh }"
+                              alternativeText="Close"
+                              variant="bare-inverse"
+                              size="large"
+                              class="slds-button slds-button_icon slds-button_icon-inverse"/>
+      </div>
+    </div>
+  </div>
+</div>
+    </aura:if>
+<!-- END TOAST SUCCESS -->  
+<!-- MODAL DIALOG -->
+<!-- MODAL CODE -->
+<aura:if isTrue="{!v.isDownloadModalOpen}">
+	<section role="dialog" tabindex="-1" aria-label="Download CSV File" aria-labelledby="modal-heading-01" 
+         aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container">
+                    <!-- Modal/Popup Box Header Starts here-->
+                    <header class="slds-modal__header">
+                        <lightning:buttonIcon iconName="utility:close"
+                                              onclick="{! c.closeDownloadModal }"
+                                              alternativeText="Close"
+                                              variant="bare-inverse"
+                                              size="large"
+                                              class="slds-modal__close"/>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Confirm Download Request</h2>
+                    </header>
+                    <!--Modal/Popup Box Body Starts here-->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        
+                        <lightning:formattedRichText value="{!v.downloadConfirm}" />
+                        
+                    </div>
+                    <!--Modal/Popup Box Footer Starts here-->
+                    <footer class="slds-modal__footer">
+                        <lightning:button variant="neutral"
+                                          label="Cancel"
+                                          title="Cancel"
+                                          onclick="{! c.closeDownloadModal }"/>
+                       
+                        <lightning:button variant="brand"
+                                          label="OK"
+                                          title="OK"
+                                          onclick="{!c.downloadCsv}"/>
+                       
+                    </footer>
+                </div>
+	</section>
+	<div class="slds-backdrop slds-backdrop_open"></div>
+</aura:if>
+<!-- END MODAL CODE -->    
+
+<!-- END MODAL DIALOG -->
+<!-- ========================================================================================= --> 
+
+    <div style="border-radius: 20px; border: 1px solid black;">
+        <div style="text-align: center;">
+         <!-- aura:if isTrue = "{!v.RefGearLoaded}" -->            
+             <!-- h4>GearExchangeWorkSheet items in Database: {!v.RefGearCount}</h4><br/ -->
+             <h2>GearExchangeWorkSheet Download-Upload</h2><br/>
+        <!-- /aura:if -->
+        </div>
+        <div class="row">
+            <div class="column">
+		     <lightning:button label="Upload Gear from CSV" onclick="{!c.CreateRecord}" class="slds-button slds-button--brand"/>
+		     </div>
+            <div class="column">
+             <input type="file" class="file" aura:id="file" onchange="{!c.showfiledata}"/>
+             <br/> 
+             <lightning:input type="checkbox" label="Display file contents upon selection" aura:id="ckbShowFileContents" onchange="{!c.resetShowFileContents}" />
+            </div>
+            <div class="column">
+            <lightning:button label="Download Gear As CSV" onclick="{!c.openDownloadModal}" class="slds-button slds-button--brand"/>        
+            </div>
+        </div>
+    </div>
+
+    <aura:if isTrue = "{!v.showImport}">
+        <div style="text-align: center;">
+        	<h2>Import Data</h2>
+        </div>
+        <lightning:card>
+            <lightning:button label="Cancel and Clear Data" onclick="{!c.cancelAndClear}" />
+            <aura:if isTrue = "{!v.showFileContents}">
+                <div id="divCSV">
+                </div>  
+            </aura:if>    
+        </lightning:card>
+    </aura:if >
+
+</aura:component>
