@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>50.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__FlowScreen</target>
+   </targets>
+
+   <targetConfigs>
+       <targetConfig targets="lightning__FlowScreen">
+           <property name="currentStatus" type="String" label="Current Status" description="Current status value" default="Active" role="inputOnly"/>
+           <property name="selectedStatus" type="String" label="Selected Status" description="Selected status value" />
+           <property name="checkboxLabel" type="String" label="Label" description="The label that will appear on the form" />
+           <property name="excludeStatuses" type="String" label="Excluded Statuses" description="A common separted list of values to exclude" />
+           <property name="errorLabel" type="String" label="ErrorMsg" description="Place messages here" />
+       </targetConfig>
+   </targetConfigs>
+
+</LightningComponentBundle>

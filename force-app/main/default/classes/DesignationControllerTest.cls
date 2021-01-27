@@ -8,13 +8,16 @@ public with sharing class DesignationControllerTest {
         Exception unexpectedException;
         try {
 
-            Contact ContactData = [SELECT Id from Contact where Referee_Rank__c = 'Referee' limit 1];
-
+            Contact ContactData = [select name, id from contact where referee_rank__c = 'Referee' and 
+				id in (select designee__c from designation__c) limit 1];
+            
             System.debug('ContactId = ' + ContactData.Id);
 
             List<Designation__c> designations = DesignationController.fetchContactDesignations(ContactData.Id);
-        
+            
             System.assert( designations != null,'testFetchContactDesignations - A list was not returned');
+            
+            System.debug('fetchContactDesignations returned ' + designations.size() + ' rows ');
 
         } catch (Exception err) {
             System.debug('testFetchContactDesignations err: ' + err);
@@ -24,4 +27,25 @@ public with sharing class DesignationControllerTest {
         System.debug('testFetchContactDesignations completed');
 
     }
+    
+    @isTest(SeeAllData=true) 
+    public static void testGetDesignationsList() {
+
+        System.debug('Confirm appropriate list returned');
+        Exception unexpectedException;
+        try {
+            
+            List<String> picklist = DesignationController.getDesignationsPicklist();
+            System.assert( picklist != null,'testGetLimitedRefereeStatusList - A list was not returned');
+
+        } catch (Exception err) {
+            System.debug('testGetLimitedRefereeStatusList err: ' + err);
+            unexpectedException = err;
+        }    
+        system.assertEquals(null, unexpectedException, 'testGetLimitedRefereeStatusList unexpected Exception');
+        System.debug('testGetLimitedRefereeStatusList completed');
+    }
+
+    
+    
 }

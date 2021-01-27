@@ -1,0 +1,18 @@
+<template>
+    <lightning-card >
+
+            <div class="slds-var-m-around_medium">
+           
+                    <lightning-radio-group name="checkboxGroup"
+                              label={checkboxGroupLabel}
+                              options={editedPicklistValues}
+                              value={value}
+                              type="radio"
+                              onchange={handleChange}>
+                    </lightning-radio-group>
+
+            </div>
+
+</lightning-card>
+
+</template>

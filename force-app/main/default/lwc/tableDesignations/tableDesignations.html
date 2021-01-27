@@ -2,50 +2,44 @@
 
     <!-- lightning-card title="Designations" icon-name="custom:custom18" -->
 
-    <lightning-card>
-
-    <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
-        <template if:true={selectLabel}>
-            {selectLabel}&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
-        </template>
-        <template if:false={selectLabel}>
-            LWS Designation&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
-        </template>
-        <lightning-helptext
-            content="Current designations are displayed. Candidates and Assistants will have one designation equal to rank.  Referees may have several as well as rank.">
-        </lightning-helptext>
-    </div>
-
-
-    <div class="slds-m-around_medium">
-
-        <lightning-datatable key-field="Id" data={data} columns={columns}>
-        </lightning-datatable>
-
-    </div>
-
-    <template if:true={loadPicklist}>
+    <lightning-card style="padding: 10 10 10 10;">
 
         <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
-            <template if:true={selectLabel}>
-                {selectLabel}&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
-            </template>
-            <template if:false={selectLabel}>
-                LWS Designation&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
-            </template>
+            {lblTable}&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
+            <lightning-helptext
+                content={infoTable}>
+            </lightning-helptext>
         </div>
 
-        <select name="selectedDesignation" class="select uiInput uiInputSelect uiInput--default uiInput--select"
-            onchange={handleChange}>
-            <template for:each={editedPicklistValues} for:item="item">
-                <option key={item}>{item}</option>
-            </template>
-        </select>
 
-        <lightning-input type="date" name="input2" label="Date field with a predefined value" style={hidenseek}
-            value="2020-09-07"></lightning-input>
-    </template>
+        <div class="slds-m-around_medium">
 
+            <lightning-datatable key-field="Id" data={data} columns={columns}>
+            </lightning-datatable>
+
+        </div>
+
+        <template if:true={loadPicklist}>
+
+            <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
+                {lblSelect}&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
+                <lightning-helptext
+                    content={infoSelect}>
+                </lightning-helptext>
+            </div>
+
+            <select name="selectedDesignation" class="select uiInput uiInputSelect uiInput--default uiInput--select"
+                onchange={handleSelection}>
+                <template for:each={editedPicklistValues} for:item="item">
+                    <option key={item}>{item}</option>
+                </template>
+            </select>
+
+            <lightning-input type="date" name="startdate" label="Designation Start Date" style={hidenseek} onchange={handleStartDate}
+                value={todaysDate}></lightning-input>
+
+        </template>
+        </br>&nbsp;</br>
 
     </lightning-card>
 
