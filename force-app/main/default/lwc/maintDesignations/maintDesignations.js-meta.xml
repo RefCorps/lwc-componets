@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>50.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Designation Maint</masterLabel>
+    <description>This lwc displays a Contact&apos;s designations using Apex DesignationController and allows you to set a new designation</description>
+    <targets>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+
+            <propertyType name="T" extends="SObject" label="Output Object (Designation__c)" description="First select the API Name of the SObject to use in the Datatable then other parameters will appear."/>
+            <property name="outputEditedRows" label="Output Edited Rows " type="{T[]}" role="outputOnly" description="Record Collection variable to contain only the records that were edited in the datatable."/>
+            
+            <property name="designeeId" type="String" label="Designee Id (ContactId)" description="Contact Id used to select values"/>
+            
+            <property name="selectedDesignation" type="String" label="Selected Designation" description="Selected Designation value"/>
+            <property name="selectionStartDate" type="Date" label="Selection Start Date" description="Selection Start Date"/>
+            <property name="selectionEndDate" type="Date" label="Selection End Date" description="Selection End Date"/>
+            
+            <property name="tableLabel" type="String" label="Table Label" description="The label that will appear above the table" role="inputOnly"/>
+            <property name="selectLabel" type="String" label="Select Label" description="The label that will appear above the select" role="inputOnly"/>
+            <property name="tableHelp" type="String" label="Table Help Msg" description="Place a table update help message here"/>
+            <property name="selectHelp" type="String" label="Select Help Msg" description="Place a select help message here"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
