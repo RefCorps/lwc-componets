@@ -1,0 +1,31 @@
+<template>
+
+
+    <div class="row">
+        
+        <lightning-input 
+            type="text" 
+            name="objAPIName" 
+            value={_objAPIName}
+            label="API Name Picklist Object" 
+            onchange={handleChange} ></lightning-input>
+
+        <lightning-input 
+            type="text"  
+            name="fieldAPIName" 
+            value={_fieldAPIName}
+            label="API Name Picklist Source Field" 
+            onchange={handleChange} ></lightning-input>
+
+        <lightning-input 
+            type="text" 
+            name="listLabel"
+            value={_listLabel} 
+            label="Label" 
+            placeholder="type here..." 
+            onchange={handleChange} ></lightning-input>
+            
+    </div>
+
+    
+</template>
