@@ -15,6 +15,7 @@ export default class PicklistCompCPE extends LightningElement {
     set inputVariables(variables) {
         this._inputVariables = variables || [];
 
+        /*
         const objAPINameValue = this._inputVariables.find(({ id }) => id === 'objAPIName');
         this._objAPIName = objAPINameValue && objAPINameValue.value;
     
@@ -23,30 +24,36 @@ export default class PicklistCompCPE extends LightningElement {
 
         const listLabelValue = this._inputVariables.find(({ id }) => id === 'listLabel');
         this._listLabel = listLabelValue && listLabelValue.value;
-
+        */
     }
   
-    @api get objAPIName() {
+    //@api
+    get objAPIName() {
        
         const param = this.inputVariables.find(({name}) => name === 'objAPIName');
         return param && param.value;
     }
 
     set objAPIName(objAPIName) {
-        this._objAPIName;
+        console.log("set objAPIName " + objAPIName);
+        this._objAPIName = objAPIName;
     }
 
     
-    @api get fieldAPIName() {
+    //@api 
+    get fieldAPIName() {
+       
         const param = this.inputVariables.find(({name}) => name === 'fieldAPIName');
         return param && param.value;
     }
 
     set fieldAPIName(fieldAPIName) {
-        this._fieldAPIName;
+        console.log("set fieldAPIName " + fieldAPIName);
+        this._fieldAPIName = fieldAPIName;
     }
 
-    @api get listLabel() {
+    //@api 
+    get listLabel() {
         const param = this.inputVariables.find(({name}) => name === 'listLabel');
         return param && param.value;
     }
@@ -65,7 +72,7 @@ export default class PicklistCompCPE extends LightningElement {
     handleChange(event) {
         if (event && event.detail) {
 
-            console.log("I saw a change " + event);
+            console.log("I saw a change " + event.detail.value);
             //
             const newValue = event.detail.value;
             const valueChangedEvent = new CustomEvent(
@@ -85,4 +92,52 @@ export default class PicklistCompCPE extends LightningElement {
         }
     }
  
+    handleChange2(event) {
+        if (event && event.detail) {
+
+            console.log("I saw field change " + event.detail.value);
+            //
+            const newValue = event.detail.value;
+            const valueChangedEvent = new CustomEvent(
+                'configuration_editor_input_value_changed', {
+                     bubbles: true,
+                     cancelable: false,
+                     composed: true,
+                     detail: {
+                         name: 'fieldAPIName',
+                         newValue,
+                         newValueDataType: 'String'
+                     }
+                }
+            );
+            this.dispatchEvent(valueChangedEvent);
+            //
+        }
+    }
+
+    handleChange3(event) {
+        if (event && event.detail) {
+
+            console.log("I saw listLabel change " + event.detail.value);
+            //
+            const newValue = event.detail.value;
+            const valueChangedEvent = new CustomEvent(
+                'configuration_editor_input_value_changed', {
+                     bubbles: true,
+                     cancelable: false,
+                     composed: true,
+                     detail: {
+                         name: 'listLabel',
+                         newValue,
+                         newValueDataType: 'String'
+                     }
+                }
+            );
+            this.dispatchEvent(valueChangedEvent);
+            //
+        }
+    }
+
+
+
 }
