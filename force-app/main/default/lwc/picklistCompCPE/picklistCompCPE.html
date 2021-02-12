@@ -1,31 +1,116 @@
 <template>
 
 
-    <div class="row">
-        
-        <lightning-input 
-            type="text" 
-            name="objAPIName" 
-            value={_objAPIName}
-            label="API Name Picklist Object" 
-            onchange={handleChange} ></lightning-input>
+    <lightning-card title="Picklist CPE" icon-name="custom:custom57">
 
-        <lightning-input 
-            type="text"  
-            name="fieldAPIName" 
-            value={_fieldAPIName}
-            label="API Name Picklist Source Field" 
-            onchange={handleChange2} ></lightning-input>
+        <div class="slds-var-m-around_medium slds-p-bottom_medium">
 
-        <lightning-input 
-            type="text" 
-            name="listLabel"
-            value={_listLabel} 
-            label="Label" 
-            placeholder="type here..." 
-            onchange={handleChange3} ></lightning-input>
-            
-    </div>
+            <lightning-input 
+                type="text" 
+                name="listLabel" 
+                value={_listLabel} 
+                label="Component Label"
+                placeholder="type here..." 
+                onchange={handleChange3}></lightning-input>
 
-    
+
+            <div>
+                <template if:false={_objAPIName}>
+                    <div class="slds-card slds-has-bottom-magnet">
+
+                        <lightning-input type="search" name="objAPIName" class="slds-show" autocomplete="off"
+                            label="Picklist Object API Name" value={_objAPIName} onchange={handleKeyChange}>
+                        </lightning-input>
+
+                    </div>
+                    <div class="slds-card slds-has-top-magnet">
+
+                        <template if:true={displayCombo}>
+                            <!-- template if:true={selectedObjects} -->
+                            <lightning-combobox class="slds-show" name="objLookup" value={value}
+                                placeholder="Select Object from this list" variant="label-hidden"
+                                options={selectedObjects} onchange={handleSelectedObj}>
+                            </lightning-combobox>
+                        </template>
+
+                    </div>
+                </template>
+
+                <template if:true={_objAPIName}>
+                    <lightning-input type="text" name="objAPIName" value={_objAPIName} label="API Name Picklist Object"
+                        onchange={handleChange}></lightning-input>
+
+                </template>
+            </div>
+
+            <div class="slds-p-top_medium">
+                <template if:true={_objAPIName}>
+                    <template if:false={_fieldAPIName}>
+                        <lightning-combobox class="slds-show" 
+                            name="fieldLookup" value={value}
+                            label="API Name Picklist Source Field" 
+                            placeholder="Select Picklist Field from this list"
+                            variant="label-hidden" 
+                            options={selectedFields} 
+                            onchange={handleChange2}>
+                        </lightning-combobox>
+                    </template>
+                    <template if:true={_fieldAPIName}>
+                        <lightning-input type="text" 
+                            name="fieldAPIName" 
+                            value={_fieldAPIName}
+                            label="API Name Picklist Source Field" 
+                            onchange={handleChange2}></lightning-input>
+                    </template>
+                </template>
+            </div>
+
+            <div>
+                <template if:true={completeSetup}>
+
+                     <lightning-input type="text"
+                        name="listHelp"
+                        label="Help Text"
+                        value={_listhelp} 
+                        onchange={handleChange3}></lightning-input>  
+
+                    <lightning-input type="text"
+                        name="placeHolder"
+                        label="Placeholder"
+                        value={_placeHolder} 
+                        onchange={handleChange3}></lightning-input>  
+
+                        <lightning-input type="text"
+                        name="currentValue"
+                        label="Current Value"
+                        value={_currentValue} 
+                        onchange={handleChange3}></lightning-input>  
+
+                        <lightning-input type="text"
+                        name="selectedValue"
+                        label="Selected Value"
+                        value={_selectedValue} 
+                        onchange={handleChange3}></lightning-input>  
+
+                        <lightning-input type="text"
+                        name="excludedValues"
+                        label="Excluded Values"
+                        value={_excludedValues} 
+                        onchange={handleChange3}></lightning-input>  
+
+                    <div class="slds-p-top_small">
+                    <lightning-input type="toggle" 
+                        label="Use radio buttons" 
+                        name="useRadioButton"
+                        onchange={handleToggle}
+                        ></lightning-input>
+                    </div>
+
+                </template>
+            </div>
+
+        </div>
+
+    </lightning-card>
+
 </template>
