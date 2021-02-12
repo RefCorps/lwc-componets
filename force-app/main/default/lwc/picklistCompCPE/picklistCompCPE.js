@@ -15,7 +15,7 @@ export default class PicklistCompCPE extends LightningElement {
     @track _listHelp;
     @track _placeHolder;
     @track _currentValue;
-    @track _selectedValue;
+    //@track _selectedValue;  value is defined as role="outputOnly"
     @track _excludedValues;
     @track _useRadioButton;
 
@@ -51,10 +51,10 @@ export default class PicklistCompCPE extends LightningElement {
         const currentValueValue =this._inputVariables.find(({ name }) => name === 'currentValue');
         this._currentValue = currentValueValue && currentValueValue.value;
 
-        const selectedValueValue = this._inputVariables.find(({ name }) => name === 'selectedValue');
-        this._selectedValue = selectedValueValue && selectedValueValue.value;
+        //const selectedValueValue = this._inputVariables.find(({ name }) => name === 'selectedValue');
+        //this._selectedValue = selectedValueValue && selectedValueValue.value;
 
-        const excludedValuesValue = this._inputVariables.find(({ name }) => name === 'excludedValue');
+        const excludedValuesValue = this._inputVariables.find(({ name }) => name === 'excludedValues');
         this._excludedValues = excludedValuesValue && excludedValuesValue.value;
 
         const useRadioButtonValue = this._inputVariables.find(({ name }) => name === 'useRadioButton');  
@@ -188,7 +188,7 @@ export default class PicklistCompCPE extends LightningElement {
 
     handleToggle(event) {
         if (event && event.detail) {
-            const newValue = event.detail.value;
+            const newValue = event.detail.checked;
             const targetName = event.target.name;
             const valueChangedEvent = new CustomEvent(
                 'configuration_editor_input_value_changed', {

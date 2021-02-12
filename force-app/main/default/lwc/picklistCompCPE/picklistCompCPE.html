@@ -43,7 +43,7 @@
                 </template>
             </div>
 
-            <div class="slds-p-top_medium">
+            <div class="slds-p-top_xxx_small">
                 <template if:true={_objAPIName}>
                     <template if:false={_fieldAPIName}>
                         <lightning-combobox class="slds-show" 
@@ -71,7 +71,7 @@
                      <lightning-input type="text"
                         name="listHelp"
                         label="Help Text"
-                        value={_listhelp} 
+                        value={_listHelp} 
                         onchange={handleChange3}></lightning-input>  
 
                     <lightning-input type="text"
@@ -86,11 +86,13 @@
                         value={_currentValue} 
                         onchange={handleChange3}></lightning-input>  
 
+                        <!-- VALUE IS DEFINED AS role="outputOnly" IN picklistComp.js-meta.xml 
                         <lightning-input type="text"
                         name="selectedValue"
                         label="Selected Value"
                         value={_selectedValue} 
                         onchange={handleChange3}></lightning-input>  
+                        -->    
 
                         <lightning-input type="text"
                         name="excludedValues"
@@ -103,6 +105,7 @@
                         label="Use radio buttons" 
                         name="useRadioButton"
                         onchange={handleToggle}
+                        checked={_useRadioButton}
                         ></lightning-input>
                     </div>
 
