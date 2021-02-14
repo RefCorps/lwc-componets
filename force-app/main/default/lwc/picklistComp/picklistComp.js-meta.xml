@@ -7,7 +7,8 @@
    </targets>
 
    <targetConfigs>
-       <targetConfig targets="lightning__FlowScreen" configurationEditor="c-picklistCompCPE">
+       <!-- targetConfig targets="lightning__FlowScreen" configurationEditor="c-picklistCompCPE" -->
+       <targetConfig targets="lightning__FlowScreen" >   
 
         <property name="objAPIName" type="String" label="API Name Picklist Object"  description="The API Name of the Object to access" role="inputOnly"/>
         <property name="fieldAPIName" type="String" label="API Name Picklist Source Field" description="The API Name of the Picklist Field in the object" role="inputOnly"/>

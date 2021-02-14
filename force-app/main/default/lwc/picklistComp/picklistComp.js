@@ -38,9 +38,9 @@ export default class PicklistComp extends LightningElement {
         //this.objAPIField = this.objAPIField ? this.objAPIField : 'Designation__c';
         //this.listLabel = this.listLabel ? this.listLabel : 'Picklist Selections';
 
-        this.placeHolder = this.placeHolder ? this.placeHolder : '--Select an Option--';
-        this.currentValue = this.currentValue ? this.currentValue : 'Current Value';
-        this.flowErrorMsg = this.flowErrorMsg ? this.flowErrorMsg : 'Test flow error msg';
+        //this.placeHolder = this.placeHolder ? this.placeHolder : '--Select an Option--';
+        //this.currentValue = this.currentValue ? this.currentValue : 'Current Value';
+        //this.flowErrorMsg = this.flowErrorMsg ? this.flowErrorMsg : 'Test flow error msg';
         // END LOCAL TEST
 
         console.log('obj: ' + this.objAPIName + ' field: ' + this.fieldAPIName);
@@ -66,7 +66,7 @@ export default class PicklistComp extends LightningElement {
     buildSelectOptions(picklistValues) {
 
         const listValues = [];
-        this.excludeStatuses = this.excludeStatuses ? this.excludeStatuses : '';
+        this.excludedValues = this.excludedValues ? this.excludedValues : '';
 
         if (!this.useRadioButton) {
             if (this.currentValue) {
@@ -88,7 +88,7 @@ export default class PicklistComp extends LightningElement {
 
         Object.keys(picklistValues).forEach((index) => {
 
-            if(!this.excludeStatuses.includes( picklistValues[index] )) {
+            if(!this.excludedValues.includes( picklistValues[index] )) {
                 listValues.push( {label: picklistValues[index], value: picklistValues[index]} );
             }
 
