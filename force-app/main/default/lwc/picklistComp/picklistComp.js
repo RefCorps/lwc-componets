@@ -4,9 +4,11 @@
  * 
  * CREATED BY:          Mike Miller
  * 
- * VERSION:             0.1.0
- * 
+ * VERSION:             v0.1.0
  * RELEASE NOTES:       You must get current data from Contact to set current Status as first option listed.
+ * 
+ * 2012-02-22   v0.1.1  If options to be excluded are set the excluded will appear and no options can be selected.  
+ *                      Commented out logic associated with local testing.
  * 
 **/
 
@@ -31,16 +33,23 @@ export default class PicklistComp extends LightningElement {
     options = [];
     value;
 
+    valueCanBeUpdated = true;
+
     async connectedCallback() {
 
         // BEGIN LOCAL TEST 
         //this.objAPIName = this.objAPIName ? this.objAPIName : 'Designation__c';
-        //this.objAPIField = this.objAPIField ? this.objAPIField : 'Designation__c';
-        //this.listLabel = this.listLabel ? this.listLabel : 'Picklist Selections';
+        //this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Designation__c';
+        //this.objAPIName = this.objAPIName ? this.objAPIName : 'Contact';
+        //this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Referee_Status__c';
+
+        // for status test
+        //this.excludedValues = this.excludedValues ? this.excludedValues : 'License Suspended,License Suspended - Safety Compliance,License Suspended - USRowing Admin';
 
         //this.placeHolder = this.placeHolder ? this.placeHolder : '--Select an Option--';
-        //this.currentValue = this.currentValue ? this.currentValue : 'Current Value';
-        //this.flowErrorMsg = this.flowErrorMsg ? this.flowErrorMsg : 'Test flow error msg';
+        //this.currentValue = this.currentValue ? this.currentValue : 'Active';
+        //this.currentValue = this.currentValue ? this.currentValue : 'License Suspended';
+        // this.flowErrorMsg = this.flowErrorMsg ? this.flowErrorMsg : 'Status change prohibited';
         // END LOCAL TEST
 
         console.log('obj: ' + this.objAPIName + ' field: ' + this.fieldAPIName);
@@ -58,6 +67,7 @@ export default class PicklistComp extends LightningElement {
 
         }).catch(error => {
             console.error("received error: " + error);
+            this.flowErrorMsg = "Unable to load component.  Received error: " + JSON.stringify(error);
             this.error = error;
         });
 
@@ -67,6 +77,11 @@ export default class PicklistComp extends LightningElement {
 
         const listValues = [];
         this.excludedValues = this.excludedValues ? this.excludedValues : '';
+
+        if(this.excludedValues.includes( this.currentValue )) {
+            this.valueCanBeUpdated = false;
+            this.flowErrorMsg = "Status change prohibited.  Current status: " + this.currentValue ;
+        }
 
         if (!this.useRadioButton) {
             if (this.currentValue) {

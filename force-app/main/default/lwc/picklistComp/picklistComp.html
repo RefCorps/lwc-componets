@@ -1,35 +1,39 @@
 <template>
     <div lwc:dom="manual"></div>
-            <div class="slds-var-m-around_medium">
+    <div class="slds-var-m-around_medium">
 
-                <template if:false={useRadioButton}>
-                    <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
-                        <template if:true={listLabel}>
-                            {listLabel}
-                        </template>    
-                    </div>
-                    <select name="selectedStatus" class="select uiInput uiInputSelect uiInput--default uiInput--select"  onchange={handleChange}>
-                        <template for:each={options} for:item="item">
-                               <option key={item.value}>{item.label}</option>
-                        </template>
-                    </select>
-                </template>
-                <template if:true={useRadioButton}>
-                    <lightning-radio-group 
-                        name="checkboxGroup"
-                        label={listLabel}
-                        options={options}
-                        value={value}
-                        type="radio"
-                        onchange={handleChange}>
-          </lightning-radio-group>
-               </template>
-
-                <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
-                    <template if:true={flowErrorMsg}>
-                        <abbr class="slds-required" data-aura-rendered-by="117:0">{flowErrorMsg}</abbr>
-                    </template>    
+        <template if:true={valueCanBeUpdated}>
+            <template if:false={useRadioButton}>
+                <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText"
+                    data-aura-class="uiOutputRichText">
+                    <template if:true={listLabel}>
+                        {listLabel}
+                    </template>
                 </div>
-            </div>
+                <select name="selectedStatus" class="select uiInput uiInputSelect uiInput--default uiInput--select"
+                    onchange={handleChange}>
+                    <template for:each={options} for:item="item">
+                        <option key={item.value}>{item.label}</option>
+                    </template>
+                </select>
+            </template>
+            <template if:true={useRadioButton}>
+                <lightning-radio-group name="checkboxGroup" label={listLabel} options={options} value={value}
+                    type="radio" onchange={handleChange}>
+                </lightning-radio-group>
+            </template>
+        </template>
+
+        <template if:true={flowErrorMsg}>
+
+            <h2 style="font-size: medium; color: red;">{flowErrorMsg}</h2>
+
+            <!-- div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
+                <abbr class="slds-required" data-aura-rendered-by="117:0">{flowErrorMsg}</abbr>
+            </div -->
+
+        </template>
+
+    </div>
 
 </template>
