@@ -1,3 +1,18 @@
+/**
+ * Lightning Web Component for RefCorp Flow Screens used to maintain Designations
+ * This component incorporates a table to maintain existing Designations and a
+ * select to add new designations.
+ * 
+ * CREATED BY:          Mike Miller
+ * 
+ * VERSION:             0.1.0
+ * 
+ * RELEASE NOTES:       None at this time
+ * 
+ * 2021-02-19 - 0.1.1 - Removed 'Rec Name'
+ * 2021-02-25 - 0.1.2 - Hardcoded Designation__c column label = Endorsement -- consider making it a param
+ * 
+**/
 import {
     api,
     LightningElement,
@@ -15,8 +30,8 @@ import DesignationPicklist from '@salesforce/apex/DesignationController.getDesig
 
 
 
-const columns = [{ label: 'Rec Name',fieldName: 'Name',type: 'text' },
-    { label: 'Designation',fieldName: 'Designation__c',type: 'text' },
+//const columns = [{ label: 'Rec Name',fieldName: 'Name',type: 'text' },
+const columns = [{ label: 'Endorsement',fieldName: 'Designation__c',type: 'text' },
     { label: 'Start Date',fieldName: 'Designation_Start_Date__c',type: 'date-local', 
         typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true },
     { label: 'End Date',fieldName: 'Designation_End_Date__c',type: 'date-local', 
@@ -181,6 +196,7 @@ export default class testWithApexDataSource extends LightningElement {
 
     handleSave(event) {
         const draftValues = event.detail.draftValues;
+        const idDesignation = "Designation__c";
         const idEndDate = "Designation_End_Date__c";
         const idStartDate = "Designation_Start_Date__c";
     
@@ -201,6 +217,7 @@ export default class testWithApexDataSource extends LightningElement {
                 
                 var enddate = "";
                 var startdate = "";
+                var designationText = "";
                 if(!draftValues[i][idEndDate]) {
                     enddate = this.findDataValue(recordId,idEndDate);
                     if(enddate)
@@ -211,6 +228,8 @@ export default class testWithApexDataSource extends LightningElement {
                     if(startdate)
                         draftValues[i][idStartDate] = startdate;
                 }
+                designationText = this.findDataValue(recordId,idDesignation);
+                draftValues[i][idDesignation] = designationText;
                 this.outputEditedRows.push(draftValues[i]);
             }
             else {  // Update edited row in output

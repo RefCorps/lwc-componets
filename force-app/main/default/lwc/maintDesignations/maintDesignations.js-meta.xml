@@ -2,7 +2,7 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>50.0</apiVersion>
     <isExposed>true</isExposed>
-    <masterLabel>Designation Maint</masterLabel>
+    <masterLabel>DesignationMaint</masterLabel>
     <description>This lwc displays a Contact&apos;s designations using Apex DesignationController and allows you to set a new designation</description>
     <targets>
         <target>lightning__FlowScreen</target>
