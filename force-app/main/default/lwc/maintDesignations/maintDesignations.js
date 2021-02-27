@@ -11,6 +11,8 @@
  * 
  * 2021-02-19 - 0.1.1 - Removed 'Rec Name'
  * 2021-02-25 - 0.1.2 - Hardcoded Designation__c column label = Endorsement -- consider making it a param
+ * 2021-02-26 - 0.2.0 - Added ability to exclude picklist values - intent is to omit Rank settings
+ * 2021-02-27 - 0.3.0 - Existing edorsements with no end date are added to excludedValues to prevent duplicate endorsements
  * 
 **/
 import {
@@ -29,13 +31,12 @@ import ContactDesignations from '@salesforce/apex/DesignationController.fetchCon
 import DesignationPicklist from '@salesforce/apex/DesignationController.getDesignationsPicklist';
 
 
-
 //const columns = [{ label: 'Rec Name',fieldName: 'Name',type: 'text' },
-const columns = [{ label: 'Endorsement',fieldName: 'Designation__c',type: 'text' },
-    { label: 'Start Date',fieldName: 'Designation_Start_Date__c',type: 'date-local', 
-        typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true },
-    { label: 'End Date',fieldName: 'Designation_End_Date__c',type: 'date-local', 
-        typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true } ]
+const columns = [{ label: 'Designation' ,fieldName: 'Designation__c',type: 'text' },
+{ label: 'Start Date',fieldName: 'Designation_Start_Date__c',type: 'date-local', 
+    typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true },
+{ label: 'End Date',fieldName: 'Designation_End_Date__c',type: 'date-local', 
+    typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true } ]
 
 export default class testWithApexDataSource extends LightningElement {
 
@@ -51,8 +52,15 @@ export default class testWithApexDataSource extends LightningElement {
 
     @api selectLabel;
     @api selectHelp;
+    @api selectHint;
+
     @api tableLabel;
     @api tableHelp;
+    @api tableHint;
+    
+    @api excludedValues;
+
+    @api tableCol1Label;
     // @api errorLabel;
 
     pDesigneeId;
@@ -65,9 +73,9 @@ export default class testWithApexDataSource extends LightningElement {
     picklist;
 
     lblSelect;
-    infoSelect ="Current designations are displayed. Candidates and Assistants will have one designation equal to rank.  Referees may have several as well as rank.";
+    infoSelect ="Current Endorsements and Rank are displayed in the table above. Candidates and Assistants will typically only appear with Rank.  Referees may have several endorsements associated with rank.";
     lblTable;
-    infoTable = "Designations are similar to rank, but are not the same.  A member of the corps may have several designations.";
+    infoTable = "Endorsements are similar to rank, but are not the same.  A member of the corps may have several active endorsements.";
 
     loadPicklist = false;
 
@@ -81,21 +89,51 @@ export default class testWithApexDataSource extends LightningElement {
     // initialize component
     async connectedCallback() {
 
-        //alert("designeeId = " + this.designeeId);
-        this.pDesigneeId = this.designeeId ? this.designeeId : '0036A00000peZM1QAM';
-        //alert("pDesigneeId = " + this.pDesigneeId);
+        // BEGIN LOCAL TEST DATA - DEFAULT VALUES
+  
+        var testing = true;
+
+        if (testing) {
+            this.pDesigneeId = this.designeeId ? this.designeeId : '0036A00000peZM1QAM';
+            this.lblSelect = this.selectLabel ? this.selectLabel : 'New Endorsement';
+            this.lblTable = this.tableLabel ? this.tableLabel : 'Career Endorsements';
+            this.tableCol1Label = this.tableCol1Label ? this.tableCol1Label : 'Endorsements/Rank';
+            this.selectHelp = this.selectHelp ? this.selectHelp : this.infoSelect;
+            this.tableHelp = this.selectTable ? this.tableHelp : this.infoTable;
+            this.selectHint = this.selectHint ? this.selectHint : 'Select a new option';
+            this.tableHint = this.tableHint ? this.tableHint : '(press enter after updating a cell)';
+    
+            this.excludedValues = this.excludedValues ? this.excludedValues : 'Referee,Full Referee,Assistant Referee,Candidate Referee, Emeritus';
+    
+        } else {
+            this.pDesigneeId = this.designeeId;
+            this.lblSelect = this.selectLabel;
+            this.lblTable = this.tableLabel;
+            this.selectHint = this.selectHint;
+            this.tableHint = this.tableHint;
+    
+            // USE DEFAULTS IF NO PROP PROVIDED
+            this.selectHelp = this.selectHelp ? this.selectHelp : this.infoSelect;
+            this.tableHelp = this.selectTable ? this.tableHelp : this.infoTable;
+            this.excludedValues = this.excludedValues ? this.excludedValues : 'Referee,Full Referee,Assistant Referee,Candidate Referee, Emeritus';
+    
+        }
+
+        // END LOCAL TEST DATA  
+
+        if(!this.pDesigneeId) {
+            alert('maintDesignations Error - No Designee__c value needed to access records was found! NO DATA CAN BE SELECTED.');
+        }
 
         this.suppressBottomBar = true;
 
-        this.lblSelect = this.selectLabel ? this.selectLabel : 'New Designations';
-        this.lblTable = this.tableLabel ? this.tableLabel : 'Current Designations';
-
-        this.infoSelect = this.selectHelp ? this.selectHelp : this.infoSelect;
-        this.infoTable = this.selectTable ? this.tableHelp : this.infoTable;
-
         this.todaysDate = this.getDateYYYYMMDD();
 
-        //alert("In connectedCallback fetchContactDesignations for " + this.pDesigneeId);
+        // THIS WILL REPLACE THE DEFAULT COLUMN LABLE
+        if(this.tableCol1Label)
+            columns[0].label = this.tableCol1Label;
+
+        console.log("In connectedCallback fetchContactDesignations for " + this.pDesigneeId);
         // NOTE: WHE
         ContactDesignations({
                 pDesigneeId: this.pDesigneeId
@@ -104,8 +142,11 @@ export default class testWithApexDataSource extends LightningElement {
                 this.data = result;
                 console.log('Designations:  ' + JSON.stringify(result));
                 var d;
+                console.log('Designation rows returned: ' + Object.keys(this.data).length);
+                // Add designation to mydesignations if there is no end date - these will be excluded from the picklist
                 for (d of this.data) {
-                    this.mydesignations.push(d.Designation__c);
+                    if(!d.Designation_End_Date__c)
+                        this.mydesignations.push(d.Designation__c);
                 }
                 this.editedData = JSON.parse(JSON.stringify(this.data));
             }).then(result => {
@@ -117,43 +158,31 @@ export default class testWithApexDataSource extends LightningElement {
                     this.picklist = result;
                     console.log('Picklist:  ' + JSON.stringify(result) );
 
-                    // test test test
-                    this.editedPicklistValues.push('-- SELECT A NEW DESIGNATION --');
-
-                    var dl;
+                    // Add mydesignations to excludedValues
                     var md;
-                    var dx = 0;
-                    for (md of this.mydesignations) {
-                        if (md === 'Assistant Referee') {
-                            if (dx < 1) {
-                                dx = 1;
-                                console.log("md=" + md + " dx=" + dx );
-                            }
-                        }
-                        if (md === 'Full Referee') {
-                            if (dx < 2) {
-                                dx = 2;
-                                console.log("md=" + md + " dx=" + dx );
-                            }
+                    if (this.excludedValues) {
+                        for( md of this.mydesignations ) {
+                            if(!this.excludedValues.includes(md))
+                                this.excludedValues = this.excludedValues + ',' + md;
                         }
                     }
-                    console.log("dx="+ dx);
-                    //var dl;
+
+                    var dl;
                     for (dl of this.picklist) {
 
-                        if (dx == 0) {
-                            this.editedPicklistValues.push('Assistant Referee');
-                            break;
-                        } else if (dx == 1) {
-                            this.editedPicklistValues.push('Full Referee');
-                            break;
-                        }
-                        if (!this.mydesignations.includes(dl)) {
-                            this.editedPicklistValues.push(dl);
-                        }
-                        //else {
-                        //    this.editedPicklistValues.push(dl);
-                        //}
+                        console.log('mydesignations ' + this.mydesignations);
+
+                        if (this.excludedValues) {
+                            if (!this.excludedValues.includes(dl)) {
+                                //this.editedPicklistValues.push({
+                                //    label: dl,
+                                //    value: dl
+                                //});
+                                this.editedPicklistValues.push(dl);
+                            }
+
+                        } 
+
                     }
                     this.loadPicklist = true;
 
@@ -168,7 +197,6 @@ export default class testWithApexDataSource extends LightningElement {
             }).catch(error => {
                 alert('detail error:  ' + error);
             });
-
 
     }
 

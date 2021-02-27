@@ -5,9 +5,9 @@
     <lightning-card style="padding: 10 10 10 10;">
 
         <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
-            {lblTable}&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
+            <span class="slds-text-title_bold">{lblTable}</span>&nbsp;<i>{tableHint}</i>&nbsp;
             <lightning-helptext
-                content={infoTable}>
+                content={tableHelp}>
             </lightning-helptext>
         </div>
 
@@ -29,14 +29,15 @@
         <template if:true={loadPicklist}>
 
             <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
-                {lblSelect}&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
+                <span class="slds-text-title_bold">{lblSelect}</span>&nbsp;
                 <lightning-helptext
-                    content={infoSelect}>
+                    content={selectHelp}>
                 </lightning-helptext>
             </div>
 
             <select name="selectedDesignation" class="select uiInput uiInputSelect uiInput--default uiInput--select"
                 onchange={handleSelection}>
+                <option value="" disabled selected>{selectHint}</option>
                 <template for:each={editedPicklistValues} for:item="item">
                     <option key={item}>{item}</option>
                 </template>

@@ -9,20 +9,23 @@
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__FlowScreen">
-
             <propertyType name="T" extends="SObject" label="Output Object (Designation__c)" description="First select the API Name of the SObject to use in the Datatable then other parameters will appear."/>
             <property name="outputEditedRows" label="Output Edited Rows " type="{T[]}" role="outputOnly" description="Record Collection variable to contain only the records that were edited in the datatable."/>
             
             <property name="designeeId" type="String" label="Designee Id (ContactId)" description="Contact Id used to select values"/>
-            
-            <property name="selectedDesignation" type="String" label="Selected Designation" description="Selected Designation value"/>
+            <property name="selectLabel" type="String" label="Select Label" description="The label that will appear above the select" role="inputOnly"/>
+            <property name="selectedDesignation" type="String" label="Selected Designation" description="Selected Designation value" />
             <property name="selectionStartDate" type="Date" label="Selection Start Date" description="Selection Start Date"/>
             <property name="selectionEndDate" type="Date" label="Selection End Date" description="Selection End Date"/>
-            
-            <property name="tableLabel" type="String" label="Table Label" description="The label that will appear above the table" role="inputOnly"/>
-            <property name="selectLabel" type="String" label="Select Label" description="The label that will appear above the select" role="inputOnly"/>
-            <property name="tableHelp" type="String" label="Table Help Msg" description="Place a table update help message here"/>
             <property name="selectHelp" type="String" label="Select Help Msg" description="Place a select help message here"/>
+            <property name="selectHint" type="String" label="Select Hint" description="Place HINT text that describes what to do."/>
+            <property name="excludedValues" type="String" placeholder="Enter comma seperated values or supply a constant" label="Excluded Picklist Values" description="A common separted list of values to exclude" role="inputOnly"/>
+
+            <property name="tableLabel" type="String" label="Table Label" description="The label that will appear above the table" role="inputOnly"/>
+            <property name="tableCol1Label" type="String" label="Table Col1 Label" description="The Label that will apear above Col 1" role="inputOnly"/>
+            <property name="tableHelp" type="String" label="Table Help Msg" description="Place a table update help message here"/>
+            <property name="tableHint" type="String" label="Table Hint" description="Place a hint on how to update the table here"/>
+
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
