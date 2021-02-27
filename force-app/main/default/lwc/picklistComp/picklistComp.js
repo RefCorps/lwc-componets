@@ -9,6 +9,7 @@
  * 
  * 2012-02-22   v0.1.1  If options to be excluded are set the excluded will appear and no options can be selected.  
  *                      Commented out logic associated with local testing.
+ * 2012-02-26   v0.1.2  Add label hint option - fixed label style
  * 
 **/
 
@@ -20,9 +21,10 @@ export default class PicklistComp extends LightningElement {
     @api objAPIName;
     @api fieldAPIName;
     @api listLabel;
-    
+    @api listHint;
     @api listHelp;
-    @api placeHolder;
+    @api placeHolder;  // DEPRECATED
+    @api selectHint;
     @api flowErrorMsg;
 
     @api currentValue;
@@ -40,8 +42,10 @@ export default class PicklistComp extends LightningElement {
         // BEGIN LOCAL TEST 
         //this.objAPIName = this.objAPIName ? this.objAPIName : 'Designation__c';
         //this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Designation__c';
-        //this.objAPIName = this.objAPIName ? this.objAPIName : 'Contact';
-        //this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Referee_Status__c';
+        this.objAPIName = this.objAPIName ? this.objAPIName : 'Contact';
+        this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Referee_Status__c';
+        this.listLabel = this.listLabel ? this.listLabel : 'Current Status';
+        this.listHint = this.listHint ? this.listHint : '(select from this list to update)';
 
         // for status test
         //this.excludedValues = this.excludedValues ? this.excludedValues : 'License Suspended,License Suspended - Safety Compliance,License Suspended - USRowing Admin';
@@ -54,6 +58,7 @@ export default class PicklistComp extends LightningElement {
 
         console.log('obj: ' + this.objAPIName + ' field: ' + this.fieldAPIName);
 
+        // If you don't select anything the current value will become the selected value;
         this.selectedValue = this.currentValue;
 
         PicklistValues({
@@ -80,7 +85,7 @@ export default class PicklistComp extends LightningElement {
 
         if(this.excludedValues.includes( this.currentValue )) {
             this.valueCanBeUpdated = false;
-            this.flowErrorMsg = "Status change prohibited.  Current status: " + this.currentValue ;
+            this.flowErrorMsg = "Change prohibited.  Current selection: " + this.currentValue ;
         }
 
         if (!this.useRadioButton) {
@@ -89,12 +94,15 @@ export default class PicklistComp extends LightningElement {
                     label: this.currentValue,
                     value: this.currentValue
                 });
-            } else if (this.placeHolder) {
+            } 
+            /*
+            else if (this.placeHolder) {
                 listValues.push({
                     label: this.placeHolder,
                     value: ''
                 });
             }
+            */
         }
         if (this.useRadioButton) {
             if (this.currentValue)

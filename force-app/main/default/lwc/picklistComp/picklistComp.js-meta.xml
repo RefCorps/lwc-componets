@@ -15,8 +15,10 @@
 
         <property name="listLabel" type="String" label="Label" description="The label that will appear on the form" role="inputOnly"/>
         <property name="listHelp" type="String" label="Help Text" description="Select a value from the picklist" role="inputOnly"/>
+        <property name="listHint" type="String" label="List Hint Text" description="A hint that will appear next to the label" role="inputOnly"/>
+        <property name="selectHint" type="String" label="Select Hint" description="Place HINT text that describes what to do." role="inputOnly"/>
 
-        <property name="placeHolder" type="String" placeholder="Enter text to override default" label="List Placeholder" description="Text that is displayed before an option is selected. If used for update set as the current value. The default is 'Select an Option'"  default="--Select an Option--" role="inputOnly"/>
+        <property name="placeHolder" type="String" placeholder="DEPRECATED" label="List Placeholder" description="" role="inputOnly" />
         <property name="currentValue" type="String" label="Current Value" description="Current value.  If present, this is replace place holder" role="inputOnly"/>
         <property name="selectedValue" type="String" label="Selected Value" description="Selected value" role="outputOnly" />
         <property name="excludedValues" type="String" placeholder="Enter comma seperated values or supply a constant" label="Excluded Picklist Values" description="A common separted list of values to exclude" role="inputOnly"/>

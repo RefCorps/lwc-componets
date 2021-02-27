@@ -7,18 +7,23 @@
                 <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText"
                     data-aura-class="uiOutputRichText">
                     <template if:true={listLabel}>
-                        {listLabel}
+                        <span class="slds-text-title_bold">{listLabel}</span>&nbsp;
+                       <i>{listHint}</i>
                     </template>
                 </div>
                 <select name="selectedStatus" class="select uiInput uiInputSelect uiInput--default uiInput--select"
                     onchange={handleChange}>
+                    <template if:true={selectHint}>
+                        <option value="" disabled selected>{selectHint}</option>
+                    </template>    
                     <template for:each={options} for:item="item">
                         <option key={item.value}>{item.label}</option>
                     </template>
                 </select>
             </template>
             <template if:true={useRadioButton}>
-                <lightning-radio-group name="checkboxGroup" label={listLabel} options={options} value={value}
+                <span class="slds-text-title_bold">{listLabel}</span>&nbsp;
+                <lightning-radio-group name="checkboxGroup" options={options} value={value}
                     type="radio" onchange={handleChange}>
                 </lightning-radio-group>
             </template>
