@@ -5,14 +5,13 @@
  * 
  * CREATED BY:          Mike Miller
  * 
- * VERSION:             0.1.0
+ * RELEASE NOTES:       You must deploy LWC richDatatableRC with this component - this allows a richtext column
  * 
- * RELEASE NOTES:       None at this time
- * 
- * 2021-02-19 - 0.1.1 - Removed 'Rec Name'
- * 2021-02-25 - 0.1.2 - Hardcoded Designation__c column label = Endorsement -- consider making it a param
- * 2021-02-26 - 0.2.0 - Added ability to exclude picklist values - intent is to omit Rank settings
- * 2021-02-27 - 0.3.0 - Existing edorsements with no end date are added to excludedValues to prevent duplicate endorsements
+ * 2021-02-19 - v0.1.1 - Removed 'Rec Name'
+ * 2021-02-25 - v0.1.2 - Hardcoded Designation__c column label = Endorsement -- consider making it a param
+ * 2021-02-26 - v0.2.0 - Added ability to exclude picklist values - intent is to omit Rank settings
+ * 2021-02-27 - v0.3.0 - Existing endorsements with no end date are added to excludedValues to prevent duplicate endorsements
+ * 2021-03-01 - v0.3.1 - Code cleanup - Modified to better support testing
  * 
 **/
 import {
@@ -39,7 +38,6 @@ const columns = [{ label: 'Designation' ,fieldName: 'Designation__c',type: 'text
     typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true } ]
 
 export default class testWithApexDataSource extends LightningElement {
-
     @api designeeId;
     @api selectedDesignation;
     @api selectionStartDate;
@@ -57,13 +55,15 @@ export default class testWithApexDataSource extends LightningElement {
     @api tableLabel;
     @api tableHelp;
     @api tableHint;
-    
+
     @api excludedValues;
 
     @api tableCol1Label;
     // @api errorLabel;
 
-    pDesigneeId;
+    @track inputValue;
+
+    pDesigneeId; // Parameter used with DesignationController.fetchContactDesignations
 
     data;
     columns = columns;
@@ -73,7 +73,7 @@ export default class testWithApexDataSource extends LightningElement {
     picklist;
 
     lblSelect;
-    infoSelect ="Current Endorsements and Rank are displayed in the table above. Candidates and Assistants will typically only appear with Rank.  Referees may have several endorsements associated with rank.";
+    infoSelect = "Current Endorsements and Rank are displayed in the table above. Candidates and Assistants will typically only appear with Rank.  Referees may have several endorsements associated with rank.";
     lblTable;
     infoTable = "Endorsements are similar to rank, but are not the same.  A member of the corps may have several active endorsements.";
 
@@ -83,17 +83,18 @@ export default class testWithApexDataSource extends LightningElement {
 
     todaysDate;
 
-    @track inputValue;
-
+    useTestData = false; // Provides default test data to facilitate local testing in VSCode
+    enableLogging = true; // When true console logging through logmessage is enabled
 
     // initialize component
     async connectedCallback() {
 
         // BEGIN LOCAL TEST DATA - DEFAULT VALUES
-  
-        var testing = true;
 
-        if (testing) {
+        if (this.useTestData) {
+
+            this.logmessage('Default test data is enabled.  Defaults will be used when there is no corresponding parameter');
+
             this.pDesigneeId = this.designeeId ? this.designeeId : '0036A00000peZM1QAM';
             this.lblSelect = this.selectLabel ? this.selectLabel : 'New Endorsement';
             this.lblTable = this.tableLabel ? this.tableLabel : 'Career Endorsements';
@@ -102,26 +103,26 @@ export default class testWithApexDataSource extends LightningElement {
             this.tableHelp = this.selectTable ? this.tableHelp : this.infoTable;
             this.selectHint = this.selectHint ? this.selectHint : 'Select a new option';
             this.tableHint = this.tableHint ? this.tableHint : '(press enter after updating a cell)';
-    
+
             this.excludedValues = this.excludedValues ? this.excludedValues : 'Referee,Full Referee,Assistant Referee,Candidate Referee, Emeritus';
-    
+
         } else {
             this.pDesigneeId = this.designeeId;
             this.lblSelect = this.selectLabel;
             this.lblTable = this.tableLabel;
             this.selectHint = this.selectHint;
             this.tableHint = this.tableHint;
-    
+
             // USE DEFAULTS IF NO PROP PROVIDED
             this.selectHelp = this.selectHelp ? this.selectHelp : this.infoSelect;
             this.tableHelp = this.selectTable ? this.tableHelp : this.infoTable;
             this.excludedValues = this.excludedValues ? this.excludedValues : 'Referee,Full Referee,Assistant Referee,Candidate Referee, Emeritus';
-    
+
         }
 
         // END LOCAL TEST DATA  
 
-        if(!this.pDesigneeId) {
+        if (!this.pDesigneeId) {
             alert('maintDesignations Error - No Designee__c value needed to access records was found! NO DATA CAN BE SELECTED.');
         }
 
@@ -130,22 +131,22 @@ export default class testWithApexDataSource extends LightningElement {
         this.todaysDate = this.getDateYYYYMMDD();
 
         // THIS WILL REPLACE THE DEFAULT COLUMN LABLE
-        if(this.tableCol1Label)
+        if (this.tableCol1Label)
             columns[0].label = this.tableCol1Label;
 
-        console.log("In connectedCallback fetchContactDesignations for " + this.pDesigneeId);
-        // NOTE: WHE
+        this.logmessage("In connectedCallback fetchContactDesignations for " + this.pDesigneeId);
+
         ContactDesignations({
                 pDesigneeId: this.pDesigneeId
             })
             .then(result => {
                 this.data = result;
-                console.log('Designations:  ' + JSON.stringify(result));
+                this.logmessage('Designations:  ' + JSON.stringify(result));
                 var d;
-                console.log('Designation rows returned: ' + Object.keys(this.data).length);
+                this.logmessage('Designation rows returned: ' + Object.keys(this.data).length);
                 // Add designation to mydesignations if there is no end date - these will be excluded from the picklist
                 for (d of this.data) {
-                    if(!d.Designation_End_Date__c)
+                    if (!d.Designation_End_Date__c)
                         this.mydesignations.push(d.Designation__c);
                 }
                 this.editedData = JSON.parse(JSON.stringify(this.data));
@@ -156,13 +157,13 @@ export default class testWithApexDataSource extends LightningElement {
 
                 DesignationPicklist().then(result => {
                     this.picklist = result;
-                    console.log('Picklist:  ' + JSON.stringify(result) );
+                    this.logmessage('Picklist:  ' + JSON.stringify(result));
 
                     // Add mydesignations to excludedValues
                     var md;
                     if (this.excludedValues) {
-                        for( md of this.mydesignations ) {
-                            if(!this.excludedValues.includes(md))
+                        for (md of this.mydesignations) {
+                            if (!this.excludedValues.includes(md))
                                 this.excludedValues = this.excludedValues + ',' + md;
                         }
                     }
@@ -170,7 +171,7 @@ export default class testWithApexDataSource extends LightningElement {
                     var dl;
                     for (dl of this.picklist) {
 
-                        console.log('mydesignations ' + this.mydesignations);
+                        this.logmessage('mydesignations ' + this.mydesignations);
 
                         if (this.excludedValues) {
                             if (!this.excludedValues.includes(dl)) {
@@ -181,21 +182,21 @@ export default class testWithApexDataSource extends LightningElement {
                                 this.editedPicklistValues.push(dl);
                             }
 
-                        } 
+                        }
 
                     }
                     this.loadPicklist = true;
 
                     // TODO:  THIS WORKS LOCALLY BUT WILL NOT DEPLOY, IT IS NOT RECOMMEDED updateRecord IS NOT WORKING FOR ME
-                    //eval($A.get('e.force:refreshView'));
+                    // eval($A.get('e.force:refreshView'));
                     // updateRecord({fields: this.picklist});
 
                 }).catch(error => {
-                    alert('picklist error:  ' + error);
+                    alert('maintDesignation picklist error:  ' + error);
                 });
 
             }).catch(error => {
-                alert('detail error:  ' + error);
+                alert('maintDesignation detail error:  ' + error);
             });
 
     }
@@ -207,12 +208,12 @@ export default class testWithApexDataSource extends LightningElement {
         this.dispatchEvent(attributeChangeEvent);
         this.hidenseek = "display:inline";
         this.selectionStartDate = this.getDateYYYYMMDD();
-        console.log("default startdate " + this.selectionStartDate);
+        this.logmessage("default startdate " + this.selectionStartDate);
     }
 
     handleStartDate(event) {
         this.selectionStartDate = event.target.value;
-        console.log("selected startdate " + this.selectionStartDate);
+        this.logmessage("selected startdate " + this.selectionStartDate);
     }
 
     handleCellChange(event) {
@@ -227,70 +228,68 @@ export default class testWithApexDataSource extends LightningElement {
         const idDesignation = "Designation__c";
         const idEndDate = "Designation_End_Date__c";
         const idStartDate = "Designation_Start_Date__c";
-    
+
         var dvrows = Object.keys(event.detail.draftValues).length;
         var outrows = Object.keys(this.outputEditedRows).length;
-        console.log("dvrows = " + Object.keys(event.detail.draftValues).length);
-        console.log("draftValues: " + JSON.stringify(draftValues));
+        this.logmessage("dvrows = " + Object.keys(event.detail.draftValues).length);
+        this.logmessage("draftValues: " + JSON.stringify(draftValues));
 
         var i = 0;
-        for( i ; i < dvrows ; i++ ) {
+        for (i; i < dvrows; i++) {
 
-            var dvId = draftValues[i].Id;  
+            var dvId = draftValues[i].Id;
             if (outrows == 0 || this.getIndex(dvId) > outrows) // empty or no match
             {
-                console.log(dvrows + " - " +  JSON.stringify(draftValues[i]));
+                this.logmessage(dvrows + " - " + JSON.stringify(draftValues[i]));
 
                 var recordId = draftValues[i].Id;
-                
+
                 var enddate = "";
                 var startdate = "";
                 var designationText = "";
-                if(!draftValues[i][idEndDate]) {
-                    enddate = this.findDataValue(recordId,idEndDate);
-                    if(enddate)
-                        draftValues[i][idEndDate] = enddate; 
+                if (!draftValues[i][idEndDate]) {
+                    enddate = this.findDataValue(recordId, idEndDate);
+                    if (enddate)
+                        draftValues[i][idEndDate] = enddate;
                 }
-                if(!draftValues[i][idStartDate]) {
-                    startdate = this.findDataValue(recordId,idStartDate);
-                    if(startdate)
+                if (!draftValues[i][idStartDate]) {
+                    startdate = this.findDataValue(recordId, idStartDate);
+                    if (startdate)
                         draftValues[i][idStartDate] = startdate;
                 }
-                designationText = this.findDataValue(recordId,idDesignation);
+                designationText = this.findDataValue(recordId, idDesignation);
                 draftValues[i][idDesignation] = designationText;
                 this.outputEditedRows.push(draftValues[i]);
-            }
-            else {  // Update edited row in output
+            } else { // Update edited row in output
                 var x = this.getIndex(this.outputEditedRows[i].Id);
-                if(draftValues[i][idEndDate])
+                if (draftValues[i][idEndDate])
                     this.outputEditedRows[x][idEndDate] = draftValues[i][idEndDate];
-                if(draftValues[i][idStartDate])
+                if (draftValues[i][idStartDate])
                     this.outputEditedRows[x][idStartDate] = draftValues[i][idStartDate];
             }
 
         }
 
-        console.log("final rec: " + JSON.stringify(this.outputEditedRows));
+        this.logmessage("final rec: " + JSON.stringify(this.outputEditedRows));
     }
 
     findDataValue(Id, key) {
         var dataLen = Object.keys(this.data).length;
         var value = "";
-        for(var i = 0; i < dataLen; i++ )
-        {
-            if(this.data[i].Id === Id) {
+        for (var i = 0; i < dataLen; i++) {
+            if (this.data[i].Id === Id) {
                 value = this.data[i][key];
                 break;
             }
-        }   
+        }
         return value;
     }
 
     getIndex(Id) {
         var rows = Object.keys(this.outputEditedRows).length;
-        var idx  = rows + 1;
-        for(var i = 0; i < rows ; i++ ) {
-            if(this.outputEditedRows[i].Id === Id) {
+        var idx = rows + 1;
+        for (var i = 0; i < rows; i++) {
+            if (this.outputEditedRows[i].Id === Id) {
                 idx = i;
                 break;
             }
@@ -298,17 +297,20 @@ export default class testWithApexDataSource extends LightningElement {
         return idx;
     }
 
-
     getDateYYYYMMDD() {
         var today = new Date();
         var p = '-';
         var dd = today.getDate();
-        var mm = today.getMonth()+1; 
+        var mm = today.getMonth() + 1;
         var yyyy = today.getFullYear();
-        dd = dd<10 ? '0'+dd : dd;  
-        mm = mm<10 ? '0'+mm : mm;
-        return yyyy+p+mm+p+dd;
+        dd = dd < 10 ? '0' + dd : dd;
+        mm = mm < 10 ? '0' + mm : mm;
+        return yyyy + p + mm + p + dd;
     }
 
-
+    logmessage(message) {
+        if (this.enableLogging) {
+            console.log('maintDesignations ' + message);
+        }
+    }
 }

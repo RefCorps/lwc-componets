@@ -7,9 +7,10 @@
  * VERSION:             v0.1.0
  * RELEASE NOTES:       You must get current data from Contact to set current Status as first option listed.
  * 
- * 2012-02-22   v0.1.1  If options to be excluded are set the excluded will appear and no options can be selected.  
- *                      Commented out logic associated with local testing.
- * 2012-02-26   v0.1.2  Add label hint option - fixed label style
+ * 2012-02-22 - v0.1.1 - If options to be excluded are set the excluded will appear and no options can be selected.  
+ *                       Commented out logic associated with local testing.
+ * 2012-02-26 - v0.1.2 - Add label hint option - fixed label style
+ * 2012-03-01 - v0.1.3 - Code cleanup - Modified to better support testing
  * 
 **/
 
@@ -37,26 +38,38 @@ export default class PicklistComp extends LightningElement {
 
     valueCanBeUpdated = true;
 
+    useTestData = false; // Provides default test data to facilitate local testing in VSCode
+    enableLogging = true; // When true console logging through logmessage is enabled
+
     async connectedCallback() {
 
         // BEGIN LOCAL TEST 
-        //this.objAPIName = this.objAPIName ? this.objAPIName : 'Designation__c';
-        //this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Designation__c';
-        this.objAPIName = this.objAPIName ? this.objAPIName : 'Contact';
-        this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Referee_Status__c';
-        this.listLabel = this.listLabel ? this.listLabel : 'Current Status';
-        this.listHint = this.listHint ? this.listHint : '(select from this list to update)';
 
-        // for status test
-        //this.excludedValues = this.excludedValues ? this.excludedValues : 'License Suspended,License Suspended - Safety Compliance,License Suspended - USRowing Admin';
+        if (this.useTestData) {
 
-        //this.placeHolder = this.placeHolder ? this.placeHolder : '--Select an Option--';
-        //this.currentValue = this.currentValue ? this.currentValue : 'Active';
-        //this.currentValue = this.currentValue ? this.currentValue : 'License Suspended';
-        // this.flowErrorMsg = this.flowErrorMsg ? this.flowErrorMsg : 'Status change prohibited';
+            this.logmessage('Default test data is enabled.  Defaults will be used when there is no corresponding parameter');
+
+            //this.objAPIName = this.objAPIName ? this.objAPIName : 'Designation__c';
+            //this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Designation__c';
+            this.objAPIName = this.objAPIName ? this.objAPIName : 'Contact';
+            this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Referee_Status__c';
+            
+
+            // for status test
+            this.excludedValues = this.excludedValues ? this.excludedValues : 'License Suspended,License Suspended - Safety Compliance,License Suspended - USRowing Admin';
+
+            this.placeHolder = this.placeHolder ? this.placeHolder : '--Select an Option--';
+            this.currentValue = this.currentValue ? this.currentValue : 'Active';
+            this.currentValue = this.currentValue ? this.currentValue : 'License Suspended';
+            this.flowErrorMsg = this.flowErrorMsg ? this.flowErrorMsg : 'Status change prohibited';
+
+        } else {
+            this.listLabel = this.listLabel ? this.listLabel : 'Current Status';
+            this.listHint = this.listHint ? this.listHint : '(select from this list to update)';
+        }
         // END LOCAL TEST
 
-        console.log('obj: ' + this.objAPIName + ' field: ' + this.fieldAPIName);
+        this.logmessage('obj: ' + this.objAPIName + ' field: ' + this.fieldAPIName);
 
         // If you don't select anything the current value will become the selected value;
         this.selectedValue = this.currentValue;
@@ -122,8 +135,13 @@ export default class PicklistComp extends LightningElement {
 
     handleChange(event) {
         this.selectedValue = event.target.value; 
-        console.log("selectedValue = "+this.selectedValue);
+        this.logmessage("selectedValue = "+this.selectedValue);
     }
 
+    logmessage(message) {
+        if (this.enableLogging) {
+            console.log('picklistComp ' + message);
+        }
+    }
 
 }

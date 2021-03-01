@@ -40,9 +40,9 @@ public with sharing class PicklistCompController {
     }
     
     @AuraEnabled
-    public static List < String > getObjectPicklistFields(String pMatchObj) {
+    public static List < String > getObjectPicklistFields(String pObjAPIName) {
 		List<String> fieldNames = new List<String>();
-        SObjectType matchType = Schema.getGlobalDescribe().get(pMatchObj);
+        SObjectType matchType = Schema.getGlobalDescribe().get(pObjAPIName);
         Map<String,Schema.SObjectField> mfields = matchType.getDescribe().fields.getMap();
         for(String fieldName : mfields.keyset()){
             if( mfields.get(fieldName).getDescribe().getType() == Schema.DisplayType.PICKLIST) {
