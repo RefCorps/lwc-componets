@@ -12,6 +12,7 @@
  * 2021-02-26 - v0.2.0 - Added ability to exclude picklist values - intent is to omit Rank settings
  * 2021-02-27 - v0.3.0 - Existing endorsements with no end date are added to excludedValues to prevent duplicate endorsements
  * 2021-03-01 - v0.3.1 - Code cleanup - Modified to better support testing
+ * 2021-03-02 - v0.3.2 - Code reset Start and End dates when user blanked data - test for update to null
  * 
 **/
 import {
@@ -83,7 +84,7 @@ export default class testWithApexDataSource extends LightningElement {
 
     todaysDate;
 
-    useTestData = false; // Provides default test data to facilitate local testing in VSCode
+    useTestData = true; // Provides default test data to facilitate local testing in VSCode
     enableLogging = true; // When true console logging through logmessage is enabled
 
     // initialize component
@@ -234,6 +235,9 @@ export default class testWithApexDataSource extends LightningElement {
         this.logmessage("dvrows = " + Object.keys(event.detail.draftValues).length);
         this.logmessage("draftValues: " + JSON.stringify(draftValues));
 
+        var vIdEndDate = idEndDate;
+        var vIdStartDate = idStartDate;
+
         var i = 0;
         for (i; i < dvrows; i++) {
 
@@ -247,15 +251,20 @@ export default class testWithApexDataSource extends LightningElement {
                 var enddate = "";
                 var startdate = "";
                 var designationText = "";
-                if (!draftValues[i][idEndDate]) {
-                    enddate = this.findDataValue(recordId, idEndDate);
-                    if (enddate)
-                        draftValues[i][idEndDate] = enddate;
+                // v0.3.2 THE ORIGINAL CODE WAS SET TO FILL IN THE BLANKS - WE'LL SKIP IF THE KEY IS PRESENT INDICATING A CHANGE
+                if(!draftValues[i].hasOwnProperty(vIdEndDate)) {
+                    if (!draftValues[i][idEndDate]) {
+                        enddate = this.findDataValue(recordId, idEndDate);
+                        if (enddate)
+                            draftValues[i][idEndDate] = enddate;
+                    }
                 }
-                if (!draftValues[i][idStartDate]) {
-                    startdate = this.findDataValue(recordId, idStartDate);
-                    if (startdate)
-                        draftValues[i][idStartDate] = startdate;
+                if(!draftValues[i].hasOwnProperty(vIdStartDate)) {  
+                    if (!draftValues[i][idStartDate]) {
+                        startdate = this.findDataValue(recordId, idStartDate);
+                        if (startdate)
+                            draftValues[i][idStartDate] = startdate;
+                    }
                 }
                 designationText = this.findDataValue(recordId, idDesignation);
                 draftValues[i][idDesignation] = designationText;
