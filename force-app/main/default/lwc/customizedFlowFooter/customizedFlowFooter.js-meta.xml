@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>50.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>customizedFlowFooter</masterLabel>
+    <description>This is a simple navigation test</description>
+    <targets>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            
+            <!-- 
+                PER DISCUSSION BOARDS: Mar 8 '20 - Flow does not yet support the default attribute on the Property element in the LWC configuration file. 
+                To use defaults with Flow, set them in your code and not in your configuration file. 
+                At this point they appear to operate like a Hint.
+            -->
+
+            <property name="flowCtrl1Text" type="String"     label="Custom Flow Ctrl 1 Button Text" description="Use as an alternate flow button with an IF" />
+            <property name="flowCtrl1Hide" type="Boolean"    label="Custom Flow Ctrl 1 Hidden" description="Enables (T-F) display of FlowCtrl1" default="true" />
+            <property name="flowCtrl1Clicked" type="Boolean" label="Custom Flow Ctrl 1 State" description="Sets the state (T-F) of FlowCtrl1" default="false" />
+            <property name="flowCtrl1HAlign" type="String"   label="Custom FLow Ctrl 1 Horiz Aligh" description="Postion of Next button - 'left' or 'right'" default="right"  role="inputOnly" />
+            <property name="flowCtrl1Variant" type="String"  label="Custom Flow Ctrl 1 Variant" description="Sets style of FlowCtrl1" default="base, brand, brand-outline, destructive, destructive-text, success" />
+
+            <property name="flowCtrl2Text" type="String"     label="Custom Flow Ctrl 2 Button Text" description="Use as an alternate flow button with an IF" />
+            <property name="flowCtrl2Hide" type="Boolean"    label="Custom Flow Ctrl 2 Hidden" description="Enables (T-F) display of FlowCtrl2" default="true" />
+            <property name="flowCtrl2Clicked" type="Boolean" label="Custom Flow Ctrl 2 State" description="Sets the state (T-F) of FlowCtrl2" default="false" />
+            <property name="flowCtrl2HAlign" type="String"   label="Custom Flow Ctrl 2 Horiz Aligh" description="Postion of Next button - 'left' or 'right'" default="right"  role="inputOnly" />
+            <property name="flowCtrl2Variant" type="String"  label="Custom Flow Ctrl 2 Variant" description="Sets style of FlowCtrl2" default="base, brand, brand-outline, destructive, destructive-text, success" />
+
+            <property name="backText" type="String" label="Back Button Alt Text" description="Replaces Back button text" default="Previous" role="inputOnly" />
+            <property name="backHide" type="Boolean" label="Back Button Hidden" description="Blocks display of Back button" default="false" role="inputOnly" />
+            <property name="backHAlign" type="String" label="Back Horiz Aligh" description="Postion of Back button - 'left' or 'right'" default="right" role="inputOnly" />
+            <property name="backVariant" type="String" label="Back Variant" description="Sets style of Back button" default="base, brand, brand-outline, destructive, destructive-text, success" />
+
+            <property name="nextText" type="String" label="Next (Finish) Alt Text" description="Replaces Next (Finish) button text" default="Next"  role="inputOnly" />
+            <property name="nextHide" type="Boolean" label="Next (Finish) Button Hidden" description="Blocks display of Next button" default="false"  role="inputOnly" />
+            <property name="nextHAlign" type="String" label="Next (Finish) Horiz Aligh" description="Postion of Next button - 'left' or 'right'" default="right"  role="inputOnly" />
+            <property name="nextVariant" type="String" label="Next Variant" description="Sets style of Next button" default="base, brand, brand-outline, destructive, destructive-text, success" />
+         
+            <property name="finishText" type="String" label="Finish Button Alt Text" description="Replaces Finish button text" default="Finish"  role="inputOnly" />
+            <property name="finishHide" type="Boolean" label="Finish Button Hidden" description="Blocks display of Finish button" default="true"  role="inputOnly" />
+            <property name="finishHAlign" type="String" label="Finish Button Horiz Align" description="Position of Finish button - 'left' or 'right'" default="right"  role="inputOnly" />
+            <property name="finishVariant" type="String" label="Finish Variant" description="Sets style of Finish button" default="base, brand, brand-outline, destructive, destructive-text, success" />
+
+        </targetConfig>
+    </targetConfigs>
+
+</LightningComponentBundle>

@@ -1,0 +1,48 @@
+<template>
+
+    <div aura:id="actionButtonBar" class="slds-clearfix slds-p-top_medium">
+
+        <template if:false={flowCtrl1Hide}>
+            <div class={ctrl1justify} >
+            <lightning-button label={flowCtrl1Text} variant={flowCtrl1Variant} class="slds-var-m-around_medium" onclick={handleFlowCtrl1}>
+            </lightning-button>
+            </div>
+        </template>
+
+        <template if:false={flowCtrl2Hide}>
+            <div class={ctrl2justify} >
+            <lightning-button label={flowCtrl2Text} variant={flowCtrl2Variant} class="slds-var-m-around_medium" onclick={handleFlowCtrl2}>
+            </lightning-button>
+            </div>
+        </template>
+        
+        <!-- div class={nextjustify} -->
+
+    <template if:false={finishHide}>
+    <div class={finishjustify} >
+        <lightning-button label={finishText} variant={finishVariant} class="slds-var-m-around_medium" onclick={handleFinish}>
+        </lightning-button>
+    </div>
+    </template>    
+
+    <template if:false={nextHide}>
+    <div class={nextjustify} >
+        <lightning-button label={nextText} variant={nextVariant}  class="slds-var-m-around_medium" onclick={handleNextFini}>
+        </lightning-button>
+    </div>        
+    </template>
+
+    <template if:false={backHide}>
+    <div class={backjustify} >
+        <lightning-button label={backText} variant={backVariant}  class="slds-var-m-around_medium" onclick={handleBack}>
+        </lightning-button>
+    </div>
+    </template>    
+    
+
+
+
+       
+    </div>
+
+</template>
