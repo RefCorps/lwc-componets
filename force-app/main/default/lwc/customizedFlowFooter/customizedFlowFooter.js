@@ -42,6 +42,7 @@
  * 
  * 2021-03-08   v0.1.0 - Initial version.
  * 2021-03-10   v0.1.1 - Updated notes - console.log changed to logmessage
+ * 2021-03-23   v1.1.1 - Deploying to production
  * 
  */
 
