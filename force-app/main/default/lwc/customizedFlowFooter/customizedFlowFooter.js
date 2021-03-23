@@ -42,7 +42,7 @@
  * 
  * 2021-03-08   v0.1.0 - Initial version.
  * 2021-03-10   v0.1.1 - Updated notes - console.log changed to logmessage
- * 2021-03-23   v1.1.1 - Deploying to production
+ * 2021-03-23   v1.1.2 - Deploying to production - error with intro of logmessage found while debugging
  * 
  */
 
@@ -104,14 +104,14 @@ export default class navToFlowFinish extends LightningElement() {
     
     init() {
 
-        this.enableLogging = true;
+        this.enableLogging = false;
 
-        logmessage('>> customizedFlowFooter');
-        logmessage('customizedFlowFooter ctrl1 text: [' + this.flowCtrl1Text + '] hide: [' + this.flowCtrl1Hide + '] align: [' + this.flowCtrl1HAlign + '] variant [' + this.flowCtrl1Variant + ']');
-        logmessage('customizedFlowFooter ctrl2 text: [' + this.flowCtrl2Text + '] hide: [' + this.flowCtrl2Hide + '] align: [' + this.flowCtrl2HAlign + '] variant [' + this.flowCtrl2Variant + ']');
-        logmessage('customizedFlowFooter next text: [' + this.nextText + '] hide: [' + this.nextHide + '] align: [' + this.nextHAlign + '] variant [' + this.nextVariant + ']');
-        logmessage('customizedFlowFooter back text: [' + this.backText + '] hide: [' + this.backHide + '] align: [' + this.backHAlign + '] variant [' + this.backVariant + ']');
-        logmessage('customizedFlowFooter finishText: [' + this.finishText + '] hide: [' + this.finishHide + '] align: [' + this.finishHAlign + '] variant [' + this.finishVariant + ']');
+        this.logmessage('>> customizedFlowFooter');
+        this.logmessage('customizedFlowFooter ctrl1 text: [' + this.flowCtrl1Text + '] hide: [' + this.flowCtrl1Hide + '] align: [' + this.flowCtrl1HAlign + '] variant [' + this.flowCtrl1Variant + ']');
+        this.logmessage('customizedFlowFooter ctrl2 text: [' + this.flowCtrl2Text + '] hide: [' + this.flowCtrl2Hide + '] align: [' + this.flowCtrl2HAlign + '] variant [' + this.flowCtrl2Variant + ']');
+        this.logmessage('customizedFlowFooter next text: [' + this.nextText + '] hide: [' + this.nextHide + '] align: [' + this.nextHAlign + '] variant [' + this.nextVariant + ']');
+        this.logmessage('customizedFlowFooter back text: [' + this.backText + '] hide: [' + this.backHide + '] align: [' + this.backHAlign + '] variant [' + this.backVariant + ']');
+        this.logmessage('customizedFlowFooter finishText: [' + this.finishText + '] hide: [' + this.finishHide + '] align: [' + this.finishHAlign + '] variant [' + this.finishVariant + ']');
         
         const alignLeft = "slds-float_left";
         const alignRight = "slds-float_right";
@@ -151,10 +151,10 @@ export default class navToFlowFinish extends LightningElement() {
         }
         if (!this.backHide) {
             if (this.availableActions.find(action => action === 'BACK')) {
-                logmessage('customizedFlowFooter BACK availableActions');
+                this.logmessage('customizedFlowFooter BACK availableActions');
                 this.backHide = false;
             } else {
-                logmessage('customizedFlowFooter NO BACK availableActions');
+                this.logmessage('customizedFlowFooter NO BACK availableActions');
                 this.backHide = true;
             }
         }
@@ -169,10 +169,10 @@ export default class navToFlowFinish extends LightningElement() {
         }
         if(!this.nextHide) {
         if (this.availableActions.find(action => action === 'NEXT')) {
-            logmessage('customizedFlowFooter NEXT availableActions');
+            this.logmessage('customizedFlowFooter NEXT availableActions');
             this.nextHide = false;
         } else {
-            logmessage('customizedFlowFooter NO NEXT availableActions');
+            this.logmessage('customizedFlowFooter NO NEXT availableActions');
             this.nextHide = true;
         }
         }
@@ -187,11 +187,11 @@ export default class navToFlowFinish extends LightningElement() {
         }
         if(!this.finishHide) {
         if (this.availableActions.find(action => action === 'FINISH')) {
-            logmessage('customizedFlowFooter FINISH availableActions');
+            this.logmessage('customizedFlowFooter FINISH availableActions');
             this.nextFiniDisplay = this.finishText;
             this.finishHide = false;
         } else {
-            logmessage('customizedFlowFooter NO FINISH availableActions');
+            this.logmessage('customizedFlowFooter NO FINISH availableActions');
             this.finishHide = true;
         }
         }
@@ -203,12 +203,12 @@ export default class navToFlowFinish extends LightningElement() {
             this.nextFiniDisplay= this.finishText;
         }
         */
-        logmessage('<< customizedFlowFooter');
-        logmessage('customizedFlowFooter ctrl1 text: [' + this.flowCtrl1Text + '] hide: [' + this.flowCtrl1Hide + '] align: [' + this.flowCtrl1HAlign + '] variant [' + this.flowCtrl1Variant + ']');
-        logmessage('customizedFlowFooter ctrl2 text: [' + this.flowCtrl2Text + '] hide: [' + this.flowCtrl2Hide + '] align: [' + this.flowCtrl2HAlign + '] variant [' + this.flowCtrl2Variant + ']');
-        logmessage('customizedFlowFooter next text: [' + this.nextText + '] hide: [' + this.nextHide + '] align: [' + this.nextHAlign + '] variant [' + this.nextVariant + ']');
-        logmessage('customizedFlowFooter back text: [' + this.backText + '] hide: [' + this.backHide + '] align: [' + this.backHAlign + '] variant [' + this.backVariant + ']');
-        logmessage('customizedFlowFooter finishText: [' + this.finishText + '] hide: [' + this.finishHide + '] align: [' + this.finishHAlign + '] variant [' + this.finishVariant + ']');
+        this.logmessage('<< customizedFlowFooter');
+        this.logmessage('customizedFlowFooter ctrl1 text: [' + this.flowCtrl1Text + '] hide: [' + this.flowCtrl1Hide + '] align: [' + this.flowCtrl1HAlign + '] variant [' + this.flowCtrl1Variant + ']');
+        this.logmessage('customizedFlowFooter ctrl2 text: [' + this.flowCtrl2Text + '] hide: [' + this.flowCtrl2Hide + '] align: [' + this.flowCtrl2HAlign + '] variant [' + this.flowCtrl2Variant + ']');
+        this.logmessage('customizedFlowFooter next text: [' + this.nextText + '] hide: [' + this.nextHide + '] align: [' + this.nextHAlign + '] variant [' + this.nextVariant + ']');
+        this.logmessage('customizedFlowFooter back text: [' + this.backText + '] hide: [' + this.backHide + '] align: [' + this.backHAlign + '] variant [' + this.backVariant + ']');
+        this.logmessage('customizedFlowFooter finishText: [' + this.finishText + '] hide: [' + this.finishHide + '] align: [' + this.finishHAlign + '] variant [' + this.finishVariant + ']');
 
     }    
 
@@ -240,7 +240,7 @@ export default class navToFlowFinish extends LightningElement() {
     handleBack() {
         
         if (this.availableActions.find(action => action === 'BACK')) {
-            logmessage('navToFlowFinish handleGoNext PREVIOUS');
+            this.logmessage('navToFlowFinish handleGoNext PREVIOUS');
             const navigateNextEvent = new FlowNavigationBackEvent();
             this.dispatchEvent(navigateNextEvent);
         }
@@ -249,16 +249,16 @@ export default class navToFlowFinish extends LightningElement() {
 
     handleNextFini() {
         
-        logmessage('navToFlowFinish handleNextFini');
+        this.logmessage('navToFlowFinish handleNextFini');
         // check if FINISH is allowed on the flow screen
         if (this.availableActions.find(action => action === 'FINISH')) {
-            logmessage('navToFlowFinish handleNextFini FINISH');
+            this.logmessage('navToFlowFinish handleNextFini FINISH');
             const navigateFinishEvent = new FlowNavigationFinishEvent();
             this.dispatchEvent(navigateFinishEvent);
         }
         // check if NEXT is allowed on the flow screen
         if (this.availableActions.find(action => action === 'NEXT')) {
-            logmessage('navToFlowFinish handleNextFini NEXT');
+            this.logmessage('navToFlowFinish handleNextFini NEXT');
             const navigateNextEvent = new FlowNavigationNextEvent();
             this.dispatchEvent(navigateNextEvent);
         }
@@ -267,10 +267,10 @@ export default class navToFlowFinish extends LightningElement() {
 
     handleFinish() {
         //
-        logmessage('navToFlowFinish handleFinish');
+        this.logmessage('navToFlowFinish handleFinish');
         // check if FINISH is allowed on the flow screen
         //if (this.availableActions.find(action => action === 'FINISH')) {
-            logmessage('navToFlowFinish handleGoNext FINISH');
+            //this.logmessage('navToFlowFinish handleGoNext FINISH');
             const navigateFinishEvent = new FlowNavigationFinishEvent();
             this.dispatchEvent(navigateFinishEvent);
         //}
