@@ -3,6 +3,7 @@
     <div class="slds-var-m-around_medium">
 
         <template if:true={valueCanBeUpdated}>
+
             <template if:false={useRadioButton}>
                 <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText"
                     data-aura-class="uiOutputRichText">
@@ -21,12 +22,14 @@
                     </template>
                 </select>
             </template>
+            
             <template if:true={useRadioButton}>
                 <span class="slds-text-title_bold">{listLabel}</span>&nbsp;
                 <lightning-radio-group name="checkboxGroup" options={options} value={value}
                     type="radio" onchange={handleChange}>
                 </lightning-radio-group>
             </template>
+            
         </template>
 
         <template if:true={flowErrorMsg}>

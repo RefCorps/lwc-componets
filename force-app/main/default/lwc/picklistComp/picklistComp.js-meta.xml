@@ -2,6 +2,8 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>50.0</apiVersion>
     <isExposed>true</isExposed>
+    <masterLabel>picklistComp</masterLabel>
+    <description>This LWC displays either a select list or a lightning radio group or a select list of picklist value using Apex PicklistCompController</description>
     <targets>
         <target>lightning__FlowScreen</target>
    </targets>
@@ -17,14 +19,13 @@
         <property name="listHelp" type="String" label="Help Text" description="Select a value from the picklist" role="inputOnly"/>
         <property name="listHint" type="String" label="List Hint Text" description="A hint that will appear next to the label" role="inputOnly"/>
         <property name="selectHint" type="String" label="Select Hint" description="Place HINT text that describes what to do." role="inputOnly"/>
+        <property name="flowErrorMsg" type="String" placeholder="Enter a displayable Constant or Varible set in the flow" label="Flow Error Msg" description="Place flow messages here" role="inputOnly"/>
 
-        <property name="placeHolder" type="String" placeholder="DEPRECATED" label="List Placeholder" description="" role="inputOnly" />
         <property name="currentValue" type="String" label="Current Value" description="Current value.  If present, this is replace place holder" role="inputOnly"/>
         <property name="selectedValue" type="String" label="Selected Value" description="Selected value" role="outputOnly" />
         <property name="excludedValues" type="String" placeholder="Enter comma seperated values or supply a constant" label="Excluded Picklist Values" description="A common separted list of values to exclude" role="inputOnly"/>
-        <property name="flowErrorMsg" type="String" placeholder="Enter a Constant or Varible set in the flow with Text do display" label="Flow Error Msg" description="Place flow messages here" role="inputOnly"/>
 
-        <property name="useRadioButton" type="Boolean" description="Use radio buttons in place of list" default="false" label="Input Type" role="inputOnly" />
+        <property name="useRadioButton" type="Boolean" description="It TRUE, component will use radio buttons in place of a select list" default="false" label="Input Type" role="inputOnly" />
 
        </targetConfig>
    </targetConfigs>

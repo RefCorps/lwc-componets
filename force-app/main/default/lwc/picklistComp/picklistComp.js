@@ -1,17 +1,20 @@
 /**
  * Lightning Web Component for RefCorp Flow Screens 
- * This component incorporates a lightning radio group and pulls data from Contact.Referee_Status__c.
+ * Designed to be used in Screen Flows, this component incorporates either a lightning radio group or a select list based upon properties
  * 
- * CREATED BY:          Mike Miller
+ * CREATED BY:      Mike Miller
  * 
- * VERSION:             v0.1.0
- * RELEASE NOTES:       You must get current data from Contact to set current Status as first option listed.
+ * RELEASE NOTES:   1.  Designed to be used in Screen Flows in place of Radio Buttons and Picklist primarily with updates
+ *                  2.  Requires Apex Controller PicklistCompController.cls (test with PicklistCompTest.cls)
+ *                  3.  You must get current data from your Object to set currentValue as first option listed.
+ *                  4.  Include a decision in your flow to test 'currentValue' against 'selectedValue' to determine if data value changed
  * 
  * 2012-02-22 - v0.1.1 - If options to be excluded are set the excluded will appear and no options can be selected.  
  *                       Commented out logic associated with local testing.
  * 2012-02-26 - v0.1.2 - Add label hint option - fixed label style
  * 2012-03-01 - v0.1.3 - Code cleanup - Modified to better support testing
  * 
+ * 2012-23-01 - v1.1.4 - Code cleanup for deployment to production
 **/
 
 import { api, LightningElement, wire } from 'lwc';
@@ -19,12 +22,14 @@ import PicklistValues from '@salesforce/apex/PicklistCompController.getPickListV
 
 export default class PicklistComp extends LightningElement {
 
+    version = 'v1.1.4';
+
     @api objAPIName;
     @api fieldAPIName;
     @api listLabel;
     @api listHint;
     @api listHelp;
-    @api placeHolder;  // DEPRECATED
+    // @api placeHolder;  // DEPRECATED
     @api selectHint;
     @api flowErrorMsg;
 
@@ -53,7 +58,6 @@ export default class PicklistComp extends LightningElement {
             //this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Designation__c';
             this.objAPIName = this.objAPIName ? this.objAPIName : 'Contact';
             this.fieldAPIName = this.fieldAPIName ? this.fieldAPIName : 'Referee_Status__c';
-            
 
             // for status test
             this.excludedValues = this.excludedValues ? this.excludedValues : 'License Suspended,License Suspended - Safety Compliance,License Suspended - USRowing Admin';
@@ -140,7 +144,7 @@ export default class PicklistComp extends LightningElement {
 
     logmessage(message) {
         if (this.enableLogging) {
-            console.log('picklistComp ' + message);
+            console.log('picklistComp ' + this.version + ': ' + message);
         }
     }
 
