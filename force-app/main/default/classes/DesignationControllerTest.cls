@@ -28,6 +28,43 @@ public with sharing class DesignationControllerTest {
 
     }
     
+
+    @IsTest(SeeAllData=true) 
+    public static void testFetchContactDesignationsWithExclusions() {
+
+        System.debug('testFetchContactDesignations Confirm appropriate list returned');
+        Exception unexpectedException;
+        try {
+
+            Contact ContactData = [select name, id from contact where referee_rank__c = 'Referee' and 
+				id in (select designee__c from designation__c) limit 1];
+            
+            System.debug('ContactId ' + ContactData.Id);
+
+            String pDesigneeId=ContactData.Id;
+            String pExclusionList='(\'Chief Referee\',\'Emeritus\',\'FISA\',\'Clinician\',\'Mentor\',\'Referee College Faculty\',\'Referee Committee\',\'Regional Coordinator\',\'Staff\')';
+            
+            System.debug('Overloaded fetchContactDesignations follows');
+            System.debug('pDesigneeId = ' + pDesigneeId);
+            System.debug('pExclusionList = ' + pExclusionList);
+
+            List<Designation__c> designations = DesignationController.fetchContactDesignations(pDesigneeId, pExclusionList);
+            
+            System.assert( designations != null,'testFetchContactDesignations - A list was not returned');
+            
+            System.debug('fetchContactDesignations returned ' + designations.size() + ' rows ');
+            System.debug('designations ' + designations);
+
+        } catch (Exception err) {
+            System.debug('testFetchContactDesignations err: ' + err);
+            unexpectedException = err;
+        }    
+        system.assertEquals(null, unexpectedException, 'testFetchContactDesignations unexpected Exception');
+        System.debug('testFetchContactDesignations completed');
+
+    }
+
+
     @isTest(SeeAllData=true) 
     public static void testGetDesignationsList() {
 

@@ -15,7 +15,9 @@
  * 2021-03-02 - v0.3.2 - Code reset Start and End dates when user blanked data - test for update to null
  *                       Note that in this version mulitple changes to a row are distinct events.  A flow may see all events at the
  *                       same time.
- * 
+ * 2021-03-29 - v0.3.3 - Added exclusion list to params so you table select rank or endorsments only 
+ * 2021-03-30 - v0.3.4 - Added tableDisplayEndDate ? columns3 : columns2;
+ * 2021-04-14 - v0.4.0 - Fixed issue with table help.  Precoded for delete Button - pending review 
 **/
 import {
     api,
@@ -34,10 +36,24 @@ import DesignationPicklist from '@salesforce/apex/DesignationController.getDesig
 
 
 //const columns = [{ label: 'Rec Name',fieldName: 'Name',type: 'text' },
-const columns = [{ label: 'Designation' ,fieldName: 'Designation__c',type: 'text' },
+
+// row actions
+const actions = [
+    { label: 'Delete', name: 'delete'},
+];
+
+const columns3 = [
+{ label: 'Designation' ,fieldName: 'Designation__c',type: 'text' },
 { label: 'Start Date',fieldName: 'Designation_Start_Date__c',type: 'date-local', 
     typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true },
 { label: 'End Date',fieldName: 'Designation_End_Date__c',type: 'date-local', 
+    typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true }
+]
+// This line can be used to add a Delete function - not doing it now however
+// { type: 'action', typeAttributes: { rowActions: actions,  menuAlignment: 'right' } }  
+
+const columns2 = [{ label: 'Designation' ,fieldName: 'Designation__c',type: 'text' },
+{ label: 'Start Date',fieldName: 'Designation_Start_Date__c',type: 'date-local', 
     typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true } ]
 
 export default class testWithApexDataSource extends LightningElement {
@@ -58,6 +74,7 @@ export default class testWithApexDataSource extends LightningElement {
     @api tableLabel;
     @api tableHelp;
     @api tableHint;
+    @api tableDisplayEndDate = false;
 
     @api excludedValues;
 
@@ -65,11 +82,11 @@ export default class testWithApexDataSource extends LightningElement {
     // @api errorLabel;
 
     @track inputValue;
+    @track columns;
 
     pDesigneeId; // Parameter used with DesignationController.fetchContactDesignations
 
     data = [];
-    columns = columns;
 
     mydesignations = [];
     editedPicklistValues = [];
@@ -96,6 +113,9 @@ export default class testWithApexDataSource extends LightningElement {
 
         this.pDesigneeId = '';
 
+        // this.columns = this.tableDisplayEndDate ? columns3 : columns2;
+        this.columns = columns3;
+
         if (this.useTestData) {
 
             this.logmessage('Default test data is enabled.  Defaults will be used when there is no corresponding parameter');
@@ -105,11 +125,12 @@ export default class testWithApexDataSource extends LightningElement {
             this.lblTable = this.tableLabel ? this.tableLabel : 'Career Endorsements';
             this.tableCol1Label = this.tableCol1Label ? this.tableCol1Label : 'Endorsements/Rank';
             this.selectHelp = this.selectHelp ? this.selectHelp : this.infoSelect;
-            this.tableHelp = this.selectTable ? this.tableHelp : this.infoTable;
+            this.tableHelp = this.tableHelp ? this.tableHelp : this.infoTable;
             this.selectHint = this.selectHint ? this.selectHint : 'Select a new option';
             this.tableHint = this.tableHint ? this.tableHint : '(press enter after updating a cell)';
 
-            this.excludedValues = this.excludedValues ? this.excludedValues : 'Referee,Full Referee,Assistant Referee,Candidate Referee, Emeritus';
+            // this.excludedValues = this.excludedValues ? this.excludedValues : 'Referee,Full Referee,Assistant Referee,Candidate Referee, Emeritus';
+            this.excludedValues = this.excludedValues ? this.excludedValues : 'Chief Referee,Emeritus,FISA,Clinician,Mentor,Referee College Faculty,Referee Committee,Regional Coordinator,Staff';
 
         } else {
             this.pDesigneeId = this.designeeId;
@@ -120,7 +141,7 @@ export default class testWithApexDataSource extends LightningElement {
 
             // USE DEFAULTS IF NO PROP PROVIDED
             this.selectHelp = this.selectHelp ? this.selectHelp : this.infoSelect;
-            this.tableHelp = this.selectTable ? this.tableHelp : this.infoTable;
+            this.tableHelp = this.tableHelp ? this.tableHelp : this.infoTable;
             this.excludedValues = this.excludedValues ? this.excludedValues : 'Referee,Full Referee,Assistant Referee,Candidate Referee, Emeritus';
 
         }
@@ -137,13 +158,16 @@ export default class testWithApexDataSource extends LightningElement {
 
         // THIS WILL REPLACE THE DEFAULT COLUMN LABLE
         if (this.tableCol1Label)
-            columns[0].label = this.tableCol1Label;
+            this.columns[0].label = this.tableCol1Label;
 
         this.logmessage("In connectedCallback fetchContactDesignations for " + this.pDesigneeId);
         this.data = [];
 
+        this.excludedValues = this.formatExclusionListForSOQL(this.excludedValues);
+        this.logmessage('pDesigneeId=' + this.pDesigneeId + ' pExclusionList=' + this.excludedValues);
         ContactDesignations({
-                pDesigneeId: this.pDesigneeId
+                pDesigneeId: this.pDesigneeId,
+                pExclusionList: this.excludedValues
                 //pDesigneeId: this.designeeId
             })
             .then(result => {
@@ -152,12 +176,28 @@ export default class testWithApexDataSource extends LightningElement {
                 this.logmessage('Designations:  ' + JSON.stringify(result));
                 var d;
                 this.logmessage('Designation rows returned: ' + Object.keys(this.data).length);
+                this.logmessage('Designations returned: ' + JSON.stringify(this.data));
+
                 // Add designation to mydesignations if there is no end date - these will be excluded from the picklist
+                var candidate = 'Candidate Referee';
+                var candidateFound = false;
+                var assistant = 'Assistant Referee';
+                var assistantFound = false;
                 for (d of this.data) {
-                    if (!d.Designation_End_Date__c)
+                    if (!d.Designation_End_Date__c) {
+                        if(d.Designation__c === candidate) 
+                            candidateFound = true;
                         this.mydesignations.push(d.Designation__c);
+                    }
                 }
+                if(!candidateFound)
+                    this.mydesignations.push(candidate);
+                if(!assistantFound)
+                    this.mydesignations.push(assistant);
+                this.logmessage(this.mydesignations);
+
                 this.editedData = JSON.parse(JSON.stringify(this.data));
+
             }).then(result => {
 
                 // Loading the picklist is dependent upon first fetcing current designations
@@ -289,6 +329,35 @@ export default class testWithApexDataSource extends LightningElement {
         this.logmessage("final rec: " + JSON.stringify(this.outputEditedRows));
     }
 
+    /*
+    handleRowActions(event) {
+        let actionName = event.detail.action.name;
+
+       this.logmessage('actionName ====> ' + actionName);
+
+        let row = event.detail.row;
+
+        this.logmessage('row ====> ' + row);
+        // eslint-disable-next-line default-case
+        switch (actionName) {
+            //
+            case 'record_details':
+                // alert('tableGearExchange - record details row ' + JSON.stringify(row));
+                this.viewCurrentRecord(row);
+                break;
+            case 'edit':
+                this.editCurrentRecord(row);
+                break;
+            //    
+            case 'delete':
+                alert('Delete this row ' + row.Designation_Start_Date__c);
+                row.Designation_Start_Date__c = '';
+                break;
+
+        }
+    }
+    */
+
     findDataValue(Id, key) {
         var dataLen = Object.keys(this.data).length;
         var value = "";
@@ -322,6 +391,15 @@ export default class testWithApexDataSource extends LightningElement {
         dd = dd < 10 ? '0' + dd : dd;
         mm = mm < 10 ? '0' + mm : mm;
         return yyyy + p + mm + p + dd;
+    }
+
+    formatExclusionListForSOQL(list) {
+        list = list.replaceAll('\'','');
+        list = list.replaceAll(', ',',');
+        list = list.replaceAll(',','\',\'');
+        list = '(\'' + list + '\')';
+        this.logmessage('ExclusionList: ' + list);
+        return list;
     }
 
     logmessage(message) {

@@ -20,6 +20,7 @@
             <property name="excludedValues" type="String" placeholder="Enter comma seperated values or supply a constant" label="Excluded Picklist Values" description="A common separted list of values to exclude" role="inputOnly"/>
 
             <property name="selectedDesignation" type="String" label="Selected Designation" description="Selected Designation value" role="outputOnly" />
+
             <property name="selectionStartDate" type="Date" label="Selection Start Date" description="Selection Start Date" role="outputOnly" />
             <property name="selectionEndDate" type="Date" label="Selection End Date" description="Selection End Date" role="outputOnly" />
 
@@ -27,6 +28,7 @@
             <property name="tableCol1Label" type="String" label="Table Col1 Label" description="The Label that will apear above Col 1" role="inputOnly"/>
             <property name="tableHelp" type="String" label="Table Help Msg" description="Place a table update help message here"  role="inputOnly"/>
             <property name="tableHint" type="String" label="Table Hint" description="Place a hint on how to update the table here"  role="inputOnly"/>
+            <property name="tableDisplayEndDate" type="Boolean" label="Display End Date Col" description="Enable display of End Date Column"  role="inputOnly"/>
 
         </targetConfig>
     </targetConfigs>
