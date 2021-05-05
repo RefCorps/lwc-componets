@@ -24,7 +24,7 @@ import {
 
 import {
     FlowAttributeChangeEvent
-} from 'lightning/flowSupport';
+} from 'maintDesignations3/node_modules/lightning/flowSupport';
 
 // NOTE:  For Apex imports, don't use curly braces, also you can designate a defaultExport name that's different from the module-name
 import ContactDesignations from '@salesforce/apex/DesignationController.fetchContactDesignations';
@@ -66,7 +66,7 @@ export default class testWithApexDataSource extends LightningElement {
 
     pDesigneeId; // Parameter used with DesignationController.fetchContactDesignations
 
-    data;
+    data = [];
     columns = columns;
 
     mydesignations = [];
@@ -84,13 +84,15 @@ export default class testWithApexDataSource extends LightningElement {
 
     todaysDate;
 
-    useTestData = true; // Provides default test data to facilitate local testing in VSCode
+    useTestData = false; // Provides default test data to facilitate local testing in VSCode
     enableLogging = true; // When true console logging through logmessage is enabled
 
     // initialize component
     async connectedCallback() {
 
         // BEGIN LOCAL TEST DATA - DEFAULT VALUES
+
+        this.pDesigneeId = '';
 
         if (this.useTestData) {
 
@@ -136,11 +138,14 @@ export default class testWithApexDataSource extends LightningElement {
             columns[0].label = this.tableCol1Label;
 
         this.logmessage("In connectedCallback fetchContactDesignations for " + this.pDesigneeId);
+        this.data = [];
 
         ContactDesignations({
-                pDesigneeId: this.pDesigneeId
+                //pDesigneeId: this.pDesigneeId
+                pDesigneeId: this.designeeId
             })
             .then(result => {
+                
                 this.data = result;
                 this.logmessage('Designations:  ' + JSON.stringify(result));
                 var d;

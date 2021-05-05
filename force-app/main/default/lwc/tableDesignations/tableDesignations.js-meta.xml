@@ -9,14 +9,21 @@
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__FlowScreen">
+
+            <property name="updatedRows" type="@salesforce/schema/Designation__c" label="Saved Rows to Update" description="Selected updates saved"/>
+            
             <property name="tableLabel" type="String" label="Table Label" description="The label that will appear above the table" role="inputOnly"/>
             <property name="selectLabel" type="String" label="Select Label" description="The label that will appear above the select" role="inputOnly"/>
+            
             <property name="designeeId" type="String" label="Selected Designee" description="Selected Designee value"/>
             <property name="selectedDesignation" type="String" label="Selected Designation" description="Selected Designation value"/>
             <property name="selectionStartDate" type="Date" label="Selection Start Date" description="Selection Start Date"/>
             <property name="selectionEndDate" type="Date" label="Selection End Date" description="Selection End Date"/>
-            <!-- property name="errorLabel" type="String" label="ErrorMsg" description="Place messages here"/ --><property name="tableHelp" type="String" label="Table Help Msg" description="Place a table help messages here"/>
+            
+            <!-- property name="errorLabel" type="String" label="ErrorMsg" description="Place messages here"/ -->
+            <property name="tableHelp" type="String" label="Table Help Msg" description="Place a table help messages here"/>
             <property name="selectHelp" type="String" label="Select Help Msg" description="Place a select help messages here"/>
+        
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

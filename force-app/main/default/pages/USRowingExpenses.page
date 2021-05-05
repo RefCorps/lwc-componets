@@ -1,17 +1,24 @@
 <apex:page standardController="Referee_Expense_Report__c" 
     recordSetVar="Expenses"  
     docType="html-5.0" 
+    renderAs="PDF"
     title="USRowing Project Voucher/Check Request">
+
+    
   <!-- Begin Default Content REMOVE THIS -->
-  <h1>USRowing Project Voucher/Check Request v3</h1>
+  <h1>USRowing Project Voucher/Check Request v0.5</h1>
   <!-- End Default Content REMOVE THIS -->
 
   <apex:variable var="items" value="{!selected}" />
+ 
+  <script type="text/javascript"> 
+    var expsum = 0.00; 
+  </script>
 
   <apex:form >
         
-    <table>
-        <tr><td>
+    <table style="width: 80%">
+        <tr><td style="vertical-align:top; align:left;">
     <table>
         <tr><td>Name:</td><td>{!$User.FirstName} {!$User.LastName} </td></tr>
         <tr><td>Address:</td><td>
@@ -20,18 +27,24 @@
         </td></tr>
     </table>
         </td>
-<td>
+        <td style="vertical-align:top; align:right;">
         <table>
-            <tr><td>Vendor &#35;:</td><td><apex:inputField></apex:inputField type="text" name="VendorNum"></td></tr>
-            <tr><td>Due Date:</td><td><apex:inputField></apex:inputField type="text" name="DueDate"></td></tr>
-            <tr><td>Amount:</td><td><apex:inputField></apex:inputField type="text" name="Amount"></td></tr>
-            <tr><td>Invoice &#35;:</td><td><apex:inputField></apex:inputField type="text" name="InvoiceNum"></td></tr>
-            <tr><td>Invoide Date:</td><td><apex:inputField></apex:inputField type="text" name="InvoiceDateDate"></td></tr>
+            <tr><td>Vendor &#35;:</td><td>  <input type="text" id="VendorNum" value="" /></td></tr>
+            <tr><td>Due Date:</td><td>      <input type="text" id="DueDate" value="" /></td></tr>
+            <tr><td>Amount:</td><td>        <input type="text" id="Amount" name="Amount" value="" /></td></tr>
+            <tr><td>Invoice &#35;:</td><td> <input type="text" id="InvoiceNum" value="" /></td></tr>
+            <tr><td>Invoide Date:</td><td>  <input type="text" id="InvoiceDateDate" value="" /></td></tr>
         </table>    
 </td>    
     </tr>
     </table>
 
+<table stype="width: 80%">
+<tr><td>Description:</td>
+    <td>
+    <textarea id="description" rows="3" cols="160" style="box-sizing:border-box" ></textarea>
+    </td></tr>
+</table>
 
         <apex:pageBlock title="Accounting Description" mode="edit">
             <apex:pageMessages />
@@ -42,7 +55,7 @@
             </apex:pageBlockButtons -->
             
             <!-- apex:pageBlockTable value="{!selected}" var="exp" -->
-            <apex:pageBlockTable value="{!items}" var="exp" >
+            <apex:pageBlockTable width="100%" value="{!items}" var="exp" >
                 <apex:column headerValue="Purpose" >
                     <apex:outputText value="{!exp.Regatta__r.Name}"/>
                 </apex:column>
@@ -55,10 +68,30 @@
                 <apex:column headerValue="Amount">
                     <apex:outputText value="{0, number, Currency }">
                         <apex:param value="{!exp.Expense__c}" />
+                        <!-- apex:param value="{!expsum1 + exp.Expense__c}" / -->
+                        <script type="text/javascript">
+                            expsum += {!exp.Expense__c};
+                            //alert( "exp " + expsum ); 
+                            document.getElementById("Amount").value = expsum;
+                            // NOTE BECAUSE THE FINAL VALUE IS BELOW THIS YOU HAVE TO SET IT AFTER ALL DATA IS LOADED
+                            alert("expsum=" + expsum);
+                        </script>
                     </apex:outputText>
                 </apex:column>
             </apex:pageBlockTable>
             
         </apex:pageBlock>
+
+ 
     </apex:form>
+
+    <p >Total: <input type="text" id="tableSum" name="tableSum" value="0.00" />
+    </p>
+    
+    <script type="text/javascript">
+        // This will load our final value
+        window.onload=function() { document.getElementById("tableSum").value = expsum; } 
+    </script>
+
+
 </apex:page>

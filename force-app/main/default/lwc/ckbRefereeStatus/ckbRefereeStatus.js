@@ -1,7 +1,17 @@
-import { api, LightningElement, wire } from 'lwc';
+/**
+ * Lightning Web Component for RefCorp Flow Screens used to update Status
+ * This component incorporates a lightning radio group and pulls data from Contact.Referee_Status__c.
+ * 
+ * CREATED BY:          Mike Miller
+ * 
+ * VERSION:             0.1.0
+ * 
+ * RELEASE NOTES:       You must get current data from Contact to set current Status as first option listed.
+ * 
+**/import { api, LightningElement, wire } from 'lwc';
 import { getPicklistValues } from 'lightning/uiObjectInfoApi';
 import REFEREE_STATUS from '@salesforce/schema/Contact.Referee_Status__c';
-import {FlowAttributeChangeEvent } from 'lightning/flowSupport';
+import {FlowAttributeChangeEvent } from 'tableEditDesignations/node_modules/lightning/flowSupport';
 
 export default class ckbRefereeStatus extends LightningElement {
 
@@ -48,8 +58,10 @@ export default class ckbRefereeStatus extends LightningElement {
         const listValues = []; 
         Object.keys(picklistValues).forEach((index) => {
 
-            if(!this.excludeStatuses.includes( picklistValues[index].label )) {
-                listValues.push( {label: picklistValues[index].label, value: picklistValues[index].value} );
+            console.log(picklistValues[index]);
+            
+            if(!this.excludeStatuses.includes( picklistValues[index] )) {
+                listValues.push( {label: picklistValues[index], value: picklistValues[index]} );
             }
 
         });

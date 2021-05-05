@@ -15,16 +15,19 @@ import DesignationPicklist from '@salesforce/apex/DesignationController.getDesig
 
 const columns = [{ label: 'Rec Name',fieldName: 'Name',type: 'text' },
     { label: 'Designation',fieldName: 'Designation__c',type: 'text' },
-    { label: 'Start Date',fieldName: 'Designation_Start_Date__c',type: 'date' },
-    { label: 'End Date',fieldName: 'Designation_End_Date__c',type: 'date' } ]
+    { label: 'Start Date',fieldName: 'Designation_Start_Date__c',type: 'date-local', 
+        typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true },
+    { label: 'End Date',fieldName: 'Designation_End_Date__c',type: 'date-local', 
+        typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true } ]
 
 export default class testWithApexDataSource extends LightningElement {
 
-    @api designeeId
-    @api selectedDesignation
-    @api selectionStartDate
-    @api selectionEndDate
+    @api designeeId;
+    @api selectedDesignation;
+    @api selectionStartDate;
+    @api selectionEndDate;
 
+    @api updatedRows;
 
     @api selectLabel;
     @api selectHelp;
@@ -157,6 +160,11 @@ export default class testWithApexDataSource extends LightningElement {
     handleStartDate(event) {
         this.selectionStartDate = event.target.value;
         console.log("selected startdate " + this.selectionStartDate);
+    }
+
+    handleSave(event) {
+        this.updatedRows = event.detail.draftValues;
+        console.log( JSON.stringify(this.updatedRows));
     }
 
     getDateYYYYMMDD() {

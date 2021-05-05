@@ -8,6 +8,7 @@ const DELAY = 350;
 export default class PicklistCompCPE extends LightningElement {
 
     @track _inputVariables = [];
+    @track _builderContext = [];
 
     @track _objAPIName;
     @track _fieldAPIName;
@@ -18,6 +19,37 @@ export default class PicklistCompCPE extends LightningElement {
     //@track _selectedValue;  value is defined as role="outputOnly"
     @track _excludedValues;
     @track _useRadioButton;
+
+
+    _flowVariables;
+    _flowConstants;
+    _flowAssignments;
+
+    @api get builderContext() {
+        return this._builderContext
+    }
+
+    set builderContext(context) {
+        console.log('builderContext: ' + JSON.stringify(context));
+        this._builderContext = context || [];
+        if(this._builderContext) {
+            const { variables } = this._builderContext;
+            this._flowVariables = [...variables];
+            const { constants } = this._builderContext;
+            this._flowConstants = [...constants];
+            //const { assignments } = this._flowAssignments;
+            //this._flowAssignments = [...assignments];
+            console.log('flowVariables: ' + JSON.stringify( this._flowVariables) );
+            console.log('flowConstatns: ' + JSON.stringify(this._flowConstants));
+            console.log('flowAssignments: ' + JSON.stringify(this._flowAssignments));
+            /*
+                return variables.map(({ name, value }) => ({
+                    label: name,
+                    value: value.stringValue,
+                }));
+            */
+        }
+    }
 
  
     @api get inputVariables() {
@@ -50,19 +82,29 @@ export default class PicklistCompCPE extends LightningElement {
 
         const currentValueValue =this._inputVariables.find(({ name }) => name === 'currentValue');
         this._currentValue = currentValueValue && currentValueValue.value;
+        console.log('currentValue: ' + this._currentValue);
+        console.log('flowVariables: ' + this._flowVariables);
+        //this._currentValue = this._currentValue + this._flowVariables;
 
         //const selectedValueValue = this._inputVariables.find(({ name }) => name === 'selectedValue');
         //this._selectedValue = selectedValueValue && selectedValueValue.value;
 
         const excludedValuesValue = this._inputVariables.find(({ name }) => name === 'excludedValues');
-        this._excludedValues = excludedValuesValue && excludedValuesValue.value;
+        if(excludedValuesValue)
+            this._excludedValues = excludedValuesValue && excludedValuesValue.value;
 
         const useRadioButtonValue = this._inputVariables.find(({ name }) => name === 'useRadioButton');  
-        this._useRadioButton = useRadioButtonValue && useRadioButtonValue.value;
 
+        if(useRadioButtonValue)
+            this._useRadioButton = useRadioButtonValue && useRadioButtonValue.value;
+
+        console.log('Set inputvariables complete');    
 
     }
-  
+
+ 
+
+
     //@api
     get objAPIName() {
         console.log("get objAPIName");
@@ -102,6 +144,8 @@ export default class PicklistCompCPE extends LightningElement {
         return validity;
     }
     
+ 
+
     selectedObjects = [];
     selectedFields = [];
     error;

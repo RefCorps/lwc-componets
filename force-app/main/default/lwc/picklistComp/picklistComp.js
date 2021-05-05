@@ -7,7 +7,8 @@
  * RELEASE NOTES:   1.  Designed to be used in Screen Flows in place of Radio Buttons and Picklist primarily with updates
  *                  2.  Requires Apex Controller PicklistCompController.cls (test with PicklistCompTest.cls)
  *                  3.  You must get current data from your Object to set currentValue as first option listed.
- *                  4.  Include a decision in your flow to test 'currentValue' against 'selectedValue' to determine if data value changed
+ *                  4.   The order of the picklist is controlled by the order of the values found in the Object Fields’s values.  Use ‘Reorder’ to change order.
+ *                  5.  Include a decision in your flow to test 'currentValue' against 'selectedValue' to determine if data value changed
  * 
  * 2012-02-22 - v0.1.1 - If options to be excluded are set the excluded will appear and no options can be selected.  
  *                       Commented out logic associated with local testing.

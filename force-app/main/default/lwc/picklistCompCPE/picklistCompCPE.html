@@ -5,15 +5,6 @@
 
         <div class="slds-var-m-around_medium slds-p-bottom_medium">
 
-            <lightning-input 
-                type="text" 
-                name="listLabel" 
-                value={_listLabel} 
-                label="Component Label"
-                placeholder="type here..." 
-                onchange={handleChange3}></lightning-input>
-
-
             <div>
                 <template if:false={_objAPIName}>
                     <div class="slds-card slds-has-bottom-magnet">
@@ -68,23 +59,58 @@
             <div>
                 <template if:true={completeSetup}>
 
-                     <lightning-input type="text"
+                    <lightning-input 
+                    type="text" 
+                    name="listLabel" 
+                    value={_listLabel} 
+                    label="Component Label"
+                    placeholder="type here..." 
+                    onchange={handleChange3}></lightning-input>
+
+
+
+                     <lightning-input type="search"
                         name="listHelp"
                         label="Help Text"
                         value={_listHelp} 
                         onchange={handleChange3}></lightning-input>  
 
-                    <lightning-input type="text"
+                    <lightning-combobox
+                        name="listHelp"
+                        label="Help Text"
+                        value={_listHelp}
+                        placeholder="Provide help text"
+                        options={_flowVariables}
+                        onchange={handleChange} >
+                    </lightning-combobox>
+
+
+
+                    <lightning-input type="search"
                         name="placeHolder"
                         label="Placeholder"
                         value={_placeHolder} 
                         onchange={handleChange3}></lightning-input>  
 
-                        <lightning-input type="text"
+               
+                <lightning-input 
+                    type="search"
                         name="currentValue"
                         label="Current Value"
                         value={_currentValue} 
                         onchange={handleChange3}></lightning-input>  
+
+                <!-- div class="slds-card slds-has-top-magnet">
+                        <lightning-combobox
+                        name="currentValue"
+                        value={_currentValue}
+                        placeholder="input a value or pick from this list"
+                        options={_flowVariables}
+                        variant="label-hidden"
+                        onchange={handleChange3} >
+                    </lightning-combobox>
+                </div -->    
+
 
                         <!-- VALUE IS DEFINED AS role="outputOnly" IN picklistComp.js-meta.xml 
                         <lightning-input type="text"

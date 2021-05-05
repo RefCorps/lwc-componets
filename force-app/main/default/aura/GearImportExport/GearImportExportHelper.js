@@ -1,15 +1,21 @@
 ({
     CSV2JSON: function (component,csv) {
+
+        try {
+            console.log('GearImportExportHelper CSV2JSON - Incoming csv =\n' + csv);
+            var csvparsed = this.parsecsv(component,csv);
+            var json = this.parsedcsv2jsonstring(component,csvparsed);
+            console.log('GearImportExportHelper CSV2JSON json: ' + json);
+        } catch (err) {
+            alert('GearImportExportHelper CSV2JSON Error: ' + err);
+        }
         
-        //  console.log('Incoming csv = ' + csv);
-        var csvparsed = this.parsecsv(csv);
-        var json = this.parsedcsv2jsonstring(csvparsed);
-        // console.log('json: ' + json);
         return json;
         
     },
 
     parsecsv : function (component, csv) {
+        
         var parsedcsv = {
             headers : [],
             rows : []
@@ -18,26 +24,35 @@
         var line = []; 
         let headerslines = new Object(parsedcsv);   
         line =  csv.split('\n');
-        console.log('number of lines = ' + line.length);
+        //console.log('number of lines = ' + line.length);
         var jsonObj = [];
+        var clearObj = [];
         var instring = false;
-        var headers = line[0].split(',');
+        var headers = line[0].replaceAll('__c','').split(',');
         headerslines.headers = headers;
-        var lines = line.length;
+        var lines = line.length-1;
+        var col = '';
         var i = 1;
         for(; i < lines; i++) {
-                var chars = line[i].length;
-                console.log(chars);
-                var col = '';
+            
+            line[i] = line[i].trim();
+            line[i] = this.scrubCSVLine(component, line[i]);
+            //console.log(line[i]);
+            
+            var chars = line[i].length;
+                //console.log(chars);
+                col = '';
                 for(var c = 0; c < chars; c++) {
-                    char = line[i][c];
+                    var char = line[i][c];
                     if(char === '"' && instring) 
                         instring = false;
                     else if (char === '"' && !instring) 
                         instring = true;
                     if(char === ',' && instring == false) {
-                        console.log( col );
+                        col = this.scrubCol(component, col);
+                        //console.log( '1 col: ' + col );
                         jsonObj.push(col);
+                        //console.log('jsonObj: ' + jsonObj);
                         col = '';
                     }
                     if(instring)
@@ -45,11 +60,17 @@
                     else
                         col = line[i][c] != ',' ? col + line[i][c] : col + "";
                 }
-                if(col.length > 0)
-                    jsonObj.push(col);
-                headerslines.rows.push(jsonObj);
+            //if(col.length > 0) {
+            //    col = this.scubCol(component, col);
+            //    console.log( '2 col: ' + col );
+            //    jsonObj.push(col);
+            //}
+            col = '';
+            console.log('jsonObj end: ' + jsonObj);
+            headerslines.rows.push(jsonObj);
+            jsonObj = [];      
         }
-        headerslines.rows.push(jsonObj);
+        //headerslines.rows.push(jsonObj);
         return headerslines;
     },
 
@@ -64,61 +85,120 @@
         console.log('headers: ' + headers);
         for (var i = 0; i < linescount; i++ ) {
             var data = csvparsed.rows[i];
-            console.log('row [' + i + ']: ' + data);
-            console.log('row elements = ' + data.length );
+            //console.log('row [' + i + ']: ' + data);
+            //console.log('row elements = ' + data.length );
             var obj = {};
             for(var j = 0; j < data.length; j++) {
-                console.log('header: ' + headers[j].trim() + ' element: ' + data[j].trim());
+                //console.log('header: ' + headers[j].trim() + ' element: ' + data[j].trim());
                 obj[headers[j].trim()] = data[j].trim();
-                console.log('element: ' + obj);
+                //console.log('element: ' + obj);
             }
             jsonObj.push(obj);
         }
         //var jsonObj = string2csv(csv);
         var json = JSON.stringify(jsonObj);
         
-        console.log('json: '+ json);
+        //console.log('GearImportExportHelper parsedcsv2jsonstring json:\n'+ json);
         // alert("GearImportExportHelper CSVJSON json = " + json);
         
         return json;
     },
 
-
+    scrubCSVLine : function (component, inputLine) {
+        var line;
+        inputLine = inputLine.trim();
+        var n = inputLine.length;
+        line = inputLine[0] === '"' ?  '^' : inputLine[0];
+        line = line + inputLine.substr(1,n-2);
+        line = inputLine[n-1] === '"' ? line + '^' : line + inputLine[n-1];
+        line = line.replaceAll('",','^,');
+        line = line.replaceAll(',"',',^');
+        line = line.replaceAll('""','~');
+        line = line.replaceAll('"','~');
+        line = line.replaceAll('^','"');
+        return line;
+    },
+    
+ 	scrubCol : function (component, col) {
+        col = col.replaceAll('"','');
+        var occ = 0;
+        if(col.includes('~')) {
+            for(var c=0; c < col.length; c++)
+                occ = col[c] === '~' ? (occ + 1) : occ;
+        }
+        col = col.replaceAll('~','\"');
+        if((occ % 2) != 0)
+            col = col + '"';
+        if(col.includes(','))
+            col = '"' + col + '"';
+        return col;
+    },
+    
     InsertGearData : function (component,event,helper,jsonstr){
         // console.log('jsonstr' + jsonstr);
         //alert("GearImportExportHelper InsertGearData jsonstr " + jsonstr);
         var action = component.get('c.insertGearExchangeData');
-        //alert("Server Action " + action);    
+        //alert("Server Action " + action); 
         action.setParams({
             strGearWS : jsonstr
         });
+        
+        //document.getElementById("spinner").style.display = "block";
+        component.set("v.uploading",true);
+        
         action.setCallback(this, function(response) {
             var state = response.getState();
             //alert(state);
             if (state === "SUCCESS") {  
                 var result=response.getReturnValue();
-                //alert("Accounts Inserted Succesfully");
-                //alert("GearImportExportHelper CreateAccount result: " + result);
+                //alert("GearImportExportHelper InsertGearData : Data successfully transferred");
+                //alert("GearImportExportHelper InsertGearData\nGearImportExport.apxc insertGearExchangeData returned: " + result);
+
+                if(result.includes('ERROR')) {
+                    //alert("GearImportExportHelper onLoad - state != SUCCESS");
+                    component.set("v.toastTheme","slds-notify slds-notify_toast slds-theme_error");
+                    component.set("v.toastClass","slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top");                 
+                    component.set("v.isSubmitCompleted",true); 
+                    //component.set("v.isModalOpen", false);               
+                    component.set("v.wasSubmitSuccessful",false);
+                    component.set('v.toastMessage', "InsertGearData: " + result);
+                } else {
+                    component.set("v.toastTheme","slds-notify slds-notify_toast slds-theme_success");
+                    component.set("v.toastClass","slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top");                 
+                    component.set("v.isSubmitCompleted",true); 
+                    //component.set("v.isModalOpen", false);               
+                    component.set("v.wasSubmitSuccessful",true);
+                    component.set('v.toastMessage'," successfully submitted");
+                }
                 
-                component.set("v.toastTheme","slds-notify slds-notify_toast slds-theme_success");
-            	component.set("v.toastClass","slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top");                 
-                component.set("v.isSubmitCompleted",true); 
-      		    //component.set("v.isModalOpen", false);               
-           		component.set("v.wasSubmitSuccessful",true);
-                component.set('v.toastMessage'," successfully submitted");
+                // document.getElementById("spinner").style.display = "none";
+                component.set("v.uploading",false);
                 
                 this.cancelAndClearAfterUpload(component,event,helper);
                 
             }
             else if (state === "ERROR") {
                 var errors = response.getError();
+                
+                document.getElementById("Accspinner").style.display = "none";
+                
                 if (errors) {
                     if (errors[0] && errors[0].message) {
                         //console.log("Error message: " + errors[0].message);
-                    }
+                    component.set("v.toastTheme","slds-notify slds-notify_toast slds-theme_error");
+                    component.set("v.toastClass","slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top");                 
+                    component.set("v.isSubmitCompleted",true); 
+                    //component.set("v.isModalOpen", false);               
+                    component.set("v.wasSubmitSuccessful",false);
+                    component.set('v.toastMessage', "InsertGearData: " + errors[0].message);                  }
                 } else {
                     //console.log("Unknown error");
                     //alert('Unknown');
+                    component.set("v.toastTheme","slds-notify slds-notify_toast slds-theme_error");
+                    component.set("v.toastClass","slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top");                 
+                    component.set("v.isSubmitCompleted",true); 
+                    component.set("v.wasSubmitSuccessful",false);
+                    component.set('v.toastMessage', "InsertGearData: An unknow error was encountered");
                 }
             }
         }); 
@@ -148,24 +228,40 @@
         
     //export helper start from here
     onLoad: function(component, event) {
-        alert("GearImportExportHelper onLoad");
+        //alert("GearImportExportHelper onLoad");
         //call apex class method
-        var action = component.get('c.fetchGearExchangeData');
+        try {var action = component.get('c.fetchGearExchangeData');}
+        catch (Err) {
+            //alert("GearImportExportHelper onLoad - state != SUCCESS");
+            component.set("v.toastTheme","slds-notify slds-notify_toast slds-theme_error");
+            component.set("v.toastClass","slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top");                 
+            component.set("v.isSubmitCompleted",true); 
+      		//component.set("v.isModalOpen", false);               
+           	component.set("v.wasSubmitSuccessful",false);
+            component.set('v.toastMessage', Err);
+            return;
+        }
         action.setCallback(this, function(response){
-            alert("GearImportExportHelper onLoad - response");
+            //alert("GearImportExportHelper onLoad - response");
             var state = response.getState();
             if (state === "SUCCESS") {
                 var gearObj = response.getReturnValue();
                 component.set('v.RefGearList', gearObj);
                 //var ObjSize = uObj.size;
-                alert("v.RefGearList size=" + gearObj.length);
+                //alert("v.RefGearList size=" + gearObj.length);
                 component.set('v.RefGearCount', gearObj.length);
                 component.set('v.RefGearLoaded',true);
-                alert("GearImportExportHelper onLoad - SUCCESS - process data next");
+                //alert("GearImportExportHelper onLoad - SUCCESS - process data next");
                 this.processDownLoad(component, event);
 
             } else {
-                alert("GearImportExportHelper onLoad - state != SUCCESS");
+                //alert("GearImportExportHelper onLoad - state != SUCCESS");
+                component.set("v.toastTheme","slds-notify slds-notify_toast slds-theme_error");
+            	component.set("v.toastClass","slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top");                 
+                component.set("v.isSubmitCompleted",true); 
+      		    //component.set("v.isModalOpen", false);               
+           		component.set("v.wasSubmitSuccessful",false);
+                component.set('v.toastMessage', "fetchGearExchangeData - state != SUCCESS");
             }
             
         });
@@ -175,7 +271,7 @@
     
     processDownLoad : function(component, event) {
               
-        alert("in processDownLoad");
+        //alert("in processDownLoad");
 
         var stockData = component.get("v.RefGearList");
 
@@ -189,14 +285,14 @@
         var hiddenElement = document.createElement('a');
         hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
         hiddenElement.target = '_self'; // 
-        hiddenElement.download = 'ExportData.csv';  // CSV file Name* you can change it.[only name not .csv] 
+        hiddenElement.download = 'GearExchangeExportData.csv';  // CSV file Name* you can change it.[only name not .csv] 
         document.body.appendChild(hiddenElement); // Required for FireFox browser
         hiddenElement.click(); // using click() js function to download csv file
 
     }, 
 
     convertArrayOfObjectsToCSV : function(component,objectRecords){
-        alert("GearImportExportHelper convertArrayOfObjectsToCSV");
+        //alert("GearImportExportHelper convertArrayOfObjectsToCSV");
         // declare variables
         var csvStringResult, counter, keys, columnDivider, lineDivider;
         
@@ -220,6 +316,7 @@
         
         csvStringResult = '';
         csvStringResult += keys.join(columnDivider);
+        csvStringResult = csvStringResult.replaceAll('__c','');
         csvStringResult += lineDivider;
         
         for(var i=0; i < objectRecords.length; i++){   
@@ -233,7 +330,9 @@
                 } 
                 // if condition for blank column display if value is empty
                 if(objectRecords[i][skey] != undefined){
-                    csvStringResult += '"'+ objectRecords[i][skey]+'"'; 
+                    var value = objectRecords[i][skey];
+                    value = value.length > 0 ? value.replaceAll('"','""') : value;
+                    csvStringResult += '"'+ value +'"'; 
                 }else{
                     csvStringResult += '"'+ '' +'"';
                 }

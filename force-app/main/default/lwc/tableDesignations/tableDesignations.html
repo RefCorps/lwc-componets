@@ -14,8 +14,12 @@
 
         <div class="slds-m-around_medium">
 
-            <lightning-datatable key-field="Id" data={data} columns={columns}>
-            </lightning-datatable>
+            <lightning-datatable 
+                key-field="Id" 
+                data={data} 
+                columns={columns}
+                onsave={handleSave}>
+            </lightning-datatable >
 
         </div>
 

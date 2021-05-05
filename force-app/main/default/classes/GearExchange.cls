@@ -39,5 +39,45 @@ public with sharing class GearExchange {
         return eg;
     }
     
+    @AuraEnabled
+    public static List<GearData> getGearBoxTableData(Integer listType) { 
+
+        List<GearData> rtr = new List<GearData>();
+            
+        String searchquery = 'SELECT Id, Category__c, Item__c, USRowing_Logo__c, '; 
+        searchquery = searchquery + ' Description__c, Item_Status__c, Offered_By__r.Name,  Offered_Date__c '; 
+        searchquery = searchquery + ' from Gear_Exchange__c  ';
+        
+        if(listType == 1)
+            searchquery = searchquery + 'WHERE Distributed_To__c = null';
+        searchquery = searchquery + ' ORDER BY Offered_Date__c, Offered_By__c';    
+        List<sObject> gear = Database.query(searchquery);
+        integer sz = gear.size();
+        for(integer i=0; i < sz; i++) {
+            GearData gd = new GearData();
+            gd.id = (String) gear[i].get('Id');
+            gd.category = (String) gear[i].get('Category__c');
+            gd.item = (String) gear[i].get('Item__c');
+        	gd.description = (String) gear[i].get('Description__c');
+        	gd.usrowinglogo = (Boolean) gear[i].get('USRowing_Logo__c');
+       		gd.offered_by = (String) gear[i].getSObject('Offered_By__r').get('Name');
+        	gd.offered_date = (Date) gear[i].get('Offered_Date__c');
+        	gd.item_status = (String) gear[i].get('Item_Status__c');
+            rtr.add(gd);
+        }
+        System.debug('getGearBoxGearList: ' + rtr);
+        return rtr;
+    }
     
+    public class GearData {
+        @AuraEnabled public String id {get; set;} 
+        @AuraEnabled public String category {get; set;}
+        @AuraEnabled public String item {get; set;}
+        @AuraEnabled public String description {get; set;}
+        @AuraEnabled public Boolean usrowinglogo {get; set;}
+        @AuraEnabled public String offered_by {get; set;}
+        @AuraEnabled public Date offered_date {get; set;}
+        @AuraEnabled public String item_status {get; set;}
+    }
+
 }

@@ -3,6 +3,7 @@
         //alert("GearImportExportController CreateRecord");
         var fileInput = component.find("file").getElement();
         var file = fileInput.files[0];
+        
         if(!file) {
             alert("No file selected. \nUse the\n\t'Browse...'\nbutton to select a local file.");
         }
@@ -17,8 +18,8 @@
                 var csv = evt.target.result;
                 //console.log('csv file contains'+ csv);
                 var result = helper.CSV2JSON(component,csv);
-                console.log('result = ' + result);
-                console.log('Result = '+JSON.parse(result));
+                //console.log('result = ' + result);
+                //console.log('Result = '+JSON.parse(result));
                 //alert("GearImportExportController CreateRecord - InsertGearData follows");
                 helper.InsertGearData(component, event, helper, result);
                 
@@ -44,6 +45,7 @@
         // Close the showcard display area
         component.set("v.showFileContents", false);
         component.set("v.showImport", false);
+        component.set("v.uploadFile","");
         
         // Clear file input
         var fileInput = component.find("file").getElement();
@@ -72,7 +74,7 @@
         
 	},
     
-    showfiledata :  function (component, event, helper){        
+    showfiledataOrig :  function (component, event, helper){        
         var fileInput = component.find("file").getElement();
         var file = fileInput.files[0];
         if (file) {
@@ -100,30 +102,58 @@
             }
             reader.onerror = function (evt) {
                 //console.log("error reading file");
+                alert("GearImportExportController showfiledataOrig - Reader Error");
             }
         }
     },    
     
-
-
-
-    showfiledata2 :  function (component, event, helper){        
+    showfiledata :  function (component, event, helper){        
         var fileInput = component.find("file").getElement();
-        var ckbShowFileContents = component.find("ckbShowFileContents");
         var file = fileInput.files[0];
+        var fileName = file.name;
+        component.set("v.uploadFile",fileName);
         if (file) {
-            
             component.set("v.showImport", true);
-            
-            //console.log("File");
+            console.log("File: " + file);
             var reader = new FileReader();
             reader.readAsText(file, "UTF-8");
             reader.onload = function (evt) {
-
                 var csv = evt.target.result;
                 var table = document.createElement("table");
+                table.style.border = "thin solid black";
+                table.style.borderCollapse = "collapse";
+                table.style.backgroundColor = "whitesmoke";
                 var csvparsed = helper.parsecsv(component,csv);
-
+                // Check for critical headers
+                var hcnt = 0;
+                for(var h = 0; h < csvparsed.headers.length; h++) {
+                    hcnt = (csvparsed.headers[h].includes('Item_Num')) ? hcnt + 1 : hcnt;
+                    hcnt = (csvparsed.headers[h].includes('Category')) ? hcnt + 1 : hcnt;
+					hcnt = (csvparsed.headers[h].includes('Item')) ? hcnt + 1 : hcnt;                    
+                }
+                if(hcnt < 3) {
+                    var fn = component.get("v.uploadFile");
+                    var err = "ERROR: '" + fn + "' missing critical headers: Item_Num, Category, Item";
+                    
+                    //alert(err);
+                    component.set("v.showFileContents", false);
+                    component.set("v.showImport", false);
+                    component.set("v.uploadFile","");
+                    
+                    var fileInput = component.find("file").getElement();
+                    fileInput.value = "";
+                    var divCSV = document.getElementById("divCSV");
+                    if(divCSV != null)
+                    	divCSV.innerHTML = "";
+                    
+                    component.set("v.isSubmitCompleted",true);  // enables display
+                    component.set("v.toastTheme","slds-notify slds-notify_toast slds-theme_error");
+                    component.set("v.toastClass","slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top");                 
+                    component.set('v.toastMessage', err); 
+                    
+                    return;
+                }
+                component.set('v.fileGearCount',csvparsed.rows.length);
                 var cells = csvparsed.headers;
                 var row = table.insertRow(-1);
                 for (var j = 0; j < cells.length; j++) {
@@ -132,7 +162,7 @@
                 }
                 var rows = csvparsed.rows;
                 for (var i = 0; i < rows.length; i++) {
-                     var cells = rows[i].split(",");
+                     var cells = rows[i];
                      if (cells.length > 1) {
                          var row = table.insertRow(-1);
                          for (var j = 0; j < cells.length; j++) {
@@ -141,18 +171,6 @@
                          }
                      }
                 }
-
-                //var rows = csv.split("\n");
-                // for (var i = 0; i < rows.length; i++) {
-                //     var cells = rows[i].split(",");
-                //     if (cells.length > 1) {
-                //         var row = table.insertRow(-1);
-                //         for (var j = 0; j < cells.length; j++) {
-                //             var cell = row.insertCell(-1);
-                //             cell.innerHTML = cells[j];
-                //         }
-                //     }
-                // }
 
                 var ckbShowFileContents = component.find("ckbShowFileContents");
         		if(ckbShowFileContents.get("v.checked") == true) {	
@@ -164,7 +182,7 @@
             	
             }
             reader.onerror = function (evt) {
-                //console.log("error reading file");
+                console.log("error reading file");
             }
         }
     },    
