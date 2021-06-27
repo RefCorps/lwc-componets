@@ -1,0 +1,11 @@
+
+
+select id, referee_status__c from contact where name = 'Mike Miller'
+
+// TONY
+select id, designee__r.name, designation__c, designation_start_date__c, designation_end_date__c from designation__c where designee__c = '0036A00000peZMbQAM'
+
+// MEL
+select id, designee__r.name, designation__c, designation_start_date__c, designation_end_date__c from designation__c where designee__c = '0036A00000peZGwQAM'
+
+select id, contactid, name, user_referee_rank__c, contact.referee_rank__c from user where name = 'Mel Shilling'

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>50.0</apiVersion>
+    <isExposed>true</isExposed>
+<targets>
+    <target>lightning__FlowScreen</target>
+</targets>    
+<targetConfigs>
+    <targetConfig targets="lightning__FlowScreen">
+        <!--
+        <propertyType name="T" extends="SObject" label="Output Object (Designation__c)" description="First select the API Name of the SObject to use in the Datatable then other parameters will appear."/>
+        <property name="outputEditedRows" label="Output Edited Rows " type="{T[]}" role="outputOnly" description="Record Collection variable to contain only the records that were edited in the datatable."/>
+        -->
+        <property name="contactId" type="String" label="Contact Id" description="Contact Id used to select history" role="inputOnly"/>
+        <property name="fieldName" type="String" label="Field Name" description="The field we're investigating" role="inputOnly"/>
+
+    </targetConfig>
+</targetConfigs>
+
+</LightningComponentBundle>

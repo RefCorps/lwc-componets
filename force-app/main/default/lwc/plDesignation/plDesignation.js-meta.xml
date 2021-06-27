@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>50.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>plDesignation</masterLabel>
+    <description>This lwc presentes an edited list of referee Designation settings.</description>
+    <targets>
+         <target>lightning__FlowScreen</target>
+    </targets>
+
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="selectLabel" type="String" label="Label" description="The label that will appear on the form"  role="inputOnly"/>
+
+            <property name="currentDesignation" type="String" label="Current Designation" description="Current Designation value"  role="inputOnly"/>
+            <property name="defaultDesignation" type="String" label="Default Designation" description="Default Designation value"  role="inputOnly"/>
+            <property name="currentStart" type="Date" label="Current Start Date" description="Start Date for Current Designation"  role="inputOnly"/>
+            <property name="currentEnd" type="Date" label="Current End Date" description="End Date for Current Designation"  role="inputOnly"/>
+
+            <property name="selectedDesignation" type="String" label="Selected Designation" description="Selected Designation value" />
+            <property name="selectedStart" type="Date" label="Selected Start Date" description="Start Date for Selected Designation"  role="inputOnly"/>
+            <property name="selectedEnd" type="Date" label="Selected End Date" description="End Date for Selected Designation"  role="inputOnly"/>
+
+            <propertyType name="U" extends="SObject" label="Incoming Records" description="Which kind of records are you passing in this time?" />   
+            <property name="incomingCollection" value="{U[]}" type="String" label="inputCollection" />
+
+            <property name="errorLabel" type="String" label="ErrorMsg" description="Place messages here" />
+        </targetConfig>
+    </targetConfigs>
+
+</LightningComponentBundle>

@@ -1,0 +1,20 @@
+<apex:page standardController="Gear_Exchange__c" 
+ recordSetVar="Name"  
+ docType="html-5.0" >
+     <style type="text/css">
+          h1 { color: #f00; 
+              text-align: center; }
+        p { background-color: #eec; }
+    </style>
+ 
+  <!-- Begin Default Content REMOVE THIS -->
+
+  <h1 style="">Test passing Gear selections from list to Flow RefereeGear</h1>
+  
+  <apex:variable var="ids" value="{!selected}" />
+  
+  <flow:interview name="RefereeGear" rerender="ids" ></flow:interview>
+
+
+  <!-- End Default Content REMOVE THIS -->
+</apex:page>

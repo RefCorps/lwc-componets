@@ -1,0 +1,62 @@
+
+select
+designee__r.name, 
+designee__r.referee_rank__c, 
+designee__r.referee_status__c, 
+designation__c, Designation_Start_Date__c,
+Designation_End_Date__c
+from Designation__c
+
+select count() from designation__c where designee__c = '0036A00000peZM1QAM'
+
+select name, id from contact where referee_rank__c = 'Referee' and 
+id in (select designee__c from designation__c) limit 1
+
+select Name, designee__r.name, 
+designee__c,
+designee__r.Id,
+designee__r.referee_rank__c, 
+designee__r.referee_status__c, isdeleted,
+designation__c, Designation_Start_Date__c,
+Designation_End_Date__c
+from Designation__c
+where designation__c  = 'Candidate Referee' 
+order by designee__r.name
+
+
+select designee__r.name, designee_user__c, designee__c, Designation_Start_Date__c from designation__c where designation__c = 'Full Referee' limit 1
+
+
+
+select QualifiedApiName  from EntityDefinition
+where ISCUSTOMIZABLE = TRUE
+AND ISQUERYABLE = TRUE
+AND ISIDENABLED = TRUE
+AND ISSEARCHABLE = TRUE
+AND QualifiedApiName like '%ontact%'
+ORDER BY QualifiedApiName 
+
+
+select MailingState, region__c from contact
+group by MailingState, region__c
+order by region__c, MailingState
+
+
+select designee__r.name, ownerId,
+designee__r.referee_rank__c, 
+designee__r.referee_status__c, 
+designation__c, Designation_Start_Date__c,
+Designation_End_Date__c
+from Designation__c where designee__r.name LIKE 'Tony Passarello' 
+
+
+select designee__r.name, ownerId,
+designee__r.referee_rank__c, 
+designee__r.referee_status__c, 
+designation__c, Designation_Start_Date__c,
+Designation_End_Date__c
+from Designation__c where ID = 'a0k2h000000PAMlAAO'
+
+
+
+select name, id from user where id = '0052h000001Cz1x'

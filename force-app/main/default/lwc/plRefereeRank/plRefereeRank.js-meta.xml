@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>50.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>plRefereeRank</masterLabel>
+    <description>This lwc presentes an edited list of referee Rank settings.</description>
+    <targets>
+         <target>lightning__FlowScreen</target>
+    </targets>
+
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="currentRank" type="String" label="Current Rank" description="Current Rank value"  role="inputOnly"/>
+            <property name="defaultRank" type="String" label="Default Rank" description="Default Rank value"  role="inputOnly"/>
+            <property name="selectLabel" type="String" label="Label" description="The label that will appear on the form"  role="inputOnly"/>
+            <property name="selectedRank" type="String" label="Selected Rank" description="Selected Rank value" />
+            <property name="errorLabel" type="String" label="ErrorMsg" description="Place messages here" />
+        </targetConfig>
+    </targetConfigs>
+
+</LightningComponentBundle>

@@ -1,0 +1,33 @@
+
+// CODE
+
+// returns each line of code as a row 
+Select Body FROM ApexClass WHERE Name = '<your apexclass>' 
+
+// returns each line of code as a row 
+Select ControllerType, Markup, MasterLabel FROM ApexPage WHERE Name = '<your pagename>' 
+
+// Aura bundle information
+Select ApiVersion, CreatedById, CreatedDate, Description, DeveloperName, Id, IsDeleted, 
+Language, LastModifiedById, LastModifiedDate, MasterLabel, NamespacePrefix, SystemModstamp FROM AuraDefinitionBundle 			
+where DeveloperName = 'evaluationquestionnaire'			
+
+// OBJECT SIMPLE DISPLAY - RelationshipName WILL GIVE YOU THE NAME TO USE FOR LOOKUP RELATIONSHIPS "customobject__r"
+select Label, QualifiedAPIName, DataType, IsIndexed, RelationshipName from FieldDefinition
+where EntityDefinition.QualifiedApiName = 'mycustomobject__c'
+
+// OBJECT DETAIL
+Select  DataType, Description, DeveloperName, Id, 
+Label, MasterLabel, NamespacePrefix, QualifiedApiName, 
+ReferenceTargetField, ReferenceTo, RelationshipName, RunningUserFieldAccessId, ServiceDataTypeId, ValueTypeId FROM FieldDefinition 
+where EntityDefinition.QualifiedApiName = 'mycustomobject' and QualifiedApiName = 'lookupfield__c'
+
+
+// SELECT ALL FROM FOLDER
+Select AccessType, CreatedById, CreatedDate, DeveloperName, Id, IsReadonly, LastModifiedById, LastModifiedDate, Name, NamespacePrefix, ParentId, SystemModstamp, Type FROM Folder 
+
+// SELECT RESOURCES
+Select AuthorId, Body, BodyLength, ContentType, CreatedById, CreatedDate, Description, DeveloperName, FolderId, Id, IsBodySearchable, IsDeleted, IsInternalUseOnly, IsPublic, Keywords, LastModifiedById, LastModifiedDate, LastReferencedDate, LastViewedDate, Name, NamespacePrefix, SystemModstamp, Type, Url FROM Document 
+
+Select AuthorId, Body, BodyLength, ContentType, CreatedById, CreatedDate, Description, DeveloperName, FolderId, Id, Name, NamespacePrefix, Type, Url FROM Document
+

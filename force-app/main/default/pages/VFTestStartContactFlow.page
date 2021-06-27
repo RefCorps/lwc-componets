@@ -1,0 +1,12 @@
+<apex:page standardController="Contact" 
+ recordSetVar="contacts"  
+ docType="html-5.0" >
+  <!-- Begin Default Content REMOVE THIS -->
+  <h1>Test passing Contact selections from list to Flow TestStartingFLows</h1>
+  
+  <apex:variable var="ids" value="{!selected}" />
+  
+  <flow:interview name="TestStartingFlows" rerender="ids" ></flow:interview>
+  
+  <!-- End Default Content REMOVE THIS -->
+</apex:page>

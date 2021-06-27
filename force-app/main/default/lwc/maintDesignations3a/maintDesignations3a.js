@@ -26,14 +26,13 @@ import {
     track
 } from 'lwc';
 
-import {
-    FlowAttributeChangeEvent
-} from 'lightning/flowSupport';
+import { FlowAttributeChangeEvent } from 'lightning/flowSupport';
+import { refreshApex } from '@salesforce/apex';
+import { ShowToastEvent }  from 'lightning/platformShowToastEvent';
 
 // NOTE:  For Apex imports, don't use curly braces, also you can designate a defaultExport name that's different from the module-name
 import ContactDesignations from '@salesforce/apex/DesignationController.fetchContactDesignations';
 import DesignationPicklist from '@salesforce/apex/DesignationController.getDesignationsPicklist';
-
 
 //const columns = [{ label: 'Rec Name',fieldName: 'Name',type: 'text' },
 
@@ -42,12 +41,21 @@ const actions = [
     { label: 'Delete', name: 'delete'},
 ];
 
+// timezones "America/New_York" "GMT-05:00" - timezone can impact date presentation - (one day less than day)
+
 const columns3 = [
 { label: 'Designation' ,fieldName: 'Designation__c',type: 'text' },
-{ label: 'Start Date',fieldName: 'Designation_Start_Date__c',type: 'date-local', 
-    typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true },
-{ label: 'End Date',fieldName: 'Designation_End_Date__c',type: 'date-local', 
-    typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true }
+{ label: 'Start Date',
+    fieldName: 'Designation_Start_Date__c',
+    type: 'date-local', 
+    typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, 
+    editable: true },
+{ label: 'End Date',
+    fieldName: 'Designation_End_Date__c',
+    type: 'date-local', 
+    typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit", timezone: "America/New_York"}, 
+    editable: true 
+    }
 ]
 // This line can be used to add a Delete function - not doing it now however
 // { type: 'action', typeAttributes: { rowActions: actions,  menuAlignment: 'right' } }  
@@ -56,7 +64,7 @@ const columns2 = [{ label: 'Designation' ,fieldName: 'Designation__c',type: 'tex
 { label: 'Start Date',fieldName: 'Designation_Start_Date__c',type: 'date-local', 
     typeAttributes: {year: "numeric", month: "2-digit", day: "2-digit"}, editable: true } ]
 
-export default class testWithApexDataSource extends LightningElement {
+export default class MaintDesignations3 extends LightningElement {
     @api designeeId;
     @api selectedDesignation;
     @api selectionStartDate;
@@ -79,14 +87,19 @@ export default class testWithApexDataSource extends LightningElement {
     @api excludedValues;
 
     @api tableCol1Label;
-    // @api errorLabel;
+    //@api errorLabel;
 
     @track inputValue;
     @track columns;
+    @track error;
 
     pDesigneeId; // Parameter used with DesignationController.fetchContactDesignations
 
-    data = [];
+    @track data = [];
+    origResultData;
+    selectedRows = [];
+
+    reload = false;
 
     mydesignations = [];
     editedPicklistValues = [];
@@ -98,6 +111,8 @@ export default class testWithApexDataSource extends LightningElement {
     infoTable = "Endorsements are similar to rank, but are not the same.  A member of the corps may have several active endorsements.";
 
     loadPicklist = false;
+    showMyWarningMessage = false;
+    myWarningMessage = "Warning";
 
     hidenseek = "display:none";
 
@@ -107,8 +122,8 @@ export default class testWithApexDataSource extends LightningElement {
     enableLogging = true; // When true console logging through logmessage is enabled
 
     // initialize component
-    async connectedCallback() {
-
+     async connectedCallback() {
+        
         // BEGIN LOCAL TEST DATA - DEFAULT VALUES
 
         this.pDesigneeId = '';
@@ -161,19 +176,23 @@ export default class testWithApexDataSource extends LightningElement {
             this.columns[0].label = this.tableCol1Label;
 
         this.logmessage("In connectedCallback fetchContactDesignations for " + this.pDesigneeId);
-        this.data = [];
+        //this.data = [];
 
         this.excludedValues = this.formatExclusionListForSOQL(this.excludedValues);
         this.logmessage('pDesigneeId=' + this.pDesigneeId + ' pExclusionList=' + this.excludedValues);
+
         ContactDesignations({
                 pDesigneeId: this.pDesigneeId,
                 pExclusionList: this.excludedValues
                 //pDesigneeId: this.designeeId
             })
+            // the then() method returns a Promise. This handles the result from fetchContactDesignations see the import above
             .then(result => {
                 
+                this.origResultData = result;
                 this.data = result;
-                this.logmessage('Designations:  ' + JSON.stringify(result));
+
+                //this.logmessage('Designations:  ' + JSON.stringify(result));
                 var d;
                 this.logmessage('Designation rows returned: ' + Object.keys(this.data).length);
                 this.logmessage('Designations returned: ' + JSON.stringify(this.data));
@@ -197,6 +216,9 @@ export default class testWithApexDataSource extends LightningElement {
                 this.logmessage(this.mydesignations);
 
                 this.editedData = JSON.parse(JSON.stringify(this.data));
+
+                //this.logmessage("processed result-data " + JSON.stringify(this.data));
+                //this.logmessage("processed result-editedData " + JSON.stringify(this.editedData));
 
             }).then(result => {
 
@@ -249,6 +271,27 @@ export default class testWithApexDataSource extends LightningElement {
 
     }
 
+/* this will react to changes of data being traced but so far no reload    
+    renderedCallback() {
+        
+        //alert("renderedCallback");
+        //var dataload = this.data;
+        //var doReload = this.reload;
+        //this.justDoIt();
+        if(this.reload) {
+            console.log('Now DoIt');
+            alert("Reload data");
+            this.data = this.origResultData;
+            this.logmessage('Reloading rows: ' + Object.keys(this.data).length);
+            this.logmessage('Reloading data: ' + JSON.stringify(this.data));
+            $A.get('e.force:refreshView').fire();
+        }
+        else
+            console.log("Don't DoIt");
+        
+    }
+*/
+
     handleSelection(event) {
         this.selectedDesignation = event.target.value;
         // DOTO: this is supposed to change date from hidden to visible - not configured correctly
@@ -267,11 +310,61 @@ export default class testWithApexDataSource extends LightningElement {
     handleCellChange(event) {
         // If suppressBottomBar is false, wait for the Save or Cancel button
         if (this.suppressBottomBar) {
+
+            // test test test
+            var et = event.target;
+
+            const changedValue = event.detail.draftValues[0];
+            var etv = et.value;
+            const idEndDate = "Designation_End_Date__c";
+            const idStartDate = "Designation_Start_Date__c";
+  
+            if (changedValue.hasOwnProperty(idEndDate)) {
+
+                this.logmessage(" >>> End Date changed: " + JSON.stringify(changedValue));
+                var startDate = this.findDataValue(changedValue.Id, idStartDate);
+                var currEndDate = this.findDataValue(changedValue.Id, idStartDate);
+                var startDt = new Date(startDate);
+
+                var newEndDate = changedValue.Designation_End_Date__c;
+                var newEndDt = new Date(newEndDate);
+
+                    if (startDt > newEndDt) {
+ 
+                        changedValue.Designation_End_Date__c = currEndDate;
+                        event.detail.draftValues[0] = currEndDate;
+
+                        //var thisdate = this.data;
+                        //this.data = this.origdata;
+
+                        this.setDataValue(changedValue.Id,idEndDate, currEndDate);
+                       
+                        this.showToast("End Date Error","End Date cannot be earlier than Start Date");
+
+                        //this.selectedRows = [];
+                        
+                        this.reload = true;
+
+                        // return refreshApex(this.origResultData);
+                        return;
+                     
+                    }
+
+            }
+  
+            // end test end test end test
+
             this.handleSave(event);
+            
+            event.target.dataset.value = this.editedData;
+
+
+            this.logmessage("handleSave returned here");
         }
     }
 
     handleSave(event) {
+        
         const draftValues = event.detail.draftValues;
         const idDesignation = "Designation__c";
         const idEndDate = "Designation_End_Date__c";
@@ -279,21 +372,33 @@ export default class testWithApexDataSource extends LightningElement {
 
         var dvrows = Object.keys(event.detail.draftValues).length;
         var outrows = Object.keys(this.outputEditedRows).length;
-        this.logmessage("dvrows = " + Object.keys(event.detail.draftValues).length);
-        this.logmessage("draftValues: " + JSON.stringify(draftValues));
+
+        var editedRow;
 
         var vIdEndDate = idEndDate;
         var vIdStartDate = idStartDate;
 
+        var before_startdate = "";
+        var before_enddate = "";
+
         var i = 0;
+        // this loops across all changes but since the save actually
+        // loads to a queue for processing rather than immediate load by the 
+        // flow this simply places changes in a queue
         for (i; i < dvrows; i++) {
 
+            // if no rows in queue prep for insert insert to top
             var dvId = draftValues[i].Id;
-            if (outrows == 0 || this.getIndex(dvId) > outrows) // empty or no match
-            {
+            var dvIdx = this.getIndex(dvId);
+            //if (outrows == 0 || dvIdx > outrows) // empty or no matc
+            if(outrows == 0 || dvIdx < 0) // empty or no match
+            { 
                 this.logmessage(dvrows + " - " + JSON.stringify(draftValues[i]));
 
                 var recordId = draftValues[i].Id;
+
+                before_enddate = this.findDataValue(recordId, idEndDate);
+                before_startdate = this.findDataValue(recordId, idStartDate);
 
                 var enddate = "";
                 var startdate = "";
@@ -313,20 +418,86 @@ export default class testWithApexDataSource extends LightningElement {
                             draftValues[i][idStartDate] = startdate;
                     }
                 }
+
+                this.logmessage("Idx=- before_startdate = " + before_startdate);
+                this.logmessage("Idx=- before_enddate = " + before_enddate);
+
                 designationText = this.findDataValue(recordId, idDesignation);
                 draftValues[i][idDesignation] = designationText;
-                this.outputEditedRows.push(draftValues[i]);
+
+                this.logmessage("draftValues [" + i + "] = " + JSON.stringify( draftValues[i] )) ;
+
+                editedRow = draftValues[i];
+                // this.outputEditedRows.push(draftValues[i]);
+
             } else { // Update edited row in output
+
+                // if row is in queue update it
+
+                var recordId = draftValues[i].Id;
+                before_enddate = this.findDataValue(recordId, idEndDate);
+                before_startdate = this.findDataValue(recordId, idStartDate);
+
+                editedRow = this.outputEditedRows[i];
                 var x = this.getIndex(this.outputEditedRows[i].Id);
-                if (draftValues[i][idEndDate])
-                    this.outputEditedRows[x][idEndDate] = draftValues[i][idEndDate];
-                if (draftValues[i][idStartDate])
-                    this.outputEditedRows[x][idStartDate] = draftValues[i][idStartDate];
+                if (draftValues[i][idEndDate]) {
+                    //this.outputEditedRows[x][idEndDate] = draftValues[i][idEndDate];
+                    editedRow[idEndDate] = draftValues[i][idEndDate]; 
+                }
+                if (draftValues[i][idStartDate]) {
+                    //this.outputEditedRows[x][idStartDate] = draftValues[i][idStartDate];
+                    editedRow[idStartDate] = draftValues[i][idStartDate];
+                }
             }
 
         }
 
-        this.logmessage("final rec: " + JSON.stringify(this.outputEditedRows));
+        this.logmessage("Edited Row = " + JSON.stringify(editedRow) );
+
+        var strEndDate = editedRow.Designation_End_Date__c;
+        var endDt = new Date(strEndDate);
+        var strStartDate = editedRow.Designation_Start_Date__c;
+        var startDt = new Date(strStartDate);
+        var designation =  editedRow.Designation__c;
+
+        // this is supposed to validate data before insert to queue
+        // it does but table is not changed - tried renderedCallback 
+        // as alternative
+        if(startDt > endDt) {
+            var msg =   "Error: " + designation;
+            msg = msg + "\nStart Date: " + strStartDate;
+            msg = msg + "\nis greater than\nEnd Date: " + strEndDate;
+            msg = msg + "\n" + designation;
+            this.logmessage(msg);
+            this.showToast('Date Error',msg);
+            //alert(msg);
+
+            var a = this.setDataValue(recordId, idStartDate, before_startdate);
+            var b = this.setDataValue(recordId, idEndDate, before_enddate);
+            
+            event.currentTarget.setValue = b;
+            event.currentTarget.dataset.value = b;
+            event.target.value = b;
+
+            this.logmessage("Unable to update row");
+            return;
+        }
+        // data goes into queue here
+        var outputEditedRowsCnt = this.outputEditedRows.length;
+        if(outputEditedRowsCnt > 0 ) {
+            var rowidx = this.getIndex(editedRow.Id);
+            if(rowidx < 0) {
+                this.outputEditedRows.push(editedRow);
+            }
+            else {
+                this.outputEditedRows[rowidx] = editedRow;
+            }
+
+        } else {
+            this.outputEditedRows.push(editedRow);
+        }
+        this.logmessage(" <<< final rec: " + JSON.stringify(this.outputEditedRows));
+
     }
 
     /*
@@ -367,18 +538,39 @@ export default class testWithApexDataSource extends LightningElement {
                 break;
             }
         }
+        this.logmessage("findDataValue Id = " + Id + " returning " + JSON.stringify(value));
         return value;
+    }
+
+    setDataValue(Id, key, value) {
+        var dataLen = Object.keys(this.data).length;
+        var setValue = "";
+        for (var i = 0; i < dataLen; i++) {
+            if (this.data[i].Id === Id) {
+                this.data[i][key] = value;
+                setValue = this.data[i][key];
+                break;
+            }
+        }
+        this.logmessage("findDataValue Id = " + Id + " returning " + JSON.stringify(setValue));
+        return setValue;
+    }
+
+    updateData(updateddata) {
+        this.data = updateddata;
     }
 
     getIndex(Id) {
         var rows = Object.keys(this.outputEditedRows).length;
-        var idx = rows + 1;
+        //rows = rows + 1;
+        var idx = -1;
         for (var i = 0; i < rows; i++) {
             if (this.outputEditedRows[i].Id === Id) {
                 idx = i;
                 break;
             }
         }
+        this.logmessage("getIndex " + Id + " returning " + idx);
         return idx;
     }
 
@@ -401,6 +593,33 @@ export default class testWithApexDataSource extends LightningElement {
         this.logmessage('ExclusionList: ' + list);
         return list;
     }
+
+
+    showToastBtn() {
+        
+        this.showMyWarningMessage = true;
+
+        /*
+        const evt = new ShowToastEvent({
+            title: 'Get Help',
+            message: 'Salesforce documentation is available in the app. Click ? in the upper-right corner.',
+        });
+        this.dispatchEvent(evt);
+        this.logmessage("What just happended?")
+        */
+    }
+
+    closeToast() {
+        this.showMyWarningMessage = false;
+    }
+
+    showToast(mytitle, mymessage) {
+
+        this.showMyWarningMessage = true;
+        this.myWarningMessage = mymessage;
+
+    }
+
 
     logmessage(message) {
         if (this.enableLogging) {

@@ -1,0 +1,73 @@
+
+SELECT ID, username, ContactId, ProfileId,
+UserRoleId from user where id = '0056A000002Hx5H'
+
+SELECT ID, username, ContactId, ProfileId,
+UserRoleId from user where id = '0056A000002Hx5HQAS'
+
+
+SELECT ID, username, ContactId, ProfileId,
+UserRoleId from user where username = 'mmiller0622@yahoo.com.uat'
+
+select name, contactid, contact.referee_status__c, contact.referee_rank__c, user_referee_rank__c from user 
+where user.user_referee_rank__c != ''
+
+
+SELECT ID, AccountId,
+CreatedById,
+IndividualId,
+LastModifiedById,
+npo02__Household__c,
+npsp__Batch__c,
+npsp__Current_Address__c,
+npsp__Primary_Affiliation__c,
+OwnerId,
+ReportsToId
+FROM contact where id = '0036A00000peZM1QAM'
+
+
+userToUpdate = 
+[
+    SELECT data_call_date__c FROM User 
+    WHERE where id = '0056A000002Hx5TQAS'
+    LIMIT 1
+];
+// Update the billing city.
+userToUpdate.data_call_date__c = null;
+// Make the update call.
+update userToUpdate;
+
+
+select User.Id, name, Data_Call_Date__c from user where name = 'Teresa Wright'
+
+
+ID                  NAME           DATA_CALL_DATE__C
+──────────────────  ─────────────  ─────────────────
+0056A000002Hx5TQAS  Teresa Wright  2020-09-02
+
+
+select User.Id, name, Data_Call_Date__c from user where Id = '0056A000002Hx5TQAS'
+
+0056A000002Hx5TQAS  Teresa Wright  2020-09-02
+
+
+select id, contact.id, contact.ownerid from user where id = '0056A000002Hx5TQAS'
+
+select id, Referee_Rank__c, Membership_Number__c, Referee_License_Number__c
+from contact where id = '0036A00000peZMQQA2'
+
+select id, firstname, Referee_Rank__c from contact where id = '0036A00000peZMQQA2'
+
+
+select id, firstname, User_Referee_Rank__c, contact.Referee_Rank__c
+from user where contact.id = '0036A00000peZMQQA2'
+
+
+select Id, OwnerId, IsDeleted, Name, CreatedDate, CreatedById,
+LastModifiedDate, LastModifiedById, SystemModstamp, LastActivityDate,
+LastViewedDate, LastReferencedDate, UserRecordAccessId, Distribution_Location__c,
+Price__c, Thanks_Sent_Date__c, Color__c, Gender__c, Value__c,
+Distribution_Date__c, Date_Recd__c, Received_by__c, Located_at__c,
+Category__c, Size__c, Notes__c, Item_Num__c, Distributed_By__c, Distributed_To__c, 
+Item__c, Donated_by__c
+from GearExchangeWorkSheet__c

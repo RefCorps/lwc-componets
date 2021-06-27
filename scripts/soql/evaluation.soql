@@ -1,0 +1,9 @@
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition where EntityDefinition.QualifiedApiName = 'Evaluation_Properties__c'
+
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition where EntityDefinition.QualifiedApiName = 'Evaluation_Questions__c'
+
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition where EntityDefinition.QualifiedApiName = 'Evaluation_QuestionTypeResp__c'
+
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition where EntityDefinition.QualifiedApiName = 'Evaluation_Responses__c'
+
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition where EntityDefinition.QualifiedApiName = 'Evaluation_ResponsesAbstract__c'

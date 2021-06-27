@@ -4,6 +4,33 @@
 
     <lightning-card style="padding: 10 10 10 10;">
 
+        <template if:true={showMyWarningMessage}>
+        <div class="demo-only" style="height:4rem">
+            <div class="slds-notify_container slds-is-relative">
+              <div class="slds-notify slds-notify_toast slds-theme_warning" role="status">
+                <span class="slds-assistive-text">warning</span>
+                <span class="slds-icon_container slds-icon-utility-warning slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+                  <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                    <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#warning"></use>
+                  </svg>
+                </span>
+                <div class="slds-notify__content">
+                  <h2 class="slds-text-heading_small ">
+                      {myWarningMessage}
+                  </h2>
+                </div>
+                <div class="slds-notify__close">
+                  <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Close" 
+                  onclick={closeToast}>
+                    <h2 style="font-size: large; font-weight: bold; padding: 200; color: red; background: white;">X</h2>
+                    <span class="slds-assistive-text">Close</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
         <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
             <span class="slds-text-title_bold">{lblTable}</span>&nbsp;<i>{tableHint}</i>&nbsp;
             <lightning-helptext
@@ -13,20 +40,28 @@
 
 
         <div class="slds-m-around_medium">
-
+           
             <lightning-datatable 
                 key-field="Id" 
                 data={data} 
+
                 columns={columns}
                 onsave={handleSave}
                 suppress-bottom-bar={suppressBottomBar}
                 hide-checkbox-column=true
                 oncellchange={handleCellChange}
                 onrowaction={handleRowActions}
+                
+                errors={errors}
             >
             </lightning-datatable >
+                     
+            <lightning-button label="Show Toast"
+            onclick={showToastBtn}>
+        </lightning-button>
 
         </div>
+
 
         <template if:true={loadPicklist}>
 

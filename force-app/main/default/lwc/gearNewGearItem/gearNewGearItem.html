@@ -1,0 +1,162 @@
+
+<template>
+   <!-- <lightning-record-form
+        object-api-name={gearExchgObject}
+        fields={myFields}
+        onsuccess={handleAccountCreated}>
+        </lightning-record-form>
+   -->    
+   <!--
+     <template for:each={editedPicklistValues} for:item="item">
+            <option key={item.value}>{item.label}</option>
+     </template>
+    -->
+
+    <!--
+    <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
+         Category<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
+    </div>
+    <select name="selectedCategory" class="select uiInput uiInputSelect uiInput--default uiInput--select"
+    onchange={handleCategory}>
+    <template for:each={optionsCategory} for:item="item">
+        <option key={item.value}>{item.label}</option>
+    </template>
+    </select>
+     -->
+
+  <div style="padding: 30 30 30 30;">
+     <lightning-card style="padding: 10 10 10 10;" >
+
+    <lightning-combobox
+    name="category"
+    label="Category"
+    value={value}
+    placeholder="Select A Category"
+    options={optionsCategory}
+    onchange={handleCategory} ></lightning-combobox>
+
+
+<template if:true={displayClothing}>
+ 
+     <lightning-combobox
+     name="clothing"
+     label="Select the best Clothing description - use Description to add for more detail"
+     value={value}
+     placeholder="Select a Clothing description"
+     options={optionsItemClothing}
+     onchange={handleItemClothing} ></lightning-combobox>
+ 
+     <lightning-combobox
+     name="gender"
+     label="Select gender if appropriate for this clothing item"
+     value={value}
+     placeholder="Select gender"
+     options={optionsGender}
+     onchange={handleGender} ></lightning-combobox>
+
+     <lightning-combobox
+     name="size"
+     label="Select a size if appropriate for this clothing item"
+     value={value}
+     placeholder="Select a size"
+     options={optionsSize}
+     onchange={handleSize} ></lightning-combobox>
+
+     <lightning-combobox
+     name="fit"
+     label="Select a fit if appropriate for this clothing item"
+     value={value}
+     placeholder="Select a fit"
+     options={optionsClothingFit}
+     onchange={handleFit} ></lightning-combobox>
+
+
+     <lightning-combobox
+     name="color"
+     label="Select a color if appropriate for this clothing item"
+     value={value}
+     placeholder="Select a color"
+     options={optionsColor}
+     onchange={handleColor} ></lightning-combobox>
+
+     <lightning-input type="checkbox" label="USRowing Logo" name="logo" onclick={handleLogo}></lightning-input>
+
+</template>
+
+<template if:true={displayMegaphones}>
+
+     <lightning-combobox
+     name="megaphone"
+     label="Select a megaphone from this list or provide information under description"
+     value={value}
+     placeholder="Select a megaphone"
+     options={optionsItemMegaphones}
+     onchange={handleItemMegaphones} ></lightning-combobox>
+
+</template>
+
+<template if:true={displayNontechtools}>
+ 
+     <lightning-combobox
+     name="nontechtools"
+     label="Select an item from this list or provide information under description"
+     value={value}
+     placeholder="Select an item"
+     options={optionsItemNonTechTools}
+     onchange={handleItemNonTechTools} ></lightning-combobox>
+
+</template>
+
+<template if:true={displayOtheritems}>
+
+     <lightning-combobox
+     name="otheritem"
+     label="Provide item information using description"
+     value={value}
+     placeholder="Use description to describe item"
+     options={optionsItemOther}
+     onchange={handleItemOther} ></lightning-combobox>
+
+</template>
+
+<template if:true={displayStopwatches}>
+
+     <lightning-combobox
+     name="stopwatch"
+     label="Select stopwatch model from this list or provide information under description"
+     value={value}
+     placeholder="Select a stopwatch"
+     options={optionsItemStopwatches}
+     onchange={handleItemStopWatches} ></lightning-combobox>
+
+</template>
+
+<template if:true={displayTechbasedtools}>
+
+     <lightning-combobox
+     name="stopwatch"
+     label="Select an item from this list or provide information under description"
+     value={value}
+     placeholder="Select an item"
+     options={optionsItemTechBasedTools}
+     onchange={handleTechBasedTools} ></lightning-combobox>
+
+</template>
+
+<template if:true={displayDescription}>
+
+     <lightning-input-rich-text
+     label="Description"
+     label-visible=true
+     placeholder="Item Description - you may include a small photo if available"
+     value={description}
+     onchange={handleDescripiton}
+     >
+    </lightning-input-rich-text>
+
+</template>
+
+     </lightning-card>
+</div>   
+
+</template>

@@ -1,0 +1,25 @@
+<apex:page >
+
+    <apex:includeLightning />
+<div style="text-align: center;">
+<p>This page is part of the Referee Gear Exchange project.  The following is a list of lightly used gear that's available to anyone that needs equipment.  The goal for this project was to help newer members to the corps get good gear.</p>
+    <br/>
+<p>If you are interested in any of the gear listed below or if you find you have gear that you'd like to offer, please send an email 
+    to:</p>
+    
+    
+    <script>
+        $Lightning.use("c:lcvfTest", function() {
+          $Lightning.createComponent("lightning:formattedEmail",
+              { label="Ref Gear Coordinators" },
+              { $Resource.TestEmailAddr1 },
+          );
+        });
+    </script>
+    
+    
+    <a href="mailto:' + {$Resource.TestEmailAddr1} + '?subject=Ref Gear Inquiry"><div style="font-size: large;">Ref Gear Coordinators</div><i>(click to initiate email)</i></a>
+<p>One of the coordinators will contact you.</p>
+    </div>
+
+</apex:page>

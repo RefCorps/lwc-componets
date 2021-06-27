@@ -1,0 +1,12 @@
+<apex:page standardController="Referee_Expense_Report__c" 
+ recordSetVar="Expenses"  
+ docType="html-5.0" >
+  <!-- Begin Default Content REMOVE THIS -->
+  <h1>Test passing selections from list - collecting and passing IDs</h1>
+  
+  <apex:variable var="ids" value="{!selected}" />
+  
+  <flow:interview name="TestStartingFlows" rerender="ids" ></flow:interview>
+  
+  <!-- End Default Content REMOVE THIS -->
+</apex:page>

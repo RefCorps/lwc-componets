@@ -1,0 +1,54 @@
+
+/*
+    The following pulls field data by object
+*/
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+where EntityDefinition.QualifiedApiName = 'Account'
+
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+where EntityDefinition.QualifiedApiName = 'User'
+
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+where EntityDefinition.QualifiedApiName = 'Opportunity'
+
+/*
+    Relationship SOQL
+
+Question Id     Question_Id__c      Lookup(Evaluation Question)
+*/
+Select DataType, MasterLabel, DeveloperName, QualifiedApiName, RelationshipName FROM FieldDefinition 
+where EntityDefinition.QualifiedApiName = 'Evaluation_Responses__c' and QualifiedApiName = 'Question_Id__c'
+
+/*
+DATATYPE                     MASTERLABEL  DEVELOPERNAME  QUALIFIEDAPINAME  RELATIONSHIPNAME
+───────────────────────────  ───────────  ─────────────  ────────────────  ────────────────
+Lookup(Evaluation Question)  Question Id  Question_Id    Question_Id__c    Question_Id__r
+*/
+
+/*
+QuestionTypeResp        QuestionTypeResp__c     Lookup(Evaluation QuestionTypeResp)
+*/
+Select DataType, MasterLabel, DeveloperName, QualifiedApiName, RelationshipName FROM FieldDefinition 
+where EntityDefinition.QualifiedApiName = 'Evaluation_Responses__c' and QualifiedApiName = 'QuestionTypeResp__c'
+
+
+Select  DataType, DeveloperName,
+Label, MasterLabel, QualifiedApiName, RelationshipName
+FROM FieldDefinition 
+where EntityDefinition.QualifiedApiName = 'Evaluation_Responses__c' and DataType like '%Lookup%'
+
+
+SELECT  Label, QualifiedApiName, DataType, RelationshipName
+FROM FieldDefinition 
+WHERE EntityDefinition.QualifiedApiName = 'Evaluation_Responses__c' 
+ORDER BY Label
+
+
+SELECT Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+where EntityDefinition.QualifiedApiName = 'Evaluation_Responses__c'
+ORDER BY Label
+
+Select DataType, MasterLabel, DeveloperName, QualifiedApiName, RelationshipName FROM FieldDefinition 
+where QualifiedApiName = 'Evaluation_Date__c'
+
+FIND {account} RETURNING FieldDefinition

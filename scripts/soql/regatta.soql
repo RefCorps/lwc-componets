@@ -1,0 +1,50 @@
+Select  DeveloperName, Description,
+Label, MasterLabel, NamespacePrefix, QualifiedApiName, 
+RelationshipName, DataType FROM FieldDefinition 
+where EntityDefinition.QualifiedApiName = 'Regatta__c' 
+order by label
+
+
+
+
+-- select regattas referee participated in since Sept 1 2019
+SELECT Participation_Regatta__r.name, Participant__r.name,
+Regatta_Participant_Role__c, Regatta_Participation_Status__c,
+Days_Worked__c, 
+Aligner__c,
+Assistant_Starter__c,
+Athlete_Weighing__c,
+Boat_Weighing__c,
+Chef_Du_Lac__c,
+Chief_Judge_at_Finish__c,
+Chief_Referee__c,
+Course_Marshal__c,
+Deputy_Chief__c,
+Finish_Line__c,
+Finish_Marshal__c,
+Judge_At_Start__c,
+Jury__c,
+Ombudsman__c,
+Referee_Position__c,
+Safety_Check__c,
+Start_Marshal__c,
+Starter_Position__c,
+Supervised_Other_Referees__c,
+Zonal_Referee__c
+FROM Regatta_Participation__c
+where Participant__r.Name like 'Tad%'
+and CreatedDate > 2018-09-01T00:00:00-04:00
+ORDER BY Participant__r.name, Participation_Regatta__r.name, CreatedDate, Regatta_Participation_Status__c desc
+
+SELECT COUNT(id), Regatta_Participant_Role__c
+FROM Regatta_Participation__c
+where CreatedDate > 2018-09-01T00:00:00-04:00
+GROUP BY Regatta_Participant_Role__c
+
+SELECT count() FROM Regatta_Attendance__c
+
+SELECT CreatedBy.name, CreatedDate, Regatta__r.name, 
+Regatta_Attendee_Signup__c, Regatta_Attendee_Role__c
+from Regatta_Signup__c
+WHERE CreatedBy.name like 'Mike Miller'
+

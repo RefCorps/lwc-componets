@@ -1,0 +1,69 @@
+Select ContactId, CreatedById, CreatedDate, DataType, Field, Id, IsDeleted, NewValue, OldValue FROM ContactHistory 
+
+
+select count(id), RecordTypeId from contact group by RecordTypeId
+
+COUNT(ID)  RECORDTYPEID
+─────────  ──────────────────
+851        null
+32         0123u000000ivIDAAY
+
+select Name, Referee_Rank__c, Referee_Status__c from contact where recordtypeid = '0123u000000ivIDAAY'
+
+NAME                REFEREE_RANK__C  REFEREE_STATUS__C
+──────────────────  ───────────────  ─────────────────
+William Harrison    Candidate        Active
+Emily Wynn          Candidate        Active
+Andrew Bright       Candidate        Active
+George Duesdieker   Candidate        Active
+Katharin Burkhardt  Candidate        Active
+Jim Baregno         Candidate        Resigned
+Carol Chu           Assistant        Active
+David Hansen        Candidate        Active
+John Wylder         Emeritus         Active
+Warren Polensky     Emeritus         Active
+Robert Cummins      Emeritus         Active
+Sarah McAuliffe     null             Active
+Cassandra Eattock   Candidate        Active
+Gardner Howe        Candidate        Active
+Timothy Cullen      Candidate        Active
+Daniel Bell         Candidate        Active
+Patricia Stichnoth  Candidate        Active
+Brandon Wong        Candidate        Active
+Isabelle Greenberg  Candidate        Active
+Courtney Olson      Candidate        Active
+Owen Albrecht       Candidate        Active
+Caroline Hauck      Candidate        Active
+John Gignac         Candidate        Active
+Sally Thomas        Candidate        Active
+Julia Ladd          Candidate        Active
+James Glinn         Candidate        Active
+Thomas Weber        Candidate        Active
+Ian Terrell         Candidate        Active
+Kevin Hight         Candidate        Active
+Jennifer Bryant     Candidate        Active
+Jeff Owens          null             Active
+Mike Connors        null             Active
+
+
+select Name, Referee_Rank__c, Referee_Status__c from contact where referee_status__c != NULL
+
+
+
+
+Select BusinessProcessId, CreatedById, CreatedDate, Description, DeveloperName, Id, IsActive, LastModifiedById, LastModifiedDate, Name, NamespacePrefix, SobjectType, SystemModstamp FROM RecordType 
+BUSINESSPROCESSID   CREATEDBYID         CREATEDDATE                   DESCRIPTION                                                             DEVELOPERNAME      ID                  ISACTIVE  LASTMODIFIEDBYID    LASTMODIFIEDDATE              NAME               NAMESPACEPREFIX  SOBJECTTYPE  SYSTEMMODSTAMP
+──────────────────  ──────────────────  ────────────────────────────  ──────────────────────────────────────────────────────────────────────  ─────────────────  ──────────────────  ────────  ──────────────────  ────────────────────────────  ─────────────────  ───────────────  ───────────  ────────────────────────────
+null                0056A000001JOunQAG  2020-02-04T23:11:29.000+0000  null                                                                    Candidate          0123u000000ivIDAAY  true      0056A000001JOunQAG  2020-06-27T22:05:11.000+0000  Candidate          null             Contact      2020-06-27T22:05:11.000+0000
+0196A0000008mkAQAQ  0056A000001JOunQAG  2018-02-19T17:29:23.000+0000  null                                                                    NPSP_Default       0126A000000tE1kQAE  true      0056A000001JOunQAG  2018-02-19T17:32:35.000+0000  NPSP Default       null             Opportunity  2018-02-19T17:32:35.000+0000
+null                0056A000001JOunQAG  2018-02-19T17:30:57.000+0000  An Account representing a Household containing one or more individuals  HH_Account         0126A000000tE1pQAE  true      0056A000001JOunQAG  2018-02-19T22:48:22.000+0000  Household Account  null             Account      2018-02-19T22:48:22.000+0000
+null                0056A000001JOunQAG  2018-02-19T17:30:57.000+0000  An Account representing an organization                                 Organization       0126A000000tE1qQAE  true      0056A000001JOunQAG  2018-02-19T22:48:22.000+0000  Organization       null             Account      2018-02-19T22:48:22.000+0000
+0196A0000005fdEQAQ  0056A000001JOunQAG  2018-10-23T00:56:31.000+0000  Candidate Referee Process                                               Candidate_Process  0126A0000019fmUQAQ  true      0056A000001JOunQAG  2018-10-23T00:56:31.000+0000  Candidate Process  null             Lead         2018-10-23T00:56:31.000+0000
+Total number of records retrieved: 5.
+
+
+Select BusinessProcessId, Description, DeveloperName, Id, IsActive, Name, NamespacePrefix, SobjectType FROM RecordType 
+where id = '0123u000000ivIDAAY'
+
+
+

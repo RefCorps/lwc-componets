@@ -1,0 +1,39 @@
+
+Select ActiveVersionId, ApiName, Builder, Description, DurableId, Id, 
+InstalledPackageName, IsActive, IsOutOfDate, IsSwingFlow, IsTemplate, Label, LastModifiedBy, 
+LastModifiedDate, LatestVersionId, ManageableState, 
+NamespacePrefix, ProcessType, TriggerType FROM FlowDefinitionView 
+where ApiName like 'Referee_Status%'
+
+FlowDefinitionView
+Select ActiveVersionId, ApiName, Builder, Description, DurableId, Id, InstalledPackageName, 
+IsActive, IsOutOfDate, IsSwingFlow, IsTemplate, Label, LastModifiedBy, LastModifiedDate, LatestVersionId, 
+ManageableState, NamespacePrefix, ProcessType, TriggerType FROM FlowDefinitionView 
+where DurableId = '3002h0000000Qc3AAE'
+
+FlowInterview
+Select CreatedById, CreatedDate, CurrentElement, Guid, Id, InterviewLabel, IsDeleted, LastModifiedById, LastModifiedDate, 
+Name, OwnerId, PauseLabel, SystemModstamp, WasPausedFromScreen FROM FlowInterview 
+WHERE 
+
+FlowVariableView
+Select ApiName, DataType, Description, DurableId, FlowVersionViewId, 
+Id, IsCollection, IsInput, IsOutput, ObjectType FROM FlowVariableView 
+WHERE DurableId = '3002h0000000Qc3AAE'
+
+FlowVersionView
+Select Description, DurableId, FlowDefinitionViewId, Id, IsSwingFlow, IsTemplate, Label, LastModifiedDate, ProcessType, RunInMode, Status, VersionNumber FROM FlowVersionView 
+
+FlowRecordRelation
+Select CreatedById, CreatedDate, Id, IsDeleted, LastModifiedById, LastModifiedDate, Name, ParentId, 
+RelatedRecordId, SystemModstamp FROM FlowRecordRelation 
+
+
+FlowDefinitionView
+Select ActiveVersionId, ApiName, Builder, Description, DurableId, Id, InstalledPackageName, IsActive, IsOutOfDate, IsSwingFlow, IsTemplate, Label, LastModifiedBy, LastModifiedDate, LatestVersionId, ManageableState, NamespacePrefix, ProcessType, TriggerType FROM FlowDefinitionView 
+
+FlowInterview
+Select CreatedById, CreatedDate, CurrentElement, Guid, Id, InterviewLabel, IsDeleted, LastModifiedById, LastModifiedDate, Name, OwnerId, PauseLabel, SystemModstamp, WasPausedFromScreen FROM FlowInterview 
+
+FlowVariableView
+Select ApiName, DataType, Description, DurableId, FlowVersionViewId, Id, IsCollection, IsInput, IsOutput, ObjectType FROM FlowVariableView 

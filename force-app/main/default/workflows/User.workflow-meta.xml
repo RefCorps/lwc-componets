@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>Background_Compliance_Notification</fullName>
+        <description>Background Compliance Notification</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Email</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/Backgroun_Check_Expiration</template>
+    </alerts>
+    <alerts>
+        <fullName>SafeSport_Compliance_Notification</fullName>
+        <description>SafeSport Compliance Notification</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Email</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/SafeSport_Training_Expiration</template>
+    </alerts>
+    <alerts>
+        <fullName>SafeSport_Update_by_Referee</fullName>
+        <description>SafeSport Update by Referee</description>
+        <protected>false</protected>
+        <recipients>
+            <recipient>mariahkmfoster@gmail.com</recipient>
+            <type>user</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/SafeSport_Date_Update</template>
+    </alerts>
+</Workflow>

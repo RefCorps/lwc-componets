@@ -1,0 +1,28 @@
+
+
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+where EntityDefinition.QualifiedApiName = 'GearExchangeWorkSheet__c'
+
+
+Select Id, Item_Num__c, Date_Recd__c, Category__c, Item__c, Size__c, Gender__c,
+Color__c, Notes__c, Donated_by__c, Received_by__c, Located_at__c, Value__c, 
+Distributed_To__c, Distribution_Date__c, Distributed_By__c, Distribution_Location__c,
+Thanks_Sent_Date__c
+from GearExchangeWorkSheet__c
+
+
+GearExchangeWorksheet03182021
+
+SELECT Item_Num__c, Date_Recd__c, Category__c, Item__c, Price__c, Size__c,
+	Gender__c, Color__c, Notes__c, Donated_by__c, Received_by__c, Located_at__c,
+	Value__c, Distributed_To__c, Distribution_Date__c, Distributed_By__c,
+	Distribution_Location__c, Thanks_Sent_Date__c, DisplayOnList__c FROM GearExchangeWorksheet__c
+ORDER BY Category__c, Item__c, Size__c, Gender__c, Color__c
+
+
+SELECT Id, Category__c, Item__c, USRowing_Logo__c,  Description__c,  Item_Status__c, 
+	Offered_By__r.Name  
+	from Gear_Exchange__c  WHERE Distributed_To__c = null	
+
+
+	

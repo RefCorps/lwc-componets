@@ -1,0 +1,26 @@
+<template>
+
+    <!-- lightning-card -->
+       
+            <div>
+              
+                <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
+                    <template if:true={selectLabel}>
+                        {selectLabel}&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
+                    </template>    
+                    <template if:false={selectLabel}>
+                        LWS Rank&nbsp;<abbr class="slds-required" data-aura-rendered-by="117:0"></abbr>
+                    </template>
+                </div>
+                <select name="selectedRank" class="select uiInput uiInputSelect uiInput--default uiInput--select"  onchange={handleChange}>
+                    <template for:each={editedPicklistValues} for:item="item">
+                           <option key={item.value}>{item.label}</option>
+                    </template>
+                </select>
+
+            </div>
+
+       
+    <!-- /lightning-card -->
+
+</template>

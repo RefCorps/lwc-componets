@@ -1,0 +1,42 @@
+
+
+-- select contact & rank for review
+select name, id, contactid, contact.referee_status__c, contact.referee_rank__c, user_referee_rank__c from user 
+where name = 'Mel Shilling'
+
+
+-- review and update
+select name, id, contactid, contact.referee_status__c, contact.referee_rank__c, user_referee_rank__c from user where id = ''
+
+-- review and update
+select name, id, referee_status__c, referee_rank__c from contact where id = '0036A00000peZGwQAM' 
+Assistant
+
+
+select id, designation__c, designation_start_date__c, designation_end_date__c from designation__c where designee__c = '0036A00000peZGwQAM'
+
+select id, designee__r.name, designation__c, designee__r.referee_rank__c, designee__r.region__c, designation_start_date__c, designation_end_date__c from designation__c 
+where designee__r.name = 'Tony Passarello'
+and DESIGNEE__R.REGION__C = 'Southeast'
+ORDER BY designee__r.name
+
+
+Select Id, 
+Name, 
+designee__c,
+designation__c, 
+Designation_Start_Date__c, 
+Designation_End_Date__c
+from Designation__c 
+where designee__c = '0036A00000peZGwQAM'
+and IsDeleted = false
+and designation__c not in ('Referee')
+order by Designation_Start_Date__c desc, Name desc
+
+
+
+select id, contactid, name, user_referee_rank__c from user where name = 'Mel Shilling'
+
+select id, designee__c, designation__c, designation_start_date__c, designation_end_date__c from designation__c where designee__c = '0036A00000peZGwQAM' 
+
+select id, contactid, name, user_referee_rank__c, contact.referee_rank__c from user where name = 'Mel Shilling'

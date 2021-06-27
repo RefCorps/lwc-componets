@@ -1,0 +1,19 @@
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+where EntityDefinition.QualifiedApiName = 'Gear_Exchange__c'
+
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+where EntityDefinition.QualifiedApiName = 'Gear_Supplier__c'
+
+select Label, QualifiedAPIName, DataType, IsIndexed from FieldDefinition
+where EntityDefinition.QualifiedApiName = 'GearExchangeBid__c'
+
+SELECT Id,OwnerId,IsDeleted,Name,CreatedDate,CreatedById,LastModifiedDate,LastModifiedById,SystemModstamp,LastViewedDate,LastReferencedDate
+,UserRecordAccessId,Category__c,Item_Clothing__c,Item_Stopwatchs__c,Item_Megaphones__c,Item_NonTech_tools__c,Item_Tech_Based_Tools__c,Item_Other__c
+,Size__c,Color__c,Offered_By__c,Value__c,Coordinated_By__c,Received_By__c,Date_Recd__c,Location_Recd__c,Located_At__c,Distribution_Date__c
+,Distributed_By__c,Distributed_To__c,Thanks_Sent__c,Description__c,US_Rowing_Logo__c,Gender__c FROM Gear_Exchange__c
+
+
+select count() from GearExchangeWorkSheet__c
+
+
+$User.LastName + String.valueOf(datetime.now().getTime())

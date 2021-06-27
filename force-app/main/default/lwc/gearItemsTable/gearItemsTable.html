@@ -1,0 +1,188 @@
+<template>
+    
+
+    <!--
+    <div> 
+        <input type = "search" value={searchKey} onchange={handleOnSearchChange}>
+    <button onclick={onClickHandler}>Search</button>
+    </div>
+-->
+
+
+<div class="gearboxheading">We currently have {availableItems} available items in our GearBox.</div>
+<div style="text-align: center;color: blue"><i>Use the form to the right to contribute your items.</i></div>    
+</br>
+<div>
+<lightning-icon size='x-small' icon-name='utility:photo' alternative-text='Photo' title='Photo'></lightning-icon>&nbsp;&nbsp;
+Indicates a photo in description.  Use <scan style="color: blue">Review Details</scan>, found at the end of each row, to see the full photo.
+</div>
+<div class="row">
+    
+    <div class="column left">
+    Use the checkboxes below then press:</br>
+        <lightning-button slot="actions" variant="brand" label="Request Item(s)" onclick={requestItems}></lightning-button> 
+    </div>
+
+    <div class="column right">
+        <div onkeyup={handleKeyUp}>
+        <lightning-input
+                name="enter-search"
+                label="Enter a Search Value - press the 'enter' key to start your search"
+                type="search"
+                onclick={handleClearIhope}
+                onchange={handleSearchChange}
+            ></lightning-input>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+    <div class="slds-m-around_medium">
+
+        <c-rich-datatable-r-c 
+            key-field="Id" 
+            data={data} 
+            columns={rtcolumns} 
+            wrap-text-max-lines="3"
+            onsort={updateColumnSorting}
+            onrowaction={handleRowActions}
+            >
+        </c-rich-datatable-r-c>
+
+    </div>
+
+<!-- Detail view modal -->
+<template if:true={bShowModal}>
+    <section role="dialog" tabindex="-1"
+            aria-labelledby="modal-heading-01"
+            aria-modal="true"
+            aria-describedby="modal-content-id-1"
+            class="slds-modal slds-fade-in-open">
+    <div class="slds-modal__container">
+        <!-- modal header -->
+        <header class="slds-modal__header">
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+            </button>
+            
+            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate" if:false={isEditForm}>Record Detail</h2>
+            <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate" if:true={isEditForm}>Update Record Values</h2>
+        </header>
+        <!-- modal body -->
+        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" if:false={isEditForm}>
+            <dl class="slds-list_horizontal slds-wrap">
+                <dt class="slds-item_label slds-truncate" title="Category">Category:</dt>
+                <dd class="slds-item_detail slds-truncate">{record.category}</dd>
+                <dt class="slds-item_label slds-truncate" title="Item">Item:</dt>
+                <dd class="slds-item_detail slds-truncate">{record.item}</dd>
+
+                <dt class="slds-item_label slds-truncate" title="Description">Item Description:</dt>
+                <dd class="slds-item_detail slds-truncate">
+                    <lightning-formatted-rich-text value={record.description} class="slds-truncate">
+                    </lightning-formatted-rich-text>    
+                </dd>
+
+                <dt class="slds-item_label slds-truncate" title="Offered By">Offered By:</dt>
+                <dd class="slds-item_detail slds-truncate">{record.offered_by}</dd>
+
+                <dt class="slds-item_label slds-truncate" title="Item Status">Item Status:</dt>
+                <dd class="slds-item_detail slds-truncate">{record.item_status}</dd>
+
+
+            </dl>
+        </div>
+        
+        <!-- showing record edit form -->
+        <div if:true={isEditForm} class="slds-theme_default">
+            <lightning-record-edit-form layout-type="Full" record-id={currentRecordId} object-api-name="Contact" onsubmit={handleSubmit} onsuccess={handleSuccess}>
+                <lightning-messages></lightning-messages>
+                <lightning-output-field field-name="AccountId"></lightning-output-field>
+                <lightning-input-field field-name="FirstName"></lightning-input-field>
+                <lightning-input-field field-name="LastName"></lightning-input-field>
+                <lightning-input-field field-name="Email"></lightning-input-field>
+                <lightning-input-field field-name="Phone"></lightning-input-field><br/>
+                
+                <div style="text-align:center;">
+                    <lightning-button class="slds-m-top_small"
+                                      variant="brand"
+                                      type="submit"
+                                      name="update"
+                                      label="Update Record"></lightning-button>
+                </div>
+            </lightning-record-edit-form><br/>
+            <div></div>
+        </div>
+
+        <!-- modal footer start-->
+        <footer class="slds-modal__footer" if:false={isEditForm}>
+            <lightning-button variant="brand"
+                              label="Close"
+                              title="Close"
+                              onclick={closeModal}></lightning-button>
+        </footer>
+    </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+   
+</template>
+
+<!-- Selected view modal-->
+<template if:true={selectedShowModal}>
+
+    <section role="dialog" tabindex="-1"
+            aria-labelledby="modal-heading-02s"
+            aria-modal="true"
+            aria-describedby="modal-content-id-2"
+            class="slds-modal slds-fade-in-open">
+
+    <div class="slds-modal__container">
+        <!-- modal header -->
+        <header class="slds-modal__header">
+
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeSelectRecordsModal}>
+                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+            </button>
+            
+            <h2 id="modal-heading-02s" class="slds-text-heading_medium slds-hyphenate" if:false={isEditForm}>Selected Records</h2>
+            
+        </header>
+        <!-- modal body -->
+
+        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2" if:false={isEditForm}>
+            <c-rich-datatable-r-c 
+            key-field="Id" 
+            data={selectedRecords} 
+            columns={selcolumns} 
+            wrap-text-max-lines="3"
+            onsort={updateColumnSorting}
+            onrowaction={handleRowActions}
+            hide-checkbox-column=true
+            >
+            </c-rich-datatable-r-c>
+        </div>
+
+    <!-- modal footer start-->
+    <footer class="slds-modal__footer" if:false={isEditForm}>
+        
+        <lightning-button 
+                        label="Cancel"
+                        title="Cancel"
+                        onclick={closeSelectRecordsModal}></lightning-button>
+        &nbsp;&nbsp;
+        <lightning-button variant="brand"
+                        label="Confirmed"
+                        title="Confirmed"
+                        onclick={closeSelectRecordsModal}></lightning-button>                
+        
+    </footer>
+
+    </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+
+</template>
+
+</template>

@@ -1,0 +1,21 @@
+<template>
+    
+    <div aura:id="actionButtonBar" class="slds-clearfix slds-p-top_medium">
+    <div class="slds-float_right">
+
+        <lightning-button
+        label="Review Changes"
+        class="slds-var-m-around_medium"
+        onclick={handleLoopBack}
+        ></lightning-button>
+
+        <lightning-button
+            label="FINISHED"
+            class="slds-var-m-around_medium"
+            onclick={handleGoNext}
+        ></lightning-button>
+
+        </div>
+    </div>
+
+</template>
