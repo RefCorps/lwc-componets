@@ -1,0 +1,20 @@
+<template>
+    <div lwc:dom="manual"></div>
+    <div class="slds-var-m-around_medium">
+    <div dir="ltr" data-aura-rendered-by="116:0" class="uiOutputRichText" data-aura-class="uiOutputRichText">
+        <template if:true={selectLabel}>
+            <span class="slds-text-title_bold">{selectLabel}</span>&nbsp;
+            <p><i>{selectHint}</i></p>
+        </template>
+    </div>
+    <div>
+        <select name="selectedYear" class="select uiInput uiInputSelect uiInput--default uiInput--select"
+            onchange={handleChange}>
+            <template for:each={options} for:item="item">
+                <option value={item.value} key={item.value} >{item.label}</option>
+            </template>
+        </select>
+
+    </div>
+    </div>
+</template>

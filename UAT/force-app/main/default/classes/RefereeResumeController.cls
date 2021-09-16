@@ -19,10 +19,6 @@ public with sharing class RefereeResumeController {
         get;
         set;
     }
-    public static boolean renderPositions {
-        get;
-        set;
-    }
 
     public static final integer MAXREPORTINGYEARS = 10;
 
@@ -56,17 +52,19 @@ public with sharing class RefereeResumeController {
         set;
     }
 
-    public static integer allRegattaCnt {
-        get;
-        set;
-    }
+    // development - debuggin
+    //public static integer allRegattaCnt {
+    //    get;
+    //    set;
+    //}
 
     public static List < Clinic_Participation__c > allClinics {
         get;
         set;
     }
 
-    public static integer allClinicCnt {get; set;}
+    // development - debugging
+    //public static integer allClinicCnt {get; set;}
 
     // Current year data objects
     public static Date currDataCallStartDate {
@@ -200,29 +198,6 @@ public with sharing class RefereeResumeController {
         }
     }
     
-    // --------------------------------------------------------------------------------
-         
-    public class SumPositionsWorked {
-        public integer intDataCallYear {get; set;}
-        public integer intAligner {get; set;}
-        public integer intAssistantStarter {get; set;}
-        public integer intAthleteWeighing {get; set;}
-        public integer intBoatWeighing {get; set;}
-        public integer intChefDuLac {get; set;}
-        public integer intChiefJudgeAtFinish {get; set;}
-        public integer intChiefReferee {get; set;}
-        public integer intCourseMarshal {get; set;}
-        public integer intDeputyChief {get; set;}
-        public integer intFinishLine {get; set;}
-        public integer intFinishMarshal {get; set;}
-        public integer intJudgeAtStart {get; set;}
-        public integer intJury {get; set;}
-        public integer intOmbudsman {get; set;}
-        public integer intDaysWorked  {get; set;}
-    }
-    
-    public static List<SumPositionsWorked> rptPositionsWorkedByYear = new List<SumPositionsWorked>();
-
     // #endregion
 
     // =====================================================================================
@@ -231,7 +206,9 @@ public with sharing class RefereeResumeController {
     //static final string TESTCONTACTID = '0036A00000dxHjWQAU';  // Howard Meisner
     //static final string TESTCONTACTID = '0036A00000P1zVCQAZ';  // Doug Jones
     static final string TESTCONTACTID = '0036A00000peZM1QAM'; // Mike Miller
-
+/*
+    RefereeResumeController.generateRefResumeVF()
+*/
 
     // ====================================================================================
     //  MAIN METHOD
@@ -240,7 +217,7 @@ public with sharing class RefereeResumeController {
     @future
     public static void generateRefResumeVF() {
 
-        System.debug('>> IN generateRefResumeVF()');
+        System.debug(LoggingLevel.DEBUG, '>> IN generateRefResumeVF()');
 
         PageReference pg = ApexPages.currentPage();
         boolean testing = false;
@@ -248,16 +225,15 @@ public with sharing class RefereeResumeController {
         renderDemo = true;
         renderDetail = true;
         renderSummary = true;
-        renderPositions = true;
-        if (pg != null) {
+         if (pg != null) {
             pRequestedContactId = pg.getParameters().get('pRequestedContactId');
-            System.debug('>> pRequestedContactId ' + pRequestedContactId);
+            System.debug(LoggingLevel.DEBUG, '>> pRequestedContactId ' + pRequestedContactId);
 
             string pDataCallYear = pg.getParameters().get('pDataCallYear');
             if (!String.isBlank(pDataCallYear) && pDataCallYear.isNumeric()) {
                 currYear = Integer.valueOf(pDataCallYear);
             } else {
-                currYear = CurrentDataCallYear(Date.today())[ENDDATE].Year();
+                currYear = CurrentDataCallYear()[ENDDATE].Year();
             }
 
 
@@ -274,17 +250,19 @@ public with sharing class RefereeResumeController {
 
         } else if (pg == null) {
             testing = true;
-            currYear = CurrentDataCallYear(Date.today())[ENDDATE].Year();
-            System.debug('>> NO pRequestedContactId testing = true');
+            currYear = CurrentDataCallYear()[ENDDATE].Year();
+            System.debug(LoggingLevel.DEBUG, '>> NO pRequestedContactId testing = true');
         }
 
         currDataCallStartDate = dataCallPeriod(currYear)[STARTDATE];
         currDataCallEndDate = dataCallPeriod(curryear)[ENDDATE];
+        System.debug(LoggingLevel.DEBUG, '>> Current Data Call Year: ' + currYear + ' Dates: ' + currDataCallStartDate.format() + ' to ' + currDataCallEndDate.format());
+
 
         // test test test
         if (String.IsBlank(pRequestedContactId)) {
             pRequestedContactId = TESTCONTACTID;
-            System.debug('testing with pRequestedContactId ' + pRequestedContactId);
+            System.debug(LoggingLevel.DEBUG, '!!! Testing with pRequestedContactId ' + pRequestedContactId);
         }
         // end test - end test - end test
 
@@ -318,7 +296,7 @@ public with sharing class RefereeResumeController {
 
         //if (renderDetail) {
 
-            System.debug('renderDetail from ' + maxYear + ' to ' + currYear + ' included years ' + reportingYears);
+            System.debug(LoggingLevel.DEBUG, 'renderDetail from ' + maxYear + ' to ' + currYear + ' included years ' + reportingYears);
             
             allRegattas = GetDataCallYearRegattas(pRequestedContactId, currYear, reportingYears);
             allClinics = GetDataCallYearClinics(pRequestedContactId, currYear, reportingYears);
@@ -361,7 +339,7 @@ public with sharing class RefereeResumeController {
                     regattacount++;
                     //System.debug('existing key = ' + regattakey);
                     regattakey = String.valueOf(regattayear) + '.' + String.valueOf(regattacount);
-                    System.debug('created key = ' + regattakey);
+                    //System.debug('created key = ' + regattakey);
                     mapRegattaParticipation.put(regattakey, r);
                 }
 
@@ -382,7 +360,7 @@ public with sharing class RefereeResumeController {
             lastyrRegattaCnt = lastyrRegattas.size();
             prioryrRegattaCnt = prioryrRegattas.size();
 
-            System.debug(' current regatta count = ' + currRegattas.size());
+            //System.debug(LoggingLevel.DEBUG, ' current regatta count = ' + currRegattas.size());
 
             integer cliniccount = 0;
 
@@ -409,7 +387,7 @@ public with sharing class RefereeResumeController {
                     cliniccount++;
                     //System.debug('existing key = ' + clinickey);
                     clinickey = String.valueOf(clinicyear) + '.' + String.valueOf(cliniccount);
-                    System.debug('created key = ' + clinickey);
+                    //System.debug('created key = ' + clinickey);
                     mapClinicParticipation.put(clinickey, c);
                 }
 
@@ -436,32 +414,7 @@ public with sharing class RefereeResumeController {
         if (renderSummary) {
             rptDataCallSummaryYear = DataCallSummary(reportingYears);
         }
-
-        // GET POSITIONS WORKED
-        if (renderPositions) {
-            rptPositionsWorkedByYear = positionsWorked(pRequestedContactId, currYear, reportingYears);
-        }
-        
-        for(SumPositionsWorked w : rptPositionsWorkedByYear) {
-            System.debug('intDataCallYear: ' + w.intDataCallYear);
-            System.debug('     intAligner: ' + w.intAligner);
-            System.debug('     intAssistantStarter: ' + w.intAssistantStarter);
-            System.debug('     intAthleteWeighing: ' + w.intAthleteWeighing);
-            System.debug('     intBoatWeighing: ' + w.intBoatWeighing);
-            System.debug('     intChefDuLac: ' + w.intChefDuLac);
-            System.debug('     intChiefJudgeAtFinish: ' + w.intChiefJudgeAtFinish);
-            System.debug('     intChiefReferee: ' + w.intChiefReferee);
-            System.debug('     intCourseMarshal: ' + w.intCourseMarshal);
-            System.debug('     intDeputyChief: ' + w.intDeputyChief);
-            System.debug('     intFinishLine: ' + w.intFinishLine);
-            System.debug('     intFinishMarshal: ' + w.intFinishMarshal);
-            System.debug('     intJudgeAtStart: ' + w.intJudgeAtStart);
-            System.debug('     intJury: ' + w.intJury);
-            System.debug('     intOmbudsman: ' + w.intOmbudsman);
-            System.debug('     intDaysWorked : ' + w.intDaysWorked );
-        }
-        
-        
+       
     }
 
     // ===================================================================================================================================
@@ -502,7 +455,7 @@ public with sharing class RefereeResumeController {
         DateTime startRptDate = DataCallPeriod(rptDataCallYear - incldYears)[STARTDATE];
         DateTime endRptDate = DataCallPeriod(rptDataCallYear)[ENDDATE];
 
-        System.debug(LoggingLevel.DEBUG, 'Regatta DataCallYear: ' + rptDataCallYear + ' StartDate = ' + startRptDate.format() + ' EndDate' + endRptDate.format());
+        System.debug(LoggingLevel.DEBUG, 'Regatta DataCallYear: ' + rptDataCallYear + ' StartDate = ' + startRptDate.format() + '  EndDate = ' + endRptDate.format());
 
         List < Regatta_Participation__c > regattas = [SELECT
             Participation_Regatta__r.name,
@@ -523,7 +476,7 @@ public with sharing class RefereeResumeController {
             order by Participation_Regatta__r.Start_Date_Time__c desc
         ];
 
-        //System.debug(LoggingLevel.DEBUG, 'regattas count = ' + regattas.size());
+        System.debug(LoggingLevel.DEBUG, 'regattas count = ' + regattas.size());
 
         return regattas;
     }
@@ -536,7 +489,7 @@ public with sharing class RefereeResumeController {
         DateTime startRptDate = DataCallPeriod(rptDataCallYear - incldYears)[STARTDATE];
         DateTime endRptDate = DataCallPeriod(rptDataCallYear)[ENDDATE];
 
-        //System.debug(LoggingLevel.DEBUG, 'Clinic DataCallYear = ' + rptDataCallYear + ' ' + startRptYear.format('MM/dd/yyyy') + ' ' + endRptYear.format('MM/dd/yyyy') );
+        System.debug(LoggingLevel.DEBUG, 'Clinic DataCallYear: ' + rptDataCallYear + ' StartDate = ' + startRptDate.format() + '  EndDate = ' + endRptDate.format('MM/dd/yyyy') );
 
         List < Clinic_Participation__c > clinics = [Select
             Participation_Clinic__r.name,
@@ -560,7 +513,7 @@ public with sharing class RefereeResumeController {
             order by Participation_Clinic__r.Start_Date__c desc
         ];
 
-        //System.debug(LoggingLevel.DEBUG, 'clinincs count = ' + clinics.size());
+        System.debug(LoggingLevel.DEBUG, 'clinincs count = ' + clinics.size());
 
         return clinics;
 
@@ -573,6 +526,8 @@ public with sharing class RefereeResumeController {
     public static List < DataCallSummaryYear > dataCallSummary(integer incldYears) {
 
         //System.debug(LoggingLevel.DEBUG, '=====================================================================================================================');
+        //System.debug(LoggingLevel.DEBUG, '>> dataCallSummary incldYears = ' + incldYears);
+
 
         List < DataCallSummaryYear > lstDataCallSummaryData = new List < DataCallSummaryYear > ();
 
@@ -588,6 +543,12 @@ public with sharing class RefereeResumeController {
         List < string > lstWorkedOutOfRegion = new List < string > ();
 
         List <string> lstAttendedClinic = new List <string> ();
+
+
+        // WHEN TESTING YOU MAY NOT HAVE ACCESS TO currYear - this will resolve testing issues
+        if(currYear == null) {
+            currYear = CurrentDataCallYear()[ENDDATE].Year();
+        }
 
         for (integer n = 0; n <= incldYears; n++) {
 
@@ -683,6 +644,11 @@ public with sharing class RefereeResumeController {
 
         }
 
+        System.debug('  ranks size ' + ranks.size());
+        System.debug('Referee Rank ' + contactData.Referee_Rank__c);
+        System.debug('    currYear ' + currYear);
+        System.debug('  incldYears ' + incldYears);
+
         Map<string, string> dbranks = getHighestRankDuringDataCallYear( ranks, contactData.Referee_Rank__c,  currYear,  incldYears);
 
         // SET INTO FINAL OBJECT
@@ -739,100 +705,7 @@ public with sharing class RefereeResumeController {
         return lstDataCallSummaryData;
 
     }
-
-        
-    public static List<SumPositionsWorked> positionsWorked(string contactId, integer rptDataCallYear, integer incldYears) {
-
-        DateTime startRptDate = DataCallPeriod(rptDataCallYear - incldYears)[STARTDATE];
-        DateTime endRptDate = DataCallPeriod(rptDataCallYear)[ENDDATE];
-        //endRptDate.addYears().addDays(1)
-        System.debug(LoggingLevel.DEBUG, 'Regatta positionsWorked: ' + rptDataCallYear + ' StartDate = ' + startRptDate.format() + ' EndDate' + endRptDate.format());
-
-        // SELECT DATA
-        List<Regatta_Participation__c> rpos = [
-            SELECT Participation_Regatta__r.Start_Date_Time__c,
-            Aligner__c,
-            Assistant_Starter__c,
-            Athlete_Weighing__c,
-            Boat_Weighing__c,
-            Chef_Du_Lac__c,
-            Chief_Judge_at_Finish__c,
-            Chief_Referee__c,
-            Course_Marshal__c,
-            Deputy_Chief__c,
-            Finish_Line__c,
-            Finish_Marshal__c,
-            Judge_At_Start__c,
-            Jury__c,
-            Ombudsman__c,
-            Days_Worked__c
-            FROM Regatta_Participation__c
-            where Participant__c =: contactId
-            and Participation_Regatta__r.Start_Date_Time__c >=: startRptDate
-            and Participation_Regatta__r.Start_Date_Time__c <: endRptDate
-            WITH SECURITY_ENFORCED
-            order by Participation_Regatta__r.Start_Date_Time__c
-        ];
-
-        System.debug('rpos size ' + rpos.size());
-        
-        // LOAD MAP
-        Map<integer,SumPositionsWorked>mapRegattaPositions = new Map<integer,SumPositionsWorked>();
-        for(Regatta_Participation__c r : rpos) {
-            
-            // FIX THIS - SHOULD APPLY DATACALLYEAR METHOD TO KEY KEY
-            integer key =  getDataCallYear(r.Participation_Regatta__r.Start_Date_Time__c);
-            if(mapRegattaPositions.containsKey(key)) {
-            	SumPositionsWorked w = mapRegattaPositions.get(key);
-                w.intAligner = r.Aligner__c ? w.intAligner + 1 : w.intAligner;
-                w.intAssistantStarter = r.Assistant_Starter__c ? w.intAssistantStarter + 1 : w.intAssistantStarter;
-                w.intAthleteWeighing = r.Athlete_Weighing__c ? w.intAthleteWeighing + 1 : w.intAthleteWeighing;
-                w.intBoatWeighing = r.Boat_Weighing__c ? w.intBoatWeighing + 1 : w.intBoatWeighing;
-                w.intChefDuLac = r.Chef_Du_Lac__c ? w.intChefDuLac + 1 : w.intChefDuLac;
-                w.intChiefJudgeAtFinish = r.Chief_Judge_at_Finish__c ? w.intChiefJudgeAtFinish + 1 : w.intChiefJudgeAtFinish;
-                w.intChiefReferee = r.Chief_Referee__c ? w.intChiefReferee + 1 : w.intChiefReferee;
-                w.intCourseMarshal = r.Course_Marshal__c ? w.intCourseMarshal + 1 : w.intCourseMarshal;
-                w.intDeputyChief = r.Deputy_Chief__c ? w.intDeputyChief + 1 : w.intDeputyChief;
-                w.intFinishLine = r.Finish_Line__c ? w.intFinishLine + 1 : w.intFinishLine;
-                w.intFinishMarshal = r.Finish_Marshal__c ? w.intFinishMarshal + 1 : w.intFinishMarshal;
-                w.intJudgeAtStart = r.Judge_At_Start__c ? w.intJudgeAtStart + 1 : w.intJudgeAtStart;
-                w.intJury = r.Jury__c ? w.intJury + 1 : w.intJury;
-                w.intOmbudsman = r.Ombudsman__c ? w.intOmbudsman + 1 : w.intOmbudsman;            
-                mapRegattaPositions.put(key,w);
-            } else{
-                SumPositionsWorked w = new SumPositionsWorked();
-                w.intDataCallYear = key;
-                w.intAligner	= 	r.Aligner__c ? 1 : 0;
-                w.intAssistantStarter = r.Assistant_Starter__c ?  1 : 0;
-                w.intAthleteWeighing = r.Athlete_Weighing__c ?  1 : 0;
-                w.intBoatWeighing = r.Boat_Weighing__c ?  1 : 0;
-                w.intChefDuLac = r.Chef_Du_Lac__c ?  1 : 0;
-                w.intChiefJudgeAtFinish = r.Chief_Judge_at_Finish__c ?  1 : 0;
-                w.intChiefReferee = r.Chief_Referee__c ?  1 : 0;
-                w.intCourseMarshal = r.Course_Marshal__c ?  1 : 0;
-                w.intDeputyChief = r.Deputy_Chief__c ?  1 : 0;
-                w.intFinishLine = r.Finish_Line__c ?  1 : 0;
-                w.intFinishMarshal = r.Finish_Marshal__c ?  1 : 0;
-                w.intJudgeAtStart = r.Judge_At_Start__c ?  1 : 0;
-                w.intJury = r.Jury__c ? 1 : 0;
-                w.intOmbudsman = r.Ombudsman__c ?  1 : 0;
-                mapRegattaPositions.put(key,w);
-
-           }
-        }
-
-        // MOVE TO LIST FOR DISPPLAY
-        List<SumPositionsWorked> lstPositionsDataCallYr = new List<SumPositionsWorked>();
-        for (integer key : mapRegattaPositions.keySet()) {
-            SumPositionsWorked w = mapRegattaPositions.get(key);
-            lstPositionsDataCallYr.Add(w);
-        }
-        
-        return lstPositionsDataCallYr;
-    }
-    
-
-    
+ 
 
     // --------------------------------------------------------------------------------------------------------------
 
@@ -921,8 +794,8 @@ public with sharing class RefereeResumeController {
     // Calculate current data call year
     // returns Date array with 2 elements start date is in element 0 and end date is in element 1
     // HINT: use STARTDATE = 0 and ENDDATE = 1 to make code readable
-    public static Date[] currentDataCallYear(Date currdate) {
-        //Date currdate = date.today();
+    public static Date[] currentDataCallYear() {
+        Date currdate = date.today();
         integer year = currdate.year();
         if (currdate.month() < 1) {
             year = year - 1;
@@ -952,13 +825,4 @@ public with sharing class RefereeResumeController {
         return dataCallDate;
     }
 
-    
-    private static string setTrueFalse(boolean value) {
-        string rtr = 'No';
-        if(value) {
-            rtr = 'Yes';
-       }
-       return rtr;
-    }
-    
 }
