@@ -1,0 +1,4 @@
+<design:component>
+    <design:attribute name="sObj" label="sObject" description="The Object that contains your field to select." />
+    <design:attribute name="field" label="RecordId" description="The Id field to use for processing" />
+</design:component>
