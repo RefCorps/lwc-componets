@@ -19,7 +19,7 @@ public with sharing class EvaluationQuestionsController {
     @AuraEnabled 
     public static List<User> fetchEvaluator(){
        string UserId = UserInfo.getUserId();
-       // USE USER ID SINCE SOME USERS MAY NOT HAVE A CONTACT - WAY IT WON'T FAIL - THE CONTANTID WILL BE BLANK
+       // USE USER ID SINCE SOME USERS MAY NOT HAVE A CONTACT - THIS WAY IT WON'T FAIL - THE CONTANTID WILL BE BLANK
        List<User> evaluator = [select name, contactid from user where id =: UserId ];
        //System.debug(LoggingLevel.DEBUG,evaluator); 
        return evaluator;
@@ -128,6 +128,69 @@ public with sharing class EvaluationQuestionsController {
         }
         return myRegattasList;
     }
+
+    @AuraEnabled
+    public static Regatta__c getRegattaDetails(string regattaId){
+        try {
+            
+            System.debug(LoggingLevel.DEBUG,'getRegattaDetails regattaId: ' + regattaId);
+            
+            String query =  'Select Id, Name, ' +
+            + 'Chief_Referee_User__c, Chief_Referee__c, Chief_Referee__r.Name, ' 
+            + 'Deputy_Chief_User__c, Deputy_Chief__c, Deputy_Chief__r.Name,  '
+            + 'LOC_Primary_Contact__c, LOC__c, ' 
+            + 'Regatta_Course__c, Regatta_Description__c,  '
+            + 'Regatta_Type__c,  '
+            + 'Start_Date_Time__c, Start_Date_Year__c,  '
+            + 'End_Date_Time__c,  '
+            + 'Total_Regatta_Days__c, ' 
+            + 'US_Rowing_Registered__c  '
+            + 'FROM Regatta__c  '
+            + 'where Id = \'' + regattaId + '\' ';
+            Regatta__c regattadetail = Database.query(query);
+            return regattadetail;
+
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static string fetchCompletedCheckList(string regattaId, string evaltype){
+
+        System.debug(LoggingLevel.DEBUG,' >> IN fetchCompletedCheckList');
+        string rpturl = '';
+        try {
+            String query = 'Select Evaluation_Date__c, Evaluation_Location__c, Evaluator_Id__c, Evaluation_Type__c, ' + 
+            ' Evaluee_Id__c, Questionnaire_Id__c, RegattaId__c FROM Evaluation_Responses__c ' + 
+            ' where EVALUATION_TYPE__C = \''  +  evaltype  + '\' ' +
+            ' and regattaid__c = \'' + regattaId +  '\' ';
+            System.debug(LoggingLevel.DEBUG,' >>> query \n\t' + query);
+            Evaluation_Responses__c[] responses = Database.query(query);
+            System.debug(LoggingLevel.DEBUG,' >>> response size = ' + responses.size());
+            if (responses.size() > 0) {
+                string pEvaluatorId = responses[0].Evaluator_Id__c;
+                string pEvalueeId = responses[0].Evaluee_Id__c;
+                string pQuestionnaireId = responses[0].Questionnaire_Id__c;
+
+                // URI as commented out below not required - simply pass parameters
+                //string rpturl = 'https://uat-usrowing.cs166.force.com/apex/refereeassessment?inline=1';
+                rpturl = '/apex/refereeassessment?inline=1';
+                rpturl = rpturl + '&pEvaluatorId=' + pEvaluatorId;
+                rpturl = rpturl + '&pEvalueeId=' + pEvalueeId;
+                rpturl = rpturl + '&pQuestionnaireId=' + pQuestionnaireId;
+                System.debug(LoggingLevel.DEBUG,'URL: \n' + rpturl + '\n');
+        		System.debug(LoggingLevel.DEBUG,' << OUT fetchCompletedCheckList');
+            }
+            return rpturl;
+        } catch (Exception e) {
+
+            System.debug(LoggingLevel.ERROR,' !! fetchCompletedCheckList Error: ' + e.getMessage());
+            return rpturl;
+            //throw new AuraHandledException(e.getMessage());
+        }
+    }
+
     
     // GET A LIST OF REFEREE PARTICIPANT CONTACT IDS ASSOCIATED WITH A SPECIFIC REGATTA - EXCLUDE THE EVALUATOR
     // WE WILL STORE EVALUEE BY CONTACT ID 
@@ -239,6 +302,7 @@ public with sharing class EvaluationQuestionsController {
         String EvaluatorComment;
         String QuestionnaireDateTime;
         String QuestionnaireId;
+        String RegattaId;
         
         System.debug(LoggingLevel.DEBUG,'insertResponses:\n' + responseString);
         String[] responses = responseString.split('\n'); 
@@ -267,6 +331,8 @@ public with sharing class EvaluationQuestionsController {
                 EvaluationType = resp.substring(resp.indexOf('=')+1); }
             else if(resp.contains('evaluationlocation')) {
                 EvaluationLocation = resp.substring(resp.indexOf('=')+1); }
+            else if(resp.contains('regattaid')) {
+                 RegattaID = resp.substring(resp.indexOf('=')+1); }    
             else if(resp.contains('evaluationdate')) {
                 EvaluationDate = resp.substring(resp.indexOf('=')+1); }
             else if(resp.contains('questionnairedatetime')) {
@@ -303,16 +369,18 @@ public with sharing class EvaluationQuestionsController {
                 '\n\tEvalueeId=' + EvalueeId + 
                 '\n\tEvaluationQuestionNum=' + EvaluationQuestionNum +
                 '\n\tEvaluationType=' + EvaluationType + 
-                '\n\tEvaluationRating=' + EvaluationRating);
+                '\n\tEvaluationRating=' + EvaluationRating +
+                '\n\tRegattaId=' + RegattaId );
 
                 Evaluation_Responses__c er = new Evaluation_Responses__c();
                                 
                 er.Evaluation_Date__c = date.valueOf(EvaluationDate);
-                
+                System.debug(logginglevel.DEBUG,'insertResponses er.Evaluation_Date__c = ' + er.Evaluation_Date__c);
+
                 //system.debug(logginglevel.debug,'String QuestionnaireDatetime = '+ QuestionnaireDateTime );
                 // THIS WAS A VERY TRICKY ONE - NORMAL PARSE AND VALUEOF DID NOT WORK
                 er.Questionnaire_DateTime__c = (DateTime) JSON.deserialize('"' + QuestionnaireDateTime + '"', DateTime.class);
-                //system.debug(logginglevel.debug,'Parsed QuestionnaireDatetime = ' + er.Questionnaire_DateTime__c);
+                system.debug(logginglevel.debug,'Parsed QuestionnaireDatetime = ' + er.Questionnaire_DateTime__c);
                 
                 System.debug(LoggingLevel.DEBUG,'insertResponses genQuestionnaireID using [' + er.Questionnaire_DateTime__c + '] ' + EvalueeId);
                 if(String.isEmpty(QuestionnaireId)) {
@@ -321,10 +389,11 @@ public with sharing class EvaluationQuestionsController {
                 er.Questionnaire_Id__c = QuestionnaireId;
                 System.debug(LoggingLevel.DEBUG,'insertResponses genQuestionnaireID = [' + er.Questionnaire_Id__c + '] ');
                 
-                if(EvaluationLocation == null || EvaluationLocation.length() == 0)
+                if(EvaluationLocation == null || EvaluationLocation.length() == 0) {
                     er.Evaluation_Location__c = 'Location omitted';
-                else
+                } else {
                     er.Evaluation_Location__c = EvaluationLocation;
+                }  
                 er.Evaluation_Type__c = EvaluationQuestionId[0].Evaluation_Type__c;
                 er.Question_Number__c =  EvaluationQuestionId[0].Question_Number__c; // EvaluationQuestionNum;
                 er.Question_Text__c = EvaluationQuestionId[0].Question_Text__c;
@@ -340,14 +409,23 @@ public with sharing class EvaluationQuestionsController {
                 if(EvaluationRating == '3') {
                     er.Evaluation_Rating_Text__c  = EvaluationQuestionId[0].QuestionType__r.Response_Text_3__c;
                 }
+                
+                System.debug(loggingLevel.DEBUG,' ### EvaluationQuestionId[0].QuestionType__r.Name = ' + EvaluationQuestionId[0].QuestionType__r.Name);
                 if(EvaluationQuestionId[0].QuestionType__r.Name.contains('Overall')) {
-                   er.Evaluator_Comment__c = EvaluatorComment;    
+                   er.Evaluator_Comment__c = EvaluatorComment;  
+                } else if (EvaluationQuestionId[0].Question_Number__c.contains('SC')) {  // PATCH TO RESOLVE COMMENTS ISSUE
+                     er.Evaluator_Comment__c = EvaluatorComment;  
                 } else {
                    er.Evaluator_Comment__c = ''; 
                 }
+                
                 er.Evaluator_User_Id__c = Id.valueOf(EvaluatorUserId);
                 er.Evaluator_Id__c = Id.valueOf(EvaluatorContactId);
                 er.Evaluee_Id__c = Id.valueOf(EvalueeId);
+
+                if(RegattaId != null && RegattaId.length() > 10) {
+                    er.RegattaId__c = Id.valueOf(RegattaId);
+                }
 
                System.debug(LoggingLevel.DEBUG,'Inserting Response:' + 
                                  '\n\tQuestion_Id__c: ' + er.Question_Id__c +
@@ -357,13 +435,17 @@ public with sharing class EvaluationQuestionsController {
                                  '\n\tQuestionnaire_Id__c: ' + er.Questionnaire_Id__c +
                                  '\n\tEvaluation_Rating__c: ' + er.Evaluation_Rating__c +
                                  '\n\tEvaluation_Rating_Text__c: ' + er.Evaluation_Rating_Text__c + 
-                                 '\n\tEvaluator_Comment__c: ' + er.Evaluator_Comment__c 
+                                 '\n\tEvaluator_Comment__c: ' + er.Evaluator_Comment__c +
+                            	 '\n\tRegattaId__c: ' + er.RegattaId__c 
                                  );
                 erlast = er;
 
                 if(Test.isRunningTest()) {
                       System.debug('insertResponses - In test skipping actual insert');
                 } else {
+                    // only for testing
+                    // RCRawRegatta__c xr = new RCRawRegatta__c();
+                    // insert xr;
                     insert er;
                 }
                 
@@ -379,6 +461,7 @@ public with sharing class EvaluationQuestionsController {
         rr.Evaluator_User_Id__c = EvaluatorUserId;
         rr.Evaluator_Id__c = EvaluatorContactId; 
         rr.Evaluation_Type__c = EvaluationType;
+        rr.RegattaId__c = RegattaId;
 
         System.debug(LoggingLevel.DEBUG,'Evaluation ResponsesAbstract:' + 
         '\n\tQuestionnaire_Id__c: ' + rr.Questionnaire_Id__c +
@@ -386,12 +469,16 @@ public with sharing class EvaluationQuestionsController {
         '\n\tEvaluation_Location__c: ' + rr.Evaluation_Location__c +
         '\n\tEvalation_User_Id__c: ' + rr.Evaluator_User_Id__c +
         '\n\tEvaluator_Id__c: ' + rr.Evaluator_Id__c +
-        '\n\rEvaluation_Type__c: ' + rr.Evaluation_Type__c 
+        '\n\rEvaluation_Type__c: ' + rr.Evaluation_Type__c +
+        '\n\rRegattaId__c: ' + rr.RegattaId__c             
         );
 
         if(Test.isRunningTest()) {
             System.debug('insertResponses - In test skipping actual insert');
         } else {
+            //only for testing
+            //RCRawRegatta__c rx = new RCRawRegatta__c();
+            //insert rx;
             insert rr;
         }
         System.debug(LoggingLevel.DEBUG,'Insert to Evaluation ResponsesAbstract of Questionnaire Id ' + QuestionnaireId + ' completed');
@@ -651,7 +738,18 @@ public with sharing class EvaluationQuestionsController {
         $ID = evaluation ID
         */
        String filename = '';
-       String fmt = getProp('FileNameFormat');
+       
+       String PropertyName = 'FileNameFormat';
+       // TEMPORARY FIX - THIS SHOULD NOT BE HARDCODED
+       if(Position.contains('SAFETY CHECKLIST'))
+       {     
+           PropertyName = PropertyName + '_' + Position;
+           PropertyName = PropertyName.replace(' ', '_');
+       }
+       System.debug(LoggingLevel.DEBUG, 'FormatFileNameFromProps lookup: ' + PropertyName);
+       String fmt = getProp(PropertyName);
+       
+       
        if(Test.isRunningTest() && String.isNotBlank(testPropFileNameFormat) ) {
            System.debug(LoggingLevel.DEBUG,'FormatFileNameFromProps running test with ' + testPropFileNameFormat);
            if(testPropFileNameFormat.contains('NOPROP'))

@@ -286,6 +286,8 @@
 
             evalregatta = [select id, name, Start_Date_Time__c 
                            from regatta__c where id =: testregatta.id limit 1];
+
+            System.debug('LoadTestRegattaParticipantData test regattaid = ' + testregatta.id);               
         }
         EvaluationQuestionsController.testEvalregatta = evalregatta.clone();
         System.debug('Loaded regatta ' + evalregatta.Name);
@@ -399,6 +401,10 @@
             System.debug('LoadEvalResponses evaluatoruser is null.  Run LoadTestRegattaParticipantData');
             LoadTestRegattaParticipantData();
         }
+        if (adminuser == null) {
+            System.debug('LoadEvalResponses adminuser is null!');
+        }
+
         User evaluatorusr = [Select id from User where Id =: evaluatoruser.id];
 
         String querystmt0 = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
@@ -779,12 +785,15 @@
     public static void LoadEvalObjsData() {
 
         System.debug('Begin loadEvalObjsData');
-        if (evaluatoruser == null) {
+        if (evaluatoruser == null ) {
             System.debug('evaluatoruser is null');
             LoadTestRegattaParticipantData();
         }
+       
         System.runAs(adminuser) {
             Evaluation_Properties__c[] ep = [select Id from Evaluation_Properties__c];
+            System.debug('LoadEvalObjsData Evaluation_Properties__c size = '  + ep.size());
+
             if (ep.size() == 0) {
                 System.debug('loadEvalObjsData - loading Evaluation Properties from Static Resources');
                 List < sObject > epload = Test.loadData(Evaluation_Properties__c.sObjectType, 'Evaluation_Properties_Data');
@@ -806,6 +815,7 @@
                 eq = [select Id from Evaluation_Questions__c];
                 System.debug('loadEvalObjsData Questions eqload size = ' + eq.size());
             }
+
         }
         System.debug('loadEvalObjsData completed');
     }
@@ -1326,6 +1336,65 @@
         System.debug('testMyRegattas completed');
     }
     
+// =====================================================================================       
+
+@IsTest(SeeAllData=true)
+public static void testGetRegattaDetails() {
+
+    System.debug('=================================================================================================');
+
+    System.debug('Begin testGetRegattaDetails');
+    if (evaluatoruser == null) {
+        System.debug('evaluatoruser is null');
+        LoadTestRegattaParticipantData();
+        LoadEvalObjsData();
+    }
+
+    System.debug('testGetRegattaDetails using regatta id ' + evalregatta.id);
+    Exception unexpectedException;
+    try {
+
+        Regatta__c testregattadetails = EvaluationQuestionsController.getRegattaDetails(evalregatta.id);
+        System.debug('testGetRegattaDetails regatta name = ' + testregattadetails.Name);
+
+    } catch (Exception err) {
+            System.debug('testGetRegattaDetails err: ' + err);
+            unexpectedException = err;
+    }
+
+    system.assertEquals(null, unexpectedException, 'Exceptions should be handled by the method');
+    System.debug('testgetRegattaDetails completed');
+
+
+}
+
+// =====================================================================================       
+
+@IsTest(SeeAllData=true)
+public static void testFetchCompletedCheckList() {
+
+    System.debug('=================================================================================================');
+
+    System.debug('Begin testFetchCompletedCheckList');
+    if (evaluatoruser == null) {
+        System.debug('evaluatoruser is null');
+        LoadTestRegattaParticipantData();
+        LoadEvalObjsData();
+    }
+    System.debug('testGetRegattatestFetchCompletedCheckListDetails using regatta id ' + evalregatta.id);
+    Exception unexpectedException;
+    try {
+
+        string rpturl = EvaluationQuestionsController.fetchCompletedCheckList(evalregatta.id, 'REFEREE');
+        System.debug('testFetchCompletedCheckList rpturl = ' + rpturl);
+
+    } catch (Exception err) {
+            System.debug('testFetchCompletedCheckList err: ' + err);
+            unexpectedException = err;
+    }
+}
+
+
 // =====================================================================================    
     @IsTest(SeeAllData=true)
     public static void testgetQuestions(){

@@ -160,7 +160,7 @@ public List < Evaluation_Responses__c > getResponses(
 
     System.debug(LoggingLevel.INFO, 'in RefereeAssessment.getResponses' +
         '\n\tpEvaluatorId=' + pEvaluatorId +
-        '\n\rpEvalueeId=' + pEvalueeId +
+        '\n\tpEvalueeId=' + pEvalueeId +
         '\n\tpQuestionnaireId=' + pQuestionnaireId
     );
 
@@ -268,7 +268,13 @@ public List < Evaluation_Responses__c > getResponses(
     //         
 
     RefereeAssessment.respCount = selectedresp.size();
-    System.debug(LoggingLevel.DEBUG, 'Rows returned = ' + RefereeAssessment.respCount);
+
+    System.debug(LoggingLevel.DEBUG, 'prefacetxt rows returned = ' + prefacetxt.size());
+    System.debug(LoggingLevel.DEBUG, 'synopsisheadingtxt rows returned = ' + synopsisheadingtxt.size());
+    System.debug(LoggingLevel.DEBUG, 'synopsistxt rows returned = ' + synopsistxt.size());
+
+    System.debug(LoggingLevel.DEBUG, 'selectedquestions rows returned = ' + selectedquestions.size());
+ 
     boolean match = false;
     for (Evaluation_Questions__c q: selectedquestions) {
         match = false;
@@ -278,28 +284,48 @@ public List < Evaluation_Responses__c > getResponses(
             // there shouldn't be any group headers in responses
             //if(q.IsQuestionGroupHeader__c)    
             //    break;
+
+            // THE FOLLOWING POPULATES STATIC GLOBAL VALUES AND RETURNED VALUES IN editedresp
             if (q.Question_Number__c == er.Question_Number__c) {
-                //System.debug(er.Evaluator_User_Id__r.name);
-                Synopsis = synopsistxt[0];
-                SynopsisHeading = synopsisheadingtxt[0];
-                Preface = prefacetxt[0];
+
+                if (synopsistxt.size() > 0) {
+                    Synopsis = synopsistxt[0];
+                  
+                }
+                if (synopsisheadingtxt.size() > 0) {
+                    SynopsisHeading = synopsisheadingtxt[0];
+                    
+                }
+                if (prefacetxt.size() > 0 && !EvaluationTypeIn.contains('SAFETY CHECKLIST')) {
+                    Preface = prefacetxt[0];
+                  
+                }
                 EvaluatorName = er.Evaluator_Id__r.name;
                 EvalueeName = er.Evaluee_Id__r.name;
                 System.debug(EvalueeName);
                 EvaluationLocation = er.Evaluation_Location__c;
                 EvaluationDate = (DateTime) er.Evaluation_Date__c;
                 fmtEvaluationDate = EvaluationDate.format('MMMMM dd, yyyy');
-                if (String.isNotBlank(er.Evaluation_Type__c))
-                    PositionEvaluated = er.Evaluation_Type__c;
-                if (String.isNotBlank(er.Evaluator_Comment__c))
-                    EvaluatorComment = er.Evaluator_Comment__c;
+                if (String.isNotBlank(er.Evaluation_Type__c)) {
+                    PositionEvaluated = er.Evaluation_Type__c; 
+                }
+                if (String.isNotBlank(er.Evaluator_Comment__c)) {
+                    EvaluatorComment = er.Evaluator_Comment__c; 
+                }
                 editedresp.add(er);
+                System.debug(LoggingLevel.DEBUG, '\n\n ### Added matched response: ' + er);
                 match = true;
             }
         }
-        if (match)
-            continue;
+        if (match) {
+            System.debug(' !!! IF MATCH CONTINUE LOOP');
+            continue; 
+        }
         else {
+
+            System.debug(' xxx NO MATCH LOOP');
+
+            // THESE WILL BE VALUES ADDED TO editedresp
             Evaluation_Responses__c r = new Evaluation_Responses__c();
             System.debug(LoggingLevel.DEBUG, 'no match ' + q.Question_Number__c + '  ' + q.Question_Text__c);
             r.Question_Text__c = q.Question_Text__c;
@@ -314,7 +340,9 @@ public List < Evaluation_Responses__c > getResponses(
             editedresp.add(r);
         }
 
-    }
+    } // END OUTER LOOP
+
+    // THIS SETS THE GLOBAL VARIABLE THAT'S USED IN THE PDF
     RefereeAssessment.responses = editedresp;
 
     System.debug(LoggingLevel.INFO, 'out getResponses return size=' + RefereeAssessment.responses.size());

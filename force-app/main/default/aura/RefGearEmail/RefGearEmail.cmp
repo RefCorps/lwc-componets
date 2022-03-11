@@ -1,0 +1,16 @@
+<aura:component controller="GearImportExport"
+        implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" 
+        access="global" >
+
+<aura:handler name="init" value="{!this}" action="{!c.loadEmailAddresses}"/>
+    
+<aura:attribute name="emailTo" type="String" default="" />    
+<aura:attribute name="emailToLoaded" type="boolean" default="false" />    
+
+<aura:if isTrue="{!v.emailToLoaded}">
+<div id="headingtext" style="text-align: center;">
+    <aura:unescapedHtml value="{!v.emailTo}"/>.
+</div>
+</aura:if>    
+    
+</aura:component>

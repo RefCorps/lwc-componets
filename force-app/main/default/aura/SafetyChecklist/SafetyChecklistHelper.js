@@ -61,6 +61,38 @@
     },
 
 
+    isCheckListCompleted : function(component) {
+
+        var regattaId = component.get("v.field");
+        var action = component.get("c.fetchCompletedCheckList");
+        var self = this;
+        action.setParams({
+            "regattaId": regattaId,
+            "evaltype": 'SAFETY CHECKLIST'
+        });
+
+        action.setCallback(self,function(response){
+        	var state = response.getState();
+        	if(state === 'SUCCESS'){
+                //alert("getRegattaDetail rtr: " + response.getReturnValue());
+                var result = response.getReturnValue();
+                if(result)
+                {
+                    component.set("v.regattaDetail", result);
+                    component.set("v.completedCheckList",true);
+                    component.set("v.rptURL", result );
+                } else {
+                    component.set("v.completedCheckList",false);
+                }   
+             }else if (state === "ERROR") {
+                console.log('Error');
+            }
+        });
+        $A.enqueueAction(action);
+
+        
+    },
+
     // THIS WILL PULL A SERVER TIMESTAMP USING EvaluationQuestionsController.apxc - getQuestionnaireTS
     // PROVIDES A CONSTANT VALUE ACROSS ALL RESPONSES - IT WILL BE GMT
     getQuestionnaireTS: function(component) {
@@ -284,9 +316,9 @@
                     var pEvalueeId = p[1];
                     var pQuestionnaireId = p[2];
                     var pPosition = p[3];
-                    var pEvaluee = component.get('v.evalueeName');
-                    var pLocation = component.get('v.regattaName');
-                    var pPosition = component.find("selectedEvaluationType").get("v.value");
+                    var pEvaluee = component.get('v.regattaDetail.Name');
+                    var pLocation = component.get('v.regattaDetail.Name');
+                    var pPosition = component.get("v.selectedEvaluationType");
                     // genRefereeAssessmentPDF: function(component, evaluatorId, evalueeId, evaluee, position, questionnaireId)
                     /*
                     alert("genRefereeAssessmentPDF\n" +

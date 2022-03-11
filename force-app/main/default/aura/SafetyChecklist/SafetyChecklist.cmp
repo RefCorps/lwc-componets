@@ -28,12 +28,16 @@
     
     <aura:attribute name="isPhone" type="boolean" default="false" />
     <aura:attribute name="doExposeForm" type="boolean" default="false" />
+    <aura:attribute name="rptURL" type="string" default="" />
+    <aura:attribute name="completedCheckList" type="boolean" default="false" />
     
     <aura:attribute name="regattas" type="Object[]" />
     <aura:attribute name="regattaName" type="String" default="No regatta" />
     <aura:attribute name="regattaId" type="String" default="No Id" />
-    <aura:attribute name="regattaStartDate" type="String" />
     
+    <aura:attribute name="regattaStartDate" type="String" />
+    <aura:attribute name="regattaEndDate" type="String" />
+
     <aura:attribute name="participants" type="Object[]" />
     <aura:attribute name="evalueeId" type="String" />
     <aura:attribute name="evalueeName" type="String" />
@@ -43,6 +47,7 @@
     <aura:attribute name="prefaceloaded" type="boolean" default="false" />
     
     <aura:attribute name="evaluationtypes" type="String[]"/>
+    <aura:attribute name="selectedEvaluationType" type="String" />
     
     <aura:attribute name="questions" type="Evaluation_Questions__c[]" />
     <aura:attribute name="questionratings" type="Evaluation_QuestionTypeResp__c[]" />
@@ -104,22 +109,33 @@
     <!-- NEW QUESTIONNAIRE LAYOUT -->
     
     <lightning:layout>
-        <lightning:layoutItem padding="around-small" size="12" >
-            <div style="text-align:center;  padding: 10px; background: white; height: 50px">
-        <lightning:button 
-            variant="destructive" 
-            label="Complete Regatta Safety Checklist" 
-            title="Open checklist action" 
-            onclick="{! c.exposeForm }"/>
-            </div>
-        </lightning:layoutItem>
-    </lightning:layout>  
 
+        <aura:if isTrue="{!v.completedCheckList}">
+            <lightning:layoutItem padding="around-small" size="12">
+                    <div style="text-align:center;  padding: 10px; background: white; height: 50px">
+                        <lightning:button variant="success" label="Regatta Safety Checklist Completed"
+                        title="Open completed checklist report"  onclick="{!c.launchCompletedForm}" />
+                </div>
+                </lightning:layoutItem>
+        <aura:set attribute="else">
+                <lightning:layoutItem padding="around-small" size="12">
+                    <div style="text-align:center;  padding: 10px; background: white; height: 50px">
+                        <lightning:button variant="destructive" label="Complete Regatta Safety Checklist"
+                            title="Open checklist form" onclick="{! c.exposeForm }" />
+                    </div>
+                </lightning:layoutItem>
+        </aura:set>
+        </aura:if>
+
+    </lightning:layout>
+ 
+    
 <!-- HIDDEN FORM FOLLOWS -->    
 <aura:if isTrue="{!v.doExposeForm}">
     <lightning:layout>
         <lightning:layoutItem padding="around-small" size="12">
-        
+
+            
     <!-- CREATE NEW QUESTIONNAIRE -->
     <div aria-labelledby="newquestionnaireform">
         
@@ -211,16 +227,30 @@
              <lightning:input aura:id="regattastartdate" label="Regatta Start Date"
                      type="string" 
                      name="regattastartdate"
-                     value="{!v.regattaDetail.Start_Date_Year__c}"
+                     value="{!v.regattaStartDate}"
                      readonly="true" />
         </td><td>&nbsp;&nbsp;&nbsp;</td><td Style="border-bottom: 1pt solid lightgray">
              <lightning:input aura:id="regattaenddate" label="Regatta End Date"
                      type="string" 
                      name="regattaenddate"
-                     value="{!v.regattaDetail.End_Date_Time__c}"
+                     value="{!v.regattaEndDate}"
                      readonly="true" />
          </td></tr></table>
         
+<br/>
+         <table><tr><td Style="border-bottom: 1pt solid lightgray"> 
+
+            <lightning:input aura:id="evaluationdate" label="Regatta Observation Date"
+            type="date" 
+            name="evaluationdate" 
+            value="{!v.evaldate}" 
+            min="2019-01-01" 
+            max="2020-09-22" 
+            onchange="{!c.regattaDateCheck}"
+            />
+
+         </td></tr></table>
+
 <!-- ========================================================================================= -->
     
     <!--
@@ -256,12 +286,14 @@
         
         <!--
          <aura:if isTrue="{!v.isPhone}">  
-            <ui:inputDate aura:id="evaluationdate" label="Regatta Observation Date ph" 
+        -->     
+        <!--
+            <ui:inputDate aura:id="evaluationdate" label="Regatta Safety Checklist Date" 
                           class="slds-input-height"
                           value="{!v.evaldate}" 
-                          displayDatePicker="true"/>
-         -->
-        
+                          displayDatePicker="false"
+                          />
+        -->
             <!-- DUE TO TIME ELEMENT THIS DOES NOT WORK WELL WHEN JUST PROCESSING DATE
                  USING DEPRECIATED ELEMENT UNTIL THIS IS RESOLVED
             <lightning:input aura:id="evaluationdate" label="Regatta Date"

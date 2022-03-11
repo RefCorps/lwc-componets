@@ -1,0 +1,32 @@
+<aura:component controller="EvaluationQuestionsController" 
+                implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" 
+                access="global" >
+
+    <!-- This will fire on load - it starts the process of filling out the form -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInitRpt}"/>
+    
+    <aura:attribute name="assessments" type="Object[]" />
+    <aura:attribute name="evaluator" type="User" />
+    
+    <lightning:layout>
+    <lightning:layoutItem padding="around-small" size="12">
+    <div aria-labelledby="newquestionnaireform">
+    	<fieldset class="slds-box slds-theme--default slds-container--max-large">
+            
+     <lightning:select name="selectevaluee" 
+                      aura:id="selectedevaluee" 
+                      label="Select Evaluee from Completed Assessments to resend file" 
+                      required="false" onchange="{!c.confirmSend}">
+    	<option value="">choose evaluee assessment to resend...</option>
+        <aura:iteration items="{!v.assessments}" var="item">
+        	<option text="{!item.label}" value="{!item.value}"/>
+        </aura:iteration> 
+                                                              
+	</lightning:select>
+    
+        </fieldset>
+        </div>
+        </lightning:layoutItem>
+    </lightning:layout>
+    
+</aura:component>

@@ -22,43 +22,60 @@
         
         var fld = component.get("v.field");
         if(!fld) {
+            // Static UAT Regatta ID used in development without passing param from Regattas Table
             component.set("v.field","a0h3u000001p8WQAAY");
         }
-        
-        helper.getRegattaDetail(component);
 
+        helper.isCheckListCompleted(component);
+        var completed =  component.get("v.completedCheckList");        
+        if(!completed)
+        {
+            helper.getRegattaDetail(component);
         
-        helper.getEvaluator(component);
-        // NOTE: helper.getMyRegattas and helper.getQuestionnaireTS ARE CALLED FROM helper.getEvaluator
-        // This is because we're making async calls - we have to wait  
-        // for user Id before we can request regattas 
-        // Calling from getEvaluator after success effectively chains the calls
-        // but there can be issues when there are errors
-        // TODO: Switch to chained promises to better handle errors
-        // see developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/js_promises.htm
+            helper.getEvaluator(component);
+            // NOTE: helper.getMyRegattas and helper.getQuestionnaireTS ARE CALLED FROM helper.getEvaluator
+            // This is because we're making async calls - we have to wait  
+            // for user Id before we can request regattas 
+            // Calling from getEvaluator after success effectively chains the calls
+            // but there can be issues when there are errors
+            // TODO: Switch to chained promises to better handle errors
+            // see developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/js_promises.htm
+            
+            // Calendar date for display - this will be replaced once a regatta is selected
         
-        // Calendar date for display - this will be replaced once a regatta is selected
-        var today = new Date();
-		//component.set("v.evaldate", today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate());
-		//component.set("v.evaldate", (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear() ) ;
-        component.set("v.evaldate",$A.localizationService.formatDate(today,"MM/dd/yyyy"));
-        component.set("v.maxdate",$A.localizationService.formatDate(today,"MM/dd/yyyy"));
-        var oneyearago  = new Date();
-        oneyearago.setFullYear(oneyearago.getFullYear()-1);
-        component.set("v.mindate",$A.localizationService.formatDate(today,"MM/dd/yyyy"));
-        
-        //alert("doInint getEvalQuestions follows");        
-        //var evaluationtype = "PREFACE";
-        var evaluationtype = "SAFETY CHECKLIST";
-        var loadpreface = false; // true;
-        helper.getEvalQuestions(component, evaluationtype, loadpreface);
-        //alert("doInit getEvaluationTypes follows");
-        helper.getEvaluationTypes(component, evaluationtype, loadpreface);
- 
-        helper.getProps(component);
-        
+            var today = new Date();
+            component.set("v.maxdate",$A.localizationService.formatDate(today,"yyyy-MM-dd"));
+            var edate = today.getUTCFullYear() + "-" + (today.getUTCMonth() + 1) + "-" + (today.getUTCDate());
+            component.set("v.evaldate", edate );
+
+            var oneyearago  = new Date();
+            oneyearago.setFullYear(oneyearago.getFullYear()-1);
+            component.set("v.mindate",$A.localizationService.formatDate(today,"yyyy-MM-dd"));
+
+            //alert("doInint getEvalQuestions follows");        
+            //var evaluationtype = "PREFACE";
+            var evaluationtype = "SAFETY CHECKLIST";
+            component.set("v.selectedEvaluationType",evaluationtype);
+
+            var loadpreface = false; // true;
+            helper.getEvalQuestions(component, evaluationtype, loadpreface);
+            //alert("doInit getEvaluationTypes follows");
+            helper.getEvaluationTypes(component, evaluationtype, loadpreface);
+    
+            helper.getProps(component);
+        }
+
     },
      
+
+    launchCompletedForm : function(component) {
+
+        // rptURL is set using helper.isCheckListCompleted - called from doInit
+        var completedFromURL = component.get("v.rptURL");
+        window.open(completedFromURL);
+
+    },
+    
     regattaDateCheck: function(component) {
 		
 		var regattadate = component.get("v.regattadate");
@@ -239,16 +256,19 @@
     // CALLED WHEN THE SUBMIT BUTTON IS PRESSED - IT WILL COLLECT 
     // RESPONSE FOR INSERT TO EvaluationResponse
     openModel: function(component, event, helper) {
-        alert("openMoal");
+        alert("openModal");
         var evaluationreview = ""; 
         var evaluatorname = component.find("evaluatorname").get("v.value");
         //var evaluatorid = component.find("evaluatorid").get("v.value");
         //var evaluatorcontactid = component.find("evaluatorcontactid").get("v.value");
         var evaluatorcontactid = component.find("evaluatorcontactid").get("v.value");
         var evaluatoruserid = component.find("evaluatoruserid").get("v.value");    
-        var evalueename = component.get('v.evalueeName'); //component.find("evalueename").get("v.value");
-        var evalueeid =  component.get('v.evalueeId'); //component.find("evalueeid").get("v.value");
+
+        // IN THE PROTYPE EVALUEE WAS CHIEF
+        var evalueename = component.get('v.regattaDetail.Name'); //component.find("evalueename").get("v.value");
+        var evalueeid =  component.get('v.regattaDetail.Chief_Referee__c'); //component.find("evalueeid").get("v.value");
         
+
         var questionnairedatetime = component.get('v.questionnaireTS');
         
         // NOTE: SOME OF THE EDITS BELOW SHOULD NOT NEEDED WITH THE REORG OF THE FORM - BUT I'VE LEFT THEM JUST IN CASE
@@ -270,8 +290,10 @@
             //$A.util.removeClass(evalueecombo, 'slds-has-error');
         }
         
-        var evaluationtypeCmp = component.find("selectedEvaluationType");
-        var evaluationtype = evaluationtypeCmp.get("v.value");
+        //var evaluationtypeCmp = component.find("selectedEvaluationType");
+        //var evaluationtype = evaluationtypeCmp.get("v.value");
+        var evaluationtype = "SAFETY CHECKLIST";
+        
         // EVALUATION TYPE EDIT - THERE SHOULD BE A TYPE OTHERWISE THERE WON'T BE 
         // QUESTIONS -- BUT YOU CAN OMIT SELECTION - HIDE SUBMIT BUTTON IF THERE ARE NO QUESTIONS 
         // TODO: BUTTON HIDDEN UNTIL QUESTIONS LOADED AND UNTIL SUCCESSFUL SUBMISSION
@@ -281,20 +303,23 @@
             return;
         } 
         
-        var evaluationlocation =  component.get("v.regattaName");  //component.find("evaluationlocation").get("v.value");
-        var evaluationdate = component.find("evaluationdate").get("v.value");
+        //var evaluationlocation =  component.get("v.regattaName");  //component.find("evaluationlocation").get("v.value");
+        var evaluationlocation = component.get("v.regattaDetail.Name");
+        var regattaid = component.get("v.regattaDetail.Id");
+        //var evaluationdate = component.find("evaluationdate").get("v.value");
+        var evaluationdate = component.get("v.evaldate");  // TODO:  CHANGED FROM FIXED DATE TO CALENDAR
         var evaluatorcomment = component.find("evaluatorcomment").get("v.value");
         
         var responseList = [];
         var review = '<table style="width:100%;">';
         review = review + '<tr style="border-bottom:1pt solid black;"><td style="width:50%;vertical-align:top">Evaluator</td><td style="width:50%;vertical-align:top">' + evaluatorname + '</td></tr>';   //+ " (" + evaluatorid + ")</td></tr>"
-        review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Evaluee</td><td style="vertical-align:top">' + evalueename + '</td></tr>';
+        review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Regatta</td><td style="vertical-align:top">' + evalueename + '</td></tr>';
 
         var displayDateTime = new Date(questionnairedatetime);
          review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Questionnaire DateTime</td><td style="vertical-align:top">' + displayDateTime + '</td></tr>';
         
          review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Evaluation Date</td><td  style="vertical-align:top">' + evaluationdate + '</td></tr>'; 
-         review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Location</td><td  style="vertical-align:top">' + evaluationlocation + '</td></tr>';
+         //review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Location</td><td  style="vertical-align:top">' + evaluationlocation + '</td></tr>';
         
         var cntOverall = 0;
         var responses = component.get("v.responses");
@@ -349,6 +374,7 @@
         responseString = responseString + "evaluationtype=" + evaluationtype + "\n";
         responseString = responseString + "questionnairedatetime=" + questionnairedatetime + "\n";
         responseString = responseString + "evaluationlocation=" + evaluationlocation + "\n"; 
+        responseString = responseString + "regattaid=" + regattaid + "\n"; 
         responseString = responseString + "evaluationdate=" + evaluationdate + "\n"; 
         responseString = responseString + "evaluatorcomment=" + evaluatorcomment + "\n";
         responseString = responseString + resps;
@@ -413,6 +439,8 @@
        testmsg += "\n\tEnd Date: " + new Intl.DateTimeFormat('en-US').format(enddate);
        //alert(testmsg);
        
+       component.set("v.regattaStartDate", new Intl.DateTimeFormat('en-US').format(startdate));
+       component.set("v.regattaEndDate", new Intl.DateTimeFormat('en-US').format(enddate));
        
        var exposed = component.get("v.doExposeForm");
        if(exposed) {
