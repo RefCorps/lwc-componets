@@ -53,6 +53,8 @@
                 //alert("getRegattaDetail rtr: " + response.getReturnValue());
                 var result = response.getReturnValue();
 				component.set("v.regattaDetail", result);
+                //alert('usrowing registred ' + result.US_Rowing_Registered__c);
+                component.set("v.regattaCklistRequired", result.US_Rowing_Registered__c);
              }else if (state === "ERROR") {
                 console.log('Error');
             }
@@ -276,6 +278,16 @@
                 } else {
 	            	component.set("v.questions", qObj);
                 	component.set("v.questionsloaded",true);
+
+                    var questions = component.get("v.questions");
+                    var type = "";
+                    // CREATE LIST OF REQUIRED QUESTIONS WITH RESPONSE REQUIRED
+                    for(var q = 0; q < qObj.length; q++ ) {
+                        if( qObj[q].Question_Type__c.includes("Overall") || qObj[q].Question_Type__c.includes("Overview") ) {           
+                            component.set("v.overviewQuestion",true);
+                        }
+                    }
+
                 }
 	           
             } else {

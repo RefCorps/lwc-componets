@@ -309,9 +309,9 @@ public List < Evaluation_Responses__c > getResponses(
                 if (String.isNotBlank(er.Evaluation_Type__c)) {
                     PositionEvaluated = er.Evaluation_Type__c; 
                 }
-                if (String.isNotBlank(er.Evaluator_Comment__c)) {
-                    EvaluatorComment = er.Evaluator_Comment__c; 
-                }
+                //if (String.isNotBlank(er.Evaluator_Comment__c)) {
+                //    EvaluatorComment = er.Evaluator_Comment__c; 
+                //}
                 editedresp.add(er);
                 System.debug(LoggingLevel.DEBUG, '\n\n ### Added matched response: ' + er);
                 match = true;

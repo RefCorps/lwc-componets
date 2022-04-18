@@ -303,7 +303,7 @@ public with sharing class EvaluationQuestionsController {
         String QuestionnaireDateTime;
         String QuestionnaireId;
         String RegattaId;
-        
+ 
         System.debug(LoggingLevel.DEBUG,'insertResponses:\n' + responseString);
         String[] responses = responseString.split('\n'); 
         
@@ -317,6 +317,8 @@ public with sharing class EvaluationQuestionsController {
         Evaluation_Responses__c erlast = new Evaluation_Responses__c();
 		Evaluation_ResponsesAbstract__c rr = new Evaluation_ResponsesAbstract__c();
         
+        String EvaluationComment = '';
+
         try {
         
         // begin responses for loop
@@ -344,8 +346,19 @@ public with sharing class EvaluationQuestionsController {
                 String[] rsp = resp.split('~');
                 String EvaluationQuestionNum = rsp[0];
                 String[] rrsp = rsp[1].split('-');
-                String EvaluationRating = rrsp[1];
-                  
+                String EvaluationRating = '';
+                              
+                System.debug(' rrsp[1] = ' + rrsp[1]);
+                if(rrsp[1].contains('#')) {
+                    String[] rs = rrsp[1].split('#');
+                    EvaluationRating = rs[0];
+                    EvaluationComment = rs[1];
+                } else {
+                    EvaluationRating = rrsp[1];
+                }
+                System.debug(LoggingLevel.DEBUG, 'EvaluationRating = ' + EvaluationRating);
+                System.debug(LoggingLevel.DEBUG, 'EvaluationComment = ' + EvaluationComment);
+
                 System.debug(LoggingLevel.DEBUG,'insertResponses - lookup Question_Number__c ' + EvaluationQuestionNum);
 
                 // THIS WAS CREATED TO REDUCE TRAFFIC BETWEEN CLIENT AND SERVER 
@@ -370,6 +383,7 @@ public with sharing class EvaluationQuestionsController {
                 '\n\tEvaluationQuestionNum=' + EvaluationQuestionNum +
                 '\n\tEvaluationType=' + EvaluationType + 
                 '\n\tEvaluationRating=' + EvaluationRating +
+                '\n\tEvaluationComment=' + EvaluationComment +
                 '\n\tRegattaId=' + RegattaId );
 
                 Evaluation_Responses__c er = new Evaluation_Responses__c();
@@ -410,10 +424,15 @@ public with sharing class EvaluationQuestionsController {
                     er.Evaluation_Rating_Text__c  = EvaluationQuestionId[0].QuestionType__r.Response_Text_3__c;
                 }
                 
+                // EvaluationComment is common to all questions
+                // EvaluatorComment is available when there is no actual Overall or Overview with no question tied to the comment
+                // EvaluatorComment is to be deprecated
                 System.debug(loggingLevel.DEBUG,' ### EvaluationQuestionId[0].QuestionType__r.Name = ' + EvaluationQuestionId[0].QuestionType__r.Name);
-                if(EvaluationQuestionId[0].QuestionType__r.Name.contains('Overall')) {
+                if(EvaluationComment.length() > 0) {
+                    er.Evaluator_Comment__c = EvaluationComment;
+                } else if(EvaluationQuestionId[0].QuestionType__r.Name.contains('Overall')) {
                    er.Evaluator_Comment__c = EvaluatorComment;  
-                } else if (EvaluationQuestionId[0].Question_Number__c.contains('SC')) {  // PATCH TO RESOLVE COMMENTS ISSUE
+                } else if (EvaluationQuestionId[0].Question_Number__c.contains('Overview')) {  // PATCH TO RESOLVE COMMENTS ISSUE
                      er.Evaluator_Comment__c = EvaluatorComment;  
                 } else {
                    er.Evaluator_Comment__c = ''; 
@@ -446,7 +465,9 @@ public with sharing class EvaluationQuestionsController {
                     // only for testing
                     // RCRawRegatta__c xr = new RCRawRegatta__c();
                     // insert xr;
-                    insert er;
+                    // TEST TEST TEST 
+                    insert er;  
+                    //System.debug(LoggingLevel.DEBUG, 'er 459 ' +  er);
                 }
                 
             }  // end if resp.contains('~')  
@@ -479,7 +500,10 @@ public with sharing class EvaluationQuestionsController {
             //only for testing
             //RCRawRegatta__c rx = new RCRawRegatta__c();
             //insert rx;
+
+            // TEST TEST TEST
             insert rr;
+            //System.debug(LoggingLevel.DEBUG, 'er 496 ' +  rr);
         }
         System.debug(LoggingLevel.DEBUG,'Insert to Evaluation ResponsesAbstract of Questionnaire Id ' + QuestionnaireId + ' completed');
             

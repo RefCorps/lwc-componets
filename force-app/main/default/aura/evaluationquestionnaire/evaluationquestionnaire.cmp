@@ -21,6 +21,7 @@
     <aura:attribute name="questionnaireTS" type="DateTime" default="" />
     <aura:attribute name="lastNDays" type="string" default="190" />
     
+    <!-- isPhone is used to ID Phone devices vs. browsers - adjusts formatting -->
     <aura:attribute name="isPhone" type="boolean" default="false" />
     
     <aura:attribute name="regattas" type="Object[]" />
@@ -253,7 +254,7 @@
                     <!-- begin phone -->    
                      <tr width="100%">
                          
-                            <td colspan:="4">
+                            <td colspan="4">
                             <table width="100%">
                                 
                                 <tr style="height: 35px;">
@@ -280,7 +281,7 @@
                                 <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
                                     
                                 <tr  style="font-size: 60%; text-align:center; border-bottom: thin solid lightgray; height: 50px;">
-                                    <td style="padding-left: 10px;">
+                                    <td style="text-aligh: center; padding: 10px;">
                                         <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
                                             <input type="radio" id="{!(q.Question_Number__c+'-1')}" 
                                                    name="{!q.Question_Number__c}" 
@@ -290,7 +291,7 @@
                                         </aura:if>
                                     </td>
                                     
-                                    <td>
+                                    <td style="text-align:center; padding: 10px;">
                                         <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 2}">
                                             <input type="radio" id="{!(q.Question_Number__c+'-2')}" name="{!q.Question_Number__c}" 
                                                    value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_2__c + ']-2')}" 
@@ -299,7 +300,7 @@
                                         </aura:if>
                                     </td>
                                     
-                                    <td>
+                                    <td style="text-align:center; padding: 10px;">
                                         <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 3}">
                                             <input type="radio" id="{!(q.Question_Number__c+'-3')}" name="{!q.Question_Number__c}" 
                                                    value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_3__c + ']-3')}" 
@@ -324,7 +325,7 @@
                          <input type="hidden" id="questionId" name="questionId" value="{!q.Id}" />
                     </td>
                       
-                    <td>
+                    <td style="text-align: center; vertical-align: middle; padding: 5px">
                         <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
                            <input type="radio" id="{!(q.Question_Number__c+'-1')}" 
                                 name="{!q.Question_Number__c}"
@@ -334,7 +335,7 @@
                         </aura:if>
                     </td>
                       
-                    <td>
+                    <td style="text-align: center; vertical-align: middle; padding: 5px">
                         <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 2}">
                            <input type="radio" id="{!(q.Question_Number__c+'-2')}" name="{!q.Question_Number__c}" 
        							value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_2__c + ']-2')}" 
@@ -343,7 +344,7 @@
                         </aura:if>
                     </td>
                      
-                    <td>
+                    <td style="text-align: center; vertical-align: middle; padding: 5px">
                         <aura:if isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 3}">
                            <input type="radio" id="{!(q.Question_Number__c+'-3')}" name="{!q.Question_Number__c}" 
        							value="{!(q.Question_Number__c+'^'+q.Question_Text__c+'  [' + q.QuestionType__r.Response_Text_3__c + ']-3')}" 

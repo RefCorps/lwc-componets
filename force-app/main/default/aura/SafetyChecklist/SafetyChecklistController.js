@@ -63,6 +63,7 @@
             helper.getEvaluationTypes(component, evaluationtype, loadpreface);
     
             helper.getProps(component);
+
         }
 
     },
@@ -121,23 +122,25 @@
        var idx = event.target.value;
        var key = idx.substr(0,idx.indexOf("^"));
 
-/* TODO:  THIS CONTROL THE OPENING OF A TEXTAREA
-       if(idx.includes("Requires Training]") || idx.includes("Needs Work")) {
+/* TODO:  THIS CONTROLS THE OPENING OF A TEXTAREA */
+       //alert("idx = " + idx);
+       if (idx.includes("Requires Training]") || idx.includes("Needs Work]") || idx.includes("NO]") || idx.includes("No]")) {
            var k = key.split('-');
            var ckey = k[0] + '-4r';
-           var ctoprow = k[0] +'-0r';
+           var ctoprow = k[0] + '-0r';
            var cval = k[0] + '-4';
            var cTR = document.getElementById(ckey);
-           var cTR1 = document.getElementById(ctoprow); 
+           var cTR1 = document.getElementById(ctoprow);
            //alert("style.display: " + cTR.style.display);
-           if(cTR.style.display.includes("none")) { 
-            cTR.style.display = "block";
-            cTR1.style.borderBottom = "none";
-            var testval =  cval.get("v.value");
-            alert("test val="+ testval);
+           if (cTR.style.display.includes("none")) {
+               cTR.style.display = "block";
+               cTR1.style.borderBottom = "none";
+               //var testval = cval.get("v.value");
+               //alert("test val=" + testval);
            }
        }
-*/       
+/* END CODE CONTROLLING TEXTAREA */       
+
        var responses = component.get("v.responses");
        // remove duplicate response by key        
        for(var i = 0; i < responses.length; i++) {
@@ -155,6 +158,76 @@
         
     },
         
+    handleOverAllComment : function(component, event, helper) 
+    {
+ 
+        //alert("handleOverAllComment");
+        var idx = event.target.value;
+        var q = event.target.name;
+        var resp = event.target.name;
+        var rckey = resp.substr(0,resp.indexOf("~"));
+
+        var question = q.split("^")[1];
+        //key = idx.substr(0,idx.indexOf("^"));
+        //var k = key.split('~');
+        //var ckey = k[0] + '-4r';
+        //var ctoprow = k[0] + '-0r';
+        //var cval = k[0] + '-4';
+        //var cTR = document.getElementById(ckey);
+        //var cTR1 = document.getElementById(ctoprow);
+
+        console.log("key=" + resp + " question=" + question) ;
+
+        var responses = component.get("v.responses");
+       // remove duplicate response by key        
+       for(var i = 0; i < responses.length; i++) {
+            var k = responses[i].substring(0,responses[i].indexOf("~"));
+            //alert("list " + k + " new entry " + key);
+            var response = responses[i];
+            if(k == resp)
+            	responses.splice(i,1);
+        }
+        // add the new response
+        responses.push(resp);
+        responses.sort();
+        console.log(responses);
+        component.set("v.responses",responses);
+
+        var comments = component.get("v.responsecomments");
+        //console.log("key = " + name + ", val = " + val);
+        
+        //component.find("evaluatorcomment").set("v.value",idx);
+        component.find("evaluatorcomment").set("v.value","");
+
+        comments.push(rckey + "~" + idx);
+		comments.sort();
+        component.set("v.responsecomments",comments);
+ 
+    },
+
+    handleResponseComment : function(component, event, helper)
+    {
+
+        console.log("in handleResponseComment");
+      	var val = event.target.value;
+        var id = event.target.id;
+        var name = event.target.name;
+
+        if(name.includes("Overall")) {
+            var responses = component.get("v.responses");
+            alert("val=" + val + "id=" + id + " name=" + name);
+            component.set("v.responses",responses);
+        }
+
+        var comments = component.get("v.responsecomments");
+        //console.log("key = " + name + ", val = " + val);
+        
+        comments.push(name + "~" + val);
+		comments.sort();
+        component.set("v.responsecomments",comments);
+
+    },
+    
     getEvalPreamble : function(component, event, helper) {
         //alert("in getEvalPreamble");
         var evaluationtype = "PREAMBLE";
@@ -255,8 +328,9 @@
     // MODAL CODE - 
     // CALLED WHEN THE SUBMIT BUTTON IS PRESSED - IT WILL COLLECT 
     // RESPONSE FOR INSERT TO EvaluationResponse
-    openModel: function(component, event, helper) {
-        alert("openModal");
+    openModal: function(component, event, helper) {
+        
+        //alert("openModal");
         var evaluationreview = ""; 
         var evaluatorname = component.find("evaluatorname").get("v.value");
         //var evaluatorid = component.find("evaluatorid").get("v.value");
@@ -267,7 +341,6 @@
         // IN THE PROTYPE EVALUEE WAS CHIEF
         var evalueename = component.get('v.regattaDetail.Name'); //component.find("evalueename").get("v.value");
         var evalueeid =  component.get('v.regattaDetail.Chief_Referee__c'); //component.find("evalueeid").get("v.value");
-        
 
         var questionnairedatetime = component.get('v.questionnaireTS');
         
@@ -323,25 +396,36 @@
         
         var cntOverall = 0;
         var responses = component.get("v.responses");
-        //alert("responses  " + responses)
+        //alert("responses  " + responses);
         //var resptext = cmp.get("v.questiontext");
         var resps = "";
         var respList = [];
        
         //
         var required = [];
-        var questions = component.get("v.questions")
+        var questions = component.get("v.questions");
+        // CREATE LIST OF REQUIRED QUESTIONS WITH RESPONSE REQUIRED
         for(var q = 0; q < questions.length; q++ ) {
             if(questions[q].isRequired__c) {           
             	required.push(questions[q].Question_Text__c);
             }
         }
         //
-        cntOverall = required.length;
+        //cntOverall = required.length;
         //alert("There are " + cntOverall + " required questions");
         //
+        
+        var commentsmap = new Map();
+        var responsecomments = component.get("v.responsecomments");
+        for(var c = 0; c < responsecomments.length; c++ ) {
+           var cr = responsecomments[c].split("~");
+           commentsmap.set(cr[0],cr[1]);
+           console.log(c + " " + cr[0] + " " + cr[1]);
+        }
+
+        //alert("Responses length = " + responses.length);
         for(var i = 0; i < responses.length; i++) {
-            resps = resps + responses[i] + "\n";
+            //resps = resps + responses[i] + "\n"; MOVED DOWN
             //alert("Check answers for required " + responses[i]);
             for(var r = 0; r < required.length; r++) {
                 if(responses[i].includes(required[r])) {
@@ -351,14 +435,33 @@
                 }
             }
             //
+            var key = responses[i].split("~")[0];
+            var comment = "";
+            if(commentsmap.has(key)) {
+                comment = commentsmap.get(key);
+                console.log("found comment " + key + " " + comment);
+            }
+            
             var resp = responses[i].substring(responses[i].indexOf("^")+1);
             resp = resp.substring(0,resp.indexOf("-"));
             resp = '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">' + resp.replace('[','</td><td style="vertical-align:top">');
-            resp = resp.replace(']','</td></tr>');
+            //resp = resp.replace(']','</td></tr>');
+            resp = resp.replace(']','');
+
+            if(comment) {
+                resp = resp + '<br>' + comment;
+                resps = resps + responses[i] + "#" + comment + "\n";
+            } else {
+
+                resps = resps + responses[i] + "\n";
+            }
+            resp = resp + '</td></tr>';
+            
             //responseList.push(resp);
             review = review + resp;
         }
-        //alert("Check for missed required elements");
+        
+        //alert("Check for missed required elements - required.length = " + required.length);
         if(required.length > 0)
         {
             for(var r = 0; r < required.length; r++) {
@@ -380,7 +483,10 @@
         responseString = responseString + resps;
         evaluationreview = responseString;
         
-         review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Evalautor Comment</td><td>' + evaluatorcomment + '</td></tr>';
+        if(!component.get("v.overviewtype")) {
+            review = review + '<tr style="border-bottom:1pt solid black;"><td style="vertical-align:top">Evalautor Comment</td><td>' + evaluatorcomment + '</td></tr>';
+        }
+
         review = review + '</table>';
         //alert(responseString + "\n" + responseList);
         //alert(responseString);

@@ -1,5 +1,8 @@
 <apex:page Controller="RefereeAssessment" action="{!getResponsesVF}" renderAs="PDF" showHeader="false" >
-  
+<!--
+<apex:page Controller="RefereeAssessment" action="{!getResponsesVF}" showHeader="false" >
+-->
+
 <div ID="renderedPage">
 
 <script>
@@ -24,56 +27,80 @@ $( document ).ready(function() {
                 <td>Evaluator:</td><td>{!EvaluatorName}</td>
             </tr>
             <tr>
-                <td>Evaluee:</td><td>{!EvalueeName}</td>
+                <td>
+                      {!IF(contains(PositionEvaluated,'SAFETY CHECKLIST'),'Chief Referee:','Evaluee:')}
+                </td><td>{!EvalueeName}</td>
             </tr>
                 <tr>
-                    <td>Position Evaluated:</td><td>{!PositionEvaluated}</td>
+                    <td>Evaluation Type:</td><td>{!PositionEvaluated}</td>
                 </tr>
             <tr>
-                <td>Evaluation Location:</td><td>{!EvaluationLocation}</td>
+                <td>
+                    {!IF(contains(PositionEvaluated,'SAFETY CHECKLIST'),'Regatta:','Evaluation Location:')}
+                </td><td>{!EvaluationLocation}</td>
             </tr>
             <tr>
-                <td>Evaluation Date:</td><td>{!fmtEvaluationDate}</td>
+                <td>
+                    {!IF(contains(PositionEvaluated,'SAFETY CHECKLIST'),'Assessment Date:','Evaluation Date:')}
+                </td><td>{!fmtEvaluationDate}</td>
             </tr>
             </table>
-                      
-            <apex:outputLabel value="{!Preface.Question_Text__c}" escape="false" />
-         
-            <div style="page-break-after:always;">
-            </div>
-            
-            <div style="page-break-after:always;">
-            <table >
-                    <tr style="background:rgb(153, 204, 255);"><td width="100%" >{!SynopsisHeading.Question_Text__c}</td></tr>
-                    <tr><td><apex:outputLabel value="{!Synopsis.Question_Text__c}" escape="false" /></td></tr>
-            </table>
-            </div>
-                        
-           <apex:pageBlockTable value="{!responses}" var="evalq" rules="rows" align="center"  columns="3" columnsWidth="70%,10%,20%">
+   
+            <table style="{!IF(contains(PositionEvaluated,'SAFETY CHECKLIST'),'display:none;','display:inline;')};"><tr><td>
+   
+                <apex:outputLabel value="{!IF(Preface.Question_Text__c != null,Preface.Question_Text__c,'')}" escape="false" />
+                <!--         
+                <apex:outputLabel value="{!Preface.Question_Text__c}" escape="false" />
+                -->
+
+                <div style="page-break-after:always;" >
+                </div>
+                
+                <div style="page-break-after:always;" >
+                <table >
+                        <tr style="background:rgb(153, 204, 255);"><td width="100%" >{!SynopsisHeading.Question_Text__c}</td></tr>
+                        <tr><td><apex:outputLabel value="{!Synopsis.Question_Text__c}" escape="false" /></td></tr>
+                </table>
+                </div>
+                
+            </td></tr></table>
+
+            <apex:pageBlockTable value="{!responses}" var="evalq" rules="rows" align="center"  columns="3" columnsWidth="70%,10%,20%">
                     
                     <apex:column style="{!IF(evalq.ResponseGroupHeader__c,'background:rgb(153, 204, 255);','')};
-                                        {!IF(contains(evalq.Evaluation_Rating_Text__c,''),'column-span:0','column-span:2')};"  
-                         value="{!evalq.Question_Text__c}" headerValue=""/>
+                                        {!IF(contains(evalq.Evaluation_Rating_Text__c,''),'column-span:0','column-span:2')};" headerValue="">  
+                         <apex:outputText value="{!evalq.Question_Text__c}" />
+                         <br/><apex:outputText style="margin-left:40px" value="{!evalq.Evaluator_Comment__c}" /> 
+                    </apex:column>
                     
-               		<apex:column style="{!IF(evalq.ResponseGroupHeader__c,'background:rgb(153, 204, 255);', '')}" headerValue="">
+                    
+                    <apex:column style="{!IF(evalq.ResponseGroupHeader__c,'background:rgb(153, 204, 255);', '')}" headerValue="">
                         <apex:outputText value="{!evalq.Question_Type__c}" rendered="{!IF(contains(evalq.Question_Number__c,'_0'),true,false)}" />
+                       
                     </apex:column>
                      
-               		<apex:column style="{!IF(evalq.ResponseGroupHeader__c,'background:rgb(153, 204, 255);', '')}" 
+                    <apex:column style="{!IF(evalq.ResponseGroupHeader__c,'background:rgb(153, 204, 255);', '')}" 
                           value="{!evalq.Evaluation_Rating_Text__c}" headerValue=""/>
                  
-             </apex:pageBlockTable>
+            </apex:pageBlockTable>
  
-            <hr/>
-            <table >
-            <tr>
-                <td>Comment:</td><td>{!EvaluatorComment}</td>
-            </tr>
-            </table>
+
             
+                <br/>
+                <br/>
+
+                <table >
+                <tr>
+                    <!-- if true '' else Comment: -->
+                    <td>{!IF(contains(EvaluatorComment,''),'','Comment: ')}</td>
+                    <td>{!IF(contains(EvaluatorComment,''),'',EvaluatorComment)}</td>
+                </tr>
+                </table>
+           
+
         </apex:pageBlockSection>
  
-	    </apex:pageBlock>
+        </apex:pageBlock>
       
     </apex:outputPanel>
         
@@ -89,9 +116,9 @@ $( document ).ready(function() {
     window.setTimeout(getresponses,2000);
     
     function fetchPageHTML() 
-	{
+    {
         getJSHTMLData();
-  	}
+    }
     
     /*
     function didIt() {
