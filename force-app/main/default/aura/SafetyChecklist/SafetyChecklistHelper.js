@@ -53,6 +53,7 @@
                 //alert("getRegattaDetail rtr: " + response.getReturnValue());
                 var result = response.getReturnValue();
 				component.set("v.regattaDetail", result);
+                component.set("v.regattaId",regattaId);
                 //alert('usrowing registred ' + result.US_Rowing_Registered__c);
                 component.set("v.regattaCklistRequired", result.US_Rowing_Registered__c);
              }else if (state === "ERROR") {
@@ -331,6 +332,7 @@
                     var pEvaluee = component.get('v.regattaDetail.Name');
                     var pLocation = component.get('v.regattaDetail.Name');
                     var pPosition = component.get("v.selectedEvaluationType");
+                    var pRegattaId = component.get("v.regattaId");
                     // genRefereeAssessmentPDF: function(component, evaluatorId, evalueeId, evaluee, position, questionnaireId)
                     /*
                     alert("genRefereeAssessmentPDF\n" +
@@ -341,7 +343,7 @@
                           "pLocation: " + pLocation + "\n" +
                           "pQuestionnaireId: " + pQuestionnaireId ); 
                     */
-                	this.genRefereeAssessmentPDF(component,pEvaluatorcontactId,pEvalueeId,pEvaluee,pLocation,pPosition,pQuestionnaireId);
+                	this.genRefereeAssessmentPDF(component,pEvaluatorcontactId,pEvalueeId,pEvaluee,pLocation,pPosition,pQuestionnaireId,pRegattaId);
                 }
                 
                 //alert("insertRespHelper success");
@@ -378,7 +380,7 @@
     },
 
                
-    genRefereeAssessmentPDF: function(component, evaluatorcontactId, evalueeId, evaluee, location, position, questionnaireId) {
+    genRefereeAssessmentPDF: function(component, evaluatorcontactId, evalueeId, evaluee, location, position, questionnaireId,regattaId) {
 
         
         //alert("in genRefereeAssessmentPDF test");
@@ -398,7 +400,8 @@
            'pEvalueeId':evalueeId, 
             'pEvaluee':evaluee,
             'pPosition':position,
-           'pQuestionnaireId':questionnaireId
+           'pQuestionnaireId':questionnaireId,
+           'pRegattaId':regattaId
         });
         
         var self = this;

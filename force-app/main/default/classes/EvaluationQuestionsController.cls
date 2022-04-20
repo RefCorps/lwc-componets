@@ -599,10 +599,10 @@ public with sharing class EvaluationQuestionsController {
     @AuraEnabled
     @future(callout=true) 
     public static void generateRefAssessmentRPT(String pEvaluatorId, String pEvalueeId, String pQuestionnaireId, 
-                                                String pEvaluee, String pLocation, String pPosition ) {
+                                                String pEvaluee, String pLocation, String pPosition, String pRegattaId ) {
 
      try {                                              
-        //System.debug(LoggingLevel.DEBUG,'in EvaluationQuestionsController generateRefAssessmentRPT');
+        System.debug(LoggingLevel.DEBUG,'in EvaluationQuestionsController generateRefAssessmentRPT');
         if( String.isEmpty(pEvaluee) || String.isEmpty(pLocation) || String.isEmpty(pPosition) ) {
            //System.debug(LoggingLevel.DEBUG,'generateRefAssessmentRPT pulling missing data from Evaluation_ResponsesAbstract__c');
            Evaluation_ResponsesAbstract__c rr = [select evaluee_id__c, evaluee_id__r.name, evaluation_type__c, evaluation_location__c from Evaluation_ResponsesAbstract__c 
@@ -678,8 +678,18 @@ public with sharing class EvaluationQuestionsController {
        
         String contentType = 'application/pdf';
         
-        //System.debug(LoggingLevel.DEBUG,'RefereeAssessment createFile follows'); 
-        ContentDocumentLink rptfile = ra.createFile(parentId, linkedId, fileName, body, contentType);
+        //System.debug(LoggingLevel.DEBUG,'RefereeAssessment createFile for ' + linkedId); 
+        //ContentDocumentLink rptfile = ra.createFile(parentId, linkedId, fileName, body, contentType);
+
+        ContentDocumentLink rptfile;
+        if(!String.isEmpty(pRegattaId)) {
+            System.debug(LoggingLevel.DEBUG,'generateRefAssessmentRPT createFile - pRegattaId=' + pRegattaId + ' linkedId=' + linkedId); 
+            rptfile = ra.createFile(pRegattaId, linkedId, fileName, body, contentType);
+        } else {
+            System.debug(LoggingLevel.DEBUG,'generateRefAssessmentRPT createFile - parentId=' + parentId + ' linkedId=' + linkedId); 
+            rptfile = ra.createFile(parentId, linkedId, fileName, body, contentType);
+        }
+        System.debug(LoggingLevel.DEBUG,'generateRefAssessment created document Id = ' + rptfile.ContentDocumentId);
         
         System.debug(LoggingLevel.DEBUG,'generateRefAssessmentRPT - SendDirectMessage p1=' + pEvalueeId + ' p2=' + rptfile.ContentDocumentId);
         ra.SendDirectMessage(pEvalueeId, rptfile.ContentDocumentId ); 

@@ -1132,7 +1132,7 @@
         System.debug('testCreateFile Test 1 - Test will replicate file creation and storage logic in method');
 
         String AppAcct = EvaluationQuestionsController.getProp('AppName');
-        Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct]; // TODO:  WORKS BUT NEED MORE INFO
+        Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct Limit 1]; // TODO:  WORKS BUT NEED MORE INFO
         String parentId = acc.Id;
 
         DateTime dtn = DateTime.now();
@@ -1322,7 +1322,7 @@
                 System.debug('testSendDirectMessage - Step 2 create a test document to send using method createFile');
 
                 String AppAcct = EvaluationQuestionsController.getProp('AppName');
-                Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct]; // TODO:  WORKS BUT NEED MORE INFO
+                Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct limit 1]; // TODO:  WORKS BUT NEED MORE INFO
                 String parentId = acc.Id;
 
                 ContentDocumentLink cdl = New ContentDocumentLink();

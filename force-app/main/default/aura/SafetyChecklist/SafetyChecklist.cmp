@@ -32,7 +32,7 @@
 
     <aura:attribute name="regattas" type="Object[]" />
     <aura:attribute name="regattaName" type="String" default="No regatta" />
-    <aura:attribute name="regattaId" type="String" default="No Id" />
+    <aura:attribute name="regattaId" type="String" default="" />
     <aura:attribute name="regattaCklistRequired" type="boolean" default="false" />
 
     <aura:attribute name="regattaStartDate" type="String" />

@@ -65,7 +65,7 @@
             helper.getProps(component);
 
         }
-
+        console.log("doInit complete");
     },
      
 
@@ -257,6 +257,7 @@
                if(regattaId === regattas[i].value) {
                  regattaName = regattas[i].label;
                  component.set('v.regattaName',regattaName);
+                 component.set('v.regattaId',regattaId);
                  break;
                }
             }

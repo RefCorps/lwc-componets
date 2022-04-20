@@ -139,13 +139,14 @@ public static void getResponsesVF() {
     System.debug(LoggingLevel.DEBUG, 'pEvalueeId: ' + pEvalueeId);
     System.debug(LoggingLevel.DEBUG, 'pQuestionnaireId: ' + pQuestionnaireId);
 
+    /*
     if (String.isEmpty(pEvaluatorId))
         throw new applicationException('RefereeAssessment error - missing pEvaluatorId value');
     if (String.isEmpty(pEvalueeId))
         throw new applicationException('RefereeAssessment error - missing pEvalueeId value');
     if (String.isEmpty(pQuestionnaireId))
         throw new applicationException('RefereeAssessment error - missing pQuestionnaireId value');
-
+    */
     ra.getResponses(pEvaluatorId, pEvalueeId, pQuestionnaireId);
 
     System.debug(LoggingLevel.INFO, 'out getResponseVF');
@@ -166,6 +167,7 @@ public List < Evaluation_Responses__c > getResponses(
 
     RefereeAssessment ra = new RefereeAssessment();
 
+    /*
     if (String.isEmpty(pQuestionnaireId)) {
         pQuestionnaireId = RefereeAssessment.QuestionnaireId;
     }
@@ -175,6 +177,7 @@ public List < Evaluation_Responses__c > getResponses(
     if (String.isEmpty(pEvaluatorId)) {
         pEvaluatorId = RefereeAssessment.EvaluatorId;
     }
+    */
 
     List < Evaluation_Questions__c > prefacetxt = new List < Evaluation_Questions__c > ();
     List < Evaluation_Questions__c > synopsistxt = new List < Evaluation_Questions__c > ();
@@ -410,7 +413,7 @@ public ConnectApi.FeedElement SendDirectMessage(String EvalueeId, String EvalRpt
 
     String AppAcct = RefereeAssessment.getProp('AppName');
     System.debug(LoggingLevel.DEBUG, 'SendDirectMessage - Lookup Account Id for ' + AppAcct);
-    Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct]; // TODO:  WORKS BUT NEED MORE INFO
+    Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct Limit 1]; // TODO:  WORKS BUT NEED MORE INFO
     String parentId = acc.Id;
     System.debug(LoggingLevel.DEBUG, 'SendDirectMessage - using Account Id = ' + parentId + ' to location contentdocument ' + EvalRptFileId);
 
