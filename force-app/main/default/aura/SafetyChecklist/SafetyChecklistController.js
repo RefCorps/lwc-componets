@@ -23,7 +23,8 @@
         var fld = component.get("v.field");
         if(!fld) {
             // Static UAT Regatta ID used in development without passing param from Regattas Table
-            component.set("v.field","a0h3u000001p8WQAAY");
+            //component.set("v.field","a0h3u000001p8WQAAY");
+            component.set("v.field","a0h3u000005YiVyAAK");
         }
 
         helper.isCheckListCompleted(component);
@@ -67,14 +68,17 @@
         }
         console.log("doInit complete");
     },
-     
+
 
     launchCompletedForm : function(component) {
 
         // rptURL is set using helper.isCheckListCompleted - called from doInit
+    
         var completedFromURL = component.get("v.rptURL");
+        alert("FILEURL = " + completedFromURL);
+        
         window.open(completedFromURL);
-
+    
     },
     
     regattaDateCheck: function(component) {

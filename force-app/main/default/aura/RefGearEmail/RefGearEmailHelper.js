@@ -4,6 +4,7 @@
         var action = component.get('c.GearExchangeEmailTo');
         action.setCallback(this, function(response) {
             var state = response.getState();
+            
             if (state === "SUCCESS") {  
                 var result=response.getReturnValue();
                 //alert("RefGearEmailTo returned: " + result);
@@ -31,7 +32,7 @@
                 
             }
             else if (state === "ERROR") {
-                alert("fetchRefGearEmailTo had an error - do not use Gear Email.\nContact support. Hint: Check Apex Class Access and Static Resource GearExchangeEmailTo ");
+                alert("fetchRefGearEmailTo had an error:\n[" + response.getError()[0].message + "]\nDo not use Gear Email.\nContact support. Hint: Check Apex Class Access and Static Resource GearExchangeEmailTo ");
             }
         }); 
         $A.enqueueAction(action);    

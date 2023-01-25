@@ -10,6 +10,7 @@ $( document ).ready(function() {
     $( "th" ).remove( "th" );
 });
 </script>
+  
     <apex:form id="assessment" >
         
     <div style="font-family: Arial Unicode MS;">
@@ -28,7 +29,7 @@ $( document ).ready(function() {
             </tr>
             <tr>
                 <td>
-                      {!IF(contains(PositionEvaluated,'SAFETY CHECKLIST'),'Chief Referee:','Evaluee:')}
+                    {!IF(contains(PositionEvaluated,'SAFETY CHECKLIST'),'Chief Referee:','Evaluee:')}
                 </td><td>{!EvalueeName}</td>
             </tr>
                 <tr>
@@ -45,9 +46,9 @@ $( document ).ready(function() {
                 </td><td>{!fmtEvaluationDate}</td>
             </tr>
             </table>
-   
+
             <table style="{!IF(contains(PositionEvaluated,'SAFETY CHECKLIST'),'display:none;','display:inline;')};"><tr><td>
-   
+
                 <apex:outputLabel value="{!IF(Preface.Question_Text__c != null,Preface.Question_Text__c,'')}" escape="false" />
                 <!--         
                 <apex:outputLabel value="{!Preface.Question_Text__c}" escape="false" />
@@ -64,30 +65,30 @@ $( document ).ready(function() {
                 </div>
                 
             </td></tr></table>
-
-            <apex:pageBlockTable value="{!responses}" var="evalq" rules="rows" align="center"  columns="3" columnsWidth="70%,10%,20%">
+           
+            <apex:pageBlockTable value="{!responses}" var="evalq" rules="rows" align="center" columns="3" columnsWidth="80%,20%" border="1">
                     
                     <apex:column style="{!IF(evalq.ResponseGroupHeader__c,'background:rgb(153, 204, 255);','')};
                                         {!IF(contains(evalq.Evaluation_Rating_Text__c,''),'column-span:0','column-span:2')};" headerValue="">  
-                         <apex:outputText value="{!evalq.Question_Text__c}" />
-                         <br/><apex:outputText style="margin-left:40px" value="{!evalq.Evaluator_Comment__c}" /> 
+                        <apex:outputText value="{!evalq.Question_Text__c}" />
+                        <br/><apex:outputText style="margin-left:40px" value="{!evalq.Evaluator_Comment__c}" /> 
+                        
                     </apex:column>
                     
-                    
+                    <!--
                     <apex:column style="{!IF(evalq.ResponseGroupHeader__c,'background:rgb(153, 204, 255);', '')}" headerValue="">
                         <apex:outputText value="{!evalq.Question_Type__c}" rendered="{!IF(contains(evalq.Question_Number__c,'_0'),true,false)}" />
-                       
                     </apex:column>
-                     
-                    <apex:column style="{!IF(evalq.ResponseGroupHeader__c,'background:rgb(153, 204, 255);', '')}" 
-                          value="{!evalq.Evaluation_Rating_Text__c}" headerValue=""/>
-                 
-            </apex:pageBlockTable>
- 
+					-->
 
+                    <apex:column style="{!IF(evalq.ResponseGroupHeader__c,'background:rgb(153, 204, 255);', '')}; text-align: center;" 
+                        value="{!evalq.Evaluation_Rating_Text__c}" headerValue="">
+                       
+                	</apex:column>
+              
+            </apex:pageBlockTable>
             
-                <br/>
-                <br/>
+                <p/>
 
                 <table >
                 <tr>
@@ -96,12 +97,11 @@ $( document ).ready(function() {
                     <td>{!IF(contains(EvaluatorComment,''),'',EvaluatorComment)}</td>
                 </tr>
                 </table>
-           
 
         </apex:pageBlockSection>
- 
+
         </apex:pageBlock>
-      
+    
     </apex:outputPanel>
         
     </div>
@@ -110,7 +110,6 @@ $( document ).ready(function() {
 
 </div>    
     
-
     <script type="text/javascript">
     
     window.setTimeout(getresponses,2000);
@@ -124,15 +123,16 @@ $( document ).ready(function() {
     function didIt() {
         alert("setApexHTML completed");
     }
-    */
-    /*
+    //
+    //
     function getJSHTMLData() {
             var divPage = element = document.getElementById('renderedPage');
         var strHTML = divPage.innerHTML;
             alert("strHTML size = " + strHTML.length);
             setApexHTML(strHTML);
-     }
+    }
     */
-     </script>
+
+    </script>
     
     </apex:page>

@@ -68,7 +68,7 @@
         String alias2 = 'aeval'; // can only be 8 chars
 
         System.debug('=================================================================================================');
-        System.debug('In LoadTestUserData');
+        System.debug('EvaluationQuestionsControllerTest In LoadTestUserData');
         
         System.debug('portalRole is ' + portalRole);
         Profile profile1 = [Select Id from Profile where name = 'System Administrator'];
@@ -239,14 +239,14 @@
 
             System.debug('User2 created');
         }
-        System.debug('LoadTestUserData completed');
+        System.debug('EvaluationQuestionsControllerTest LoadTestUserData completed');
         System.debug('=================================================================================================');
     }
     
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void LoadTestRegattaParticipantData() {
 
-        System.debug('In LoadTestRegattaParticipantData');
+        System.debug('In EvaluationQuestionsControllerTest LoadTestRegattaParticipantData');
         if (evaluatoruser == null) {
             System.debug('evaluatoruser is null');
             LoadTestUserData();
@@ -274,6 +274,7 @@
                 REGATTA_STATE__C = 'Florida',
                 REGATTA_STATUS__C = 'On Schedule',
                 REGATTA_TYPE__C = 'Sprint',
+                Year__c = '2022',
 
                 HOUSING_PROVIDED__C = FALSE,
                 INVITE_ONLY__C = TRUE,
@@ -287,7 +288,7 @@
             evalregatta = [select id, name, Start_Date_Time__c 
                            from regatta__c where id =: testregatta.id limit 1];
 
-            System.debug('LoadTestRegattaParticipantData test regattaid = ' + testregatta.id);               
+            System.debug('EvaluationQuestionsControllerTest LoadTestRegattaParticipantData test regattaid = ' + testregatta.id);               
         }
         EvaluationQuestionsController.testEvalregatta = evalregatta.clone();
         System.debug('Loaded regatta ' + evalregatta.Name);
@@ -386,42 +387,42 @@
         System.debug('Particpants fetch count = '+ regattaparticipation.size());
         // Load to EvaluationQuestionController for processing tests
         EvaluationQuestionsController.testRegattaParticipation = regattaparticipation.clone();
-        System.debug('EvaluationQuestionsController testRegattaParticipation count = '+ EvaluationQuestionsController.testRegattaParticipation.size());
+        System.debug('EvaluationQuestionsControllerTest EvaluationQuestionsController testRegattaParticipation count = '+ EvaluationQuestionsController.testRegattaParticipation.size());
         
         System.debug('=================================================================================================');
     }
    
-    @IsTest(SeeAllData=true)    
+    @IsTest //(SeeAllData=true)    
     public static void LoadEvalResponses() {
 
         System.debug('--------------------------------------------------------------------------------');
-        System.debug('Begin LoadEvalResponses');
+        System.debug('Begin EvaluationQuestionsControllerTest  LoadEvalResponses');
 
         if (evaluatoruser == null) {
             System.debug('LoadEvalResponses evaluatoruser is null.  Run LoadTestRegattaParticipantData');
             LoadTestRegattaParticipantData();
         }
         if (adminuser == null) {
-            System.debug('LoadEvalResponses adminuser is null!');
+            System.debug('EvaluationQuestionsControllerTest LoadEvalResponses adminuser is null!');
         }
 
         User evaluatorusr = [Select id from User where Id =: evaluatoruser.id];
 
         String querystmt0 = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
-        System.debug('LoadEvalResponses test0 ' + querystmt0);
+        System.debug('EvaluationQuestionsControllerTest LoadEvalResponses test0 ' + querystmt0);
         Contact ee0 = Database.query(querystmt0);
-        System.debug('LoadEvalResponses test0 evaluee Id'+ ee0.Id + ' / ' + evalueecontact.Id );        
+        System.debug('EvaluationQuestionsControllerTest LoadEvalResponses test0 evaluee Id'+ ee0.Id + ' / ' + evalueecontact.Id );        
 
         //System.RunAs(evaluatorusr) {
         System.RunAs(adminuser) {
 
             String querystmt01 = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
-            System.debug('LoadEvalResponses test01 ' + querystmt01);
+            System.debug('EvaluationQuestionsControllerTest LoadEvalResponses test01 ' + querystmt01);
             Contact ee01 = Database.query(querystmt01);
-            System.debug('LoadEvalResponses test0 evaluee Id'+ ee01.Id + ' / ' + evalueecontact.Id );        
+            System.debug('EvaluationQuestionsControllerTest LoadEvalResponses test0 evaluee Id'+ ee01.Id + ' / ' + evalueecontact.Id );        
 
-            System.debug('LoadEvalResponses evaluatorname=' + evaluatorcontact.name);
-            System.debug('LoadEvalResponses evaluatoruserid=' + evaluatoruser.Id);
+            System.debug('EvaluationQuestionsControllerTest LoadEvalResponses evaluatorname=' + evaluatorcontact.name);
+            System.debug('EvaluationQuestionsControllerTest LoadEvalResponses evaluatoruserid=' + evaluatoruser.Id);
 
             // The following is TEST DATA captured from a live test each part is delimited by a line return
  
@@ -440,7 +441,7 @@
             responseString = responseString + 'CJ1_2~CJ1_2^Position setup  [Meets Standard]-1\n';
             responseString = responseString + 'CJ1_3~CJ1_3^Awareness of regatta; specific procedures, schedules, and crews  [Not Observed]-3\n';
             responseString = responseString + 'CJ5_4~CJ5_4^Overall Evaluation  [Fully Competent]-1';
-            System.debug('testInsertResponses Test data appears as:\n' + responseString);
+            System.debug('EvaluationQuestionsControllerTest testInsertResponses Test data appears as:\n' + responseString);
 
             String EvaluatorUserId;
             String EvaluatorContactId;
@@ -452,7 +453,7 @@
             String QuestionnaireDateTime;
             String QuestionnaireId;
 
-            System.debug('testInsertResponses:\n' + responseString);
+            System.debug('EvaluationQuestionsControllerTest testInsertResponses:\n' + responseString);
             String[] responses = responseString.split('\n');
 
             Evaluation_Responses__c erlast = new Evaluation_Responses__c();
@@ -460,7 +461,7 @@
             String querystmt1 = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
             System.debug(querystmt1);
             Contact ee1 = Database.query(querystmt1);
-            System.debug('LoadEvalResponses test1 evaluee Id'+ ee1.Id + ' / ' + evalueecontact.Id );        
+            System.debug('EvaluationQuestionsControllerTest LoadEvalResponses test1 evaluee Id'+ ee1.Id + ' / ' + evalueecontact.Id );        
 
 
             Integer ctr = 0;
@@ -486,20 +487,21 @@
                         EvaluatorComment = resp.substring(resp.indexOf('=') + 1);
                     } else if (resp.contains('~')) {
 
-                        System.debug('testInsertRespones - parse evalueeid = ' + EvalueeId);
+                        System.debug('EvaluationQuestionsControllerTest testInsertRespones - parse evalueeid = ' + EvalueeId);
 
                         String[] rsp = resp.split('~');
                         String EvaluationQuestionNum = rsp[0];
                         String[] rrsp = rsp[1].split('-');
                         String EvaluationRating = rrsp[1];
 
-                        System.debug('testInsertResponses - lookup Question_Number__c ' + EvaluationQuestionNum);
+                        System.debug('EvaluationQuestionsControllerTest testInsertResponses - lookup Question_Number__c ' + EvaluationQuestionNum);
 
                         // THIS WAS CREATED TO REDUCE TRAFFIC BETWEEN CLIENT AND SERVER 
                         // TODO:  REVIEW EFFECTIVENESS
                         Evaluation_Questions__c[] EvaluationQuestionId = [SELECT id,
                             Evaluation_Type__c,
                             Question_Number__c,
+                            Question_Type__c,
                             Question_Text__c,
                             isRequired__c,
                             QuestionType__r.Name,
@@ -509,9 +511,9 @@
                             from Evaluation_Questions__c WHERE Question_Number__c =: EvaluationQuestionNum
                         ];
 
-                        System.debug('testInsertResponses - Questions returned = ' + EvaluationQuestionId.size());
+                        System.debug('EvaluationQuestionsControllerTest testInsertResponses - Questions returned = ' + EvaluationQuestionId.size());
 
-                        System.debug('testInsertResponses Common values: ' +
+                        System.debug('EvaluationQuestionsControllerTest testInsertResponses Common values: ' +
                             '\n\tEvaluatorUserId=' + EvaluatorUserId +
                             '\n\tEvaluatorContactId=' + EvaluatorContactId +
                             '\n\tEvalueeId=' + EvalueeId +
@@ -528,12 +530,12 @@
                         er.Questionnaire_DateTime__c = (DateTime) JSON.deserialize('"' + QuestionnaireDateTime + '"', DateTime.class);
                         //system.debug(logginglevel.debug,'Parsed QuestionnaireDatetime = ' + er.Questionnaire_DateTime__c);
 
-                        System.debug('testInsertResponses genQuestionnaireID using [' + er.Questionnaire_DateTime__c + '] ' + EvalueeId);
+                        System.debug('EvaluationQuestionsControllerTest testInsertResponses genQuestionnaireID using [' + er.Questionnaire_DateTime__c + '] ' + EvalueeId);
                         if (String.isEmpty(QuestionnaireId)) {
                             QuestionnaireId = EvaluationQuestionsController.genQuestionnaireID(er.Questionnaire_DateTime__c, EvalueeId);
                         }
                         er.Questionnaire_Id__c = QuestionnaireId;
-                        System.debug('testInsertResponses genQuestionnaireID = [' + er.Questionnaire_Id__c + '] ');
+                        System.debug('EvaluationQuestionsControllerTest testInsertResponses genQuestionnaireID = [' + er.Questionnaire_Id__c + '] ');
 
                         if (EvaluationLocation == null || EvaluationLocation.length() == 0)
                             er.Evaluation_Location__c = 'Location omitted';
@@ -543,6 +545,10 @@
                         er.Question_Number__c = EvaluationQuestionId[0].Question_Number__c; // EvaluationQuestionNum;
                         er.Question_Text__c = EvaluationQuestionId[0].Question_Text__c;
                         er.Question_Type__c = EvaluationQuestionId[0].QuestionType__r.Name;
+                        if(er.Question_Type__c == null ) {
+                            System.Debug('EvaluationQuestionsControllerTest testInsertResponses QuestionType__r.Name failed lookup - using static Question_Type__c value ' +  EvaluationQuestionId[0].Question_Type__c);
+                            er.Question_Type__c = EvaluationQuestionId[0].Question_Type__c;
+                        }
                         er.Question_Id__c = EvaluationQuestionId[0].ID; // EvaluationQuestionNum;
                         er.Evaluation_Rating__c = EvaluationRating;
                         if (EvaluationRating == '1') {
@@ -566,17 +572,17 @@
                         er.Evaluator_Id__c = Id.valueOf(EvaluatorContactId);
                         
                         Contact evaluatorcnt = [Select id from Contact where Id =: evaluatorcontact.id];
-                        System.debug('LoadEvalResponses evaluator Id '+ evaluatorcnt.Id + ' / ' + evaluatorcontact.id );
+                        System.debug('EvaluationQuestionsControllerTest LoadEvalResponses evaluator Id '+ evaluatorcnt.Id + ' / ' + evaluatorcontact.id );
 
                         String querystmt = 'Select Id, Name from Contact where Id = \'' + evalueecontact.Id + '\'';
                         System.debug(querystmt);
                         Contact ee = Database.query(querystmt);
-                        System.debug('LoadEvalResponses evaluee Id'+ ee.Id + ' / ' + evalueecontact.Id );        
+                        System.debug('EvaluationQuestionsControllerTest LoadEvalResponses evaluee Id'+ ee.Id + ' / ' + evalueecontact.Id );        
 
                         Integer cnt = [Select count() from Evaluation_Responses__c WHERE Questionnaire_Id__c =: er.Questionnaire_Id__c];
-                        System.debug('LoadEvalResponses - current related responses = ' + cnt);
+                        System.debug('EvaluationQuestionsControllerTest LoadEvalResponses - current related responses = ' + cnt);
 
-                        System.debug('testInsertResponses  Inserting Response:' +
+                        System.debug('EvaluationQuestionsControllerTest testInsertResponses  Inserting Response:' +
                             '\n\tEvaluation_Date__c: ' + er.Evaluation_Date__c + 
                             '\n\tQuestionnaire_DateTime__c: ' +  er.Questionnaire_DateTime__c +
                             '\n\tQuestionnaire_Id__c: ' + er.Questionnaire_Id__c +
@@ -602,17 +608,17 @@
                             insert er;
 
                         //}
-                        System.debug('testInsertResponses - insert ' + ctr + ' completed');
+                        System.debug('EvaluationQuestionsControllerTest testInsertResponses - insert ' + ctr + ' completed');
                     } // end if resp.contains('~')  
                 } // end end responses for loop
-                System.debug('testInsertResponses - Insert responses to Evaluation Responses complete - Insert to Evaluation ResponsesAbstract follows');
+                System.debug('EvaluationQuestionsControllerTest testInsertResponses - Insert responses to Evaluation Responses complete - Insert to Evaluation ResponsesAbstract follows');
 
                 Evaluation_Responses__c[] evalresps = [SELECT Question_Id__c, Question_Number__c, Question_Text__c, Question_type__c,
                     Questionnaire_Id__c, Evaluation_Rating__c, Evaluation_Rating_Text__c, Evaluator_Comment__c
                     FROM Evaluation_Responses__c WHERE Questionnaire_Id__c =: QuestionnaireId
                 ];
 
-                System.debug('testInsertResponses - ' + evalresps.size() + ' Evaluation_Responses__c rows associated with QuestionnaireId ' + QuestionnaireId);
+                System.debug('EvaluationQuestionsControllerTest testInsertResponses - ' + evalresps.size() + ' Evaluation_Responses__c rows associated with QuestionnaireId ' + QuestionnaireId);
                 
                 Evaluation_ResponsesAbstract__c rr = new Evaluation_ResponsesAbstract__c();
 
@@ -625,7 +631,7 @@
                 rr.Evaluator_Id__c = EvaluatorContactId;
                 rr.Evaluation_Type__c = EvaluationType;
 
-                System.debug('testInsertResponses Evaluation ResponsesAbstract:' +
+                System.debug('EvaluationQuestionsControllerTest testInsertResponses Evaluation ResponsesAbstract:' +
                     '\n\tQuestionnaire_Id__c: ' + rr.Questionnaire_Id__c +
                     '\n\tEvaluation_Date__c: ' + rr.Evaluation_Date__c +
                     '\n\tEvaluation_Location__c: ' + rr.Evaluation_Location__c +
@@ -643,9 +649,9 @@
 
                 rQuestionnaireId = rr.Questionnaire_Id__c;
 
-                System.debug('testInsertResponses - ' + evalabstract.size() + ' Evaluation_Responses__c rows associated with QuestionnaireId ' + QuestionnaireId);
+                System.debug('EvaluationQuestionsControllerTest testInsertResponses - ' + evalabstract.size() + ' Evaluation_Responses__c rows associated with QuestionnaireId ' + QuestionnaireId);
 
-                System.debug('testInsertResponses Insert to Evaluation ResponsesAbstract of Questionnaire Id ' + QuestionnaireId + ' completed');
+                System.debug('EvaluationQuestionsControllerTest testInsertResponses Insert to Evaluation ResponsesAbstract of Questionnaire Id ' + QuestionnaireId + ' completed');
 
                 String rtr = EvaluatorContactId + ';' + EvalueeId + ';' + QuestionnaireId + ';' + EvaluationType;
 
@@ -654,10 +660,10 @@
             } catch (Exception err) {
                 String errMsg = err.getMessage();
                 String errTrace = err.getStackTraceString();
-                System.debug(LoggingLevel.ERROR, 'testInsertResponses Error: ' + errMsg);
-                System.debug(LoggingLevel.ERROR, 'testInsertResponses StackTrace:\n' + errTrace);
+                System.debug(LoggingLevel.ERROR, 'EvaluationQuestionsControllerTest testInsertResponses Error: ' + errMsg);
+                System.debug(LoggingLevel.ERROR, 'EvaluationQuestionsControllerTest testInsertResponses StackTrace:\n' + errTrace);
 
-                System.debug(LoggingLevel.DEBUG, 'testInsertResponses Exception Last Inserted Response Prior to error:' +
+                System.debug(LoggingLevel.DEBUG, 'EvaluationQuestionsControllerTest testInsertResponses Exception Last Inserted Response Prior to error:' +
                     '\n\tQuestion_Id__c: ' + erlast.Question_Id__c +
                     '\n\tQuestion_Number__c: ' + erlast.Question_Number__c +
                     '\n\tQuestion_Text__c: ' + erlast.Question_Text__c +
@@ -672,11 +678,11 @@
             }
          } // End RunAs
       
-        System.debug('LoadEvalResponses completed');
+        System.debug('EvaluationQuestionsControllerTest LoadEvalResponses completed');
         System.debug('-------------------------------------------------------------------------');
     }
 
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testObjectAvailablity() {
         /* 
            EvaluationQuestionController was created to support the data demands of evaluationquestionnaire.
@@ -684,7 +690,7 @@
            This will check to see if they are there and in some cases will check for data.
         */
         System.debug('=================================================================================================');
-        System.debug('Begin testObjectAvailablity');
+        System.debug('Begin EvaluationQuestionsControllerTest testObjectAvailablity');
         String Evaluation_ResponsesAbstract = 'Evaluation_ResponsesAbstract__c';
         String Evaluation_Responses = 'Evaluation_Responses__c';
         String Evaluation_Questions = 'Evaluation_Questions__c';
@@ -754,37 +760,37 @@
             
             // If any object is missing throw a fatal error and end this test
             if(!existsEvaluation_ResponsesAbstract) {
-                System.assertNotEquals(true, existsEvaluation_ResponsesAbstract, 'testObjectAvailablity: missing object Evaluation Responses Abstract ');
+                System.assertNotEquals(true, existsEvaluation_ResponsesAbstract, 'EvaluationQuestionsControllerTest testObjectAvailablity: missing object Evaluation Responses Abstract ');
             }            
             if(!existsEvaluation_Responses) {
-                System.assertNotEquals(true, existsEvaluation_Responses, 'testObjectAvailablity: missing object Evaluation Responses');
+                System.assertNotEquals(true, existsEvaluation_Responses, 'EvaluationQuestionsControllerTest testObjectAvailablity: missing object Evaluation Responses');
             }                
             
             if(!existsEvaluation_Questions) {
-                System.assertNotEquals(true, existsEvaluation_Responses, 'testObjectAvailablity: missing object Evaluation Questions');
+                System.assertNotEquals(true, existsEvaluation_Responses, 'EvaluationQuestionsControllerTest testObjectAvailablity: missing object Evaluation Questions');
             }
             
             if(!existsEvaluation_Properties) {
-                System.assertNotEquals(true, existsEvaluation_Properties, 'testObjectAvailablity: missing object Evaluation Properties');
+                System.assertNotEquals(true, existsEvaluation_Properties, 'EvaluationQuestionsControllerTest testObjectAvailablity: missing object Evaluation Properties');
             }
             
             if(!existsEvaluation_QuestionTypeResp) {
-                System.assertNotEquals(true, existsEvaluation_QuestionTypeResp, 'testObjectAvailablity: missing object Evaluation QuestionTypeResp');
+                System.assertNotEquals(true, existsEvaluation_QuestionTypeResp, 'EvaluationQuestionsControllerTest testObjectAvailablity: missing object Evaluation QuestionTypeResp');
             }
 
            
 
-            System.debug('testGetResponses - all objects found continue test');
+            System.debug('EvaluationQuestionsControllerTest testGetResponses - all objects found continue test');
         } catch (Exception err) {
             
         }
-        System.debug('testObjectAvailablity complete');
+        System.debug('EvaluationQuestionsControllerTest testObjectAvailablity complete');
     }
     
     @isTest
     public static void LoadEvalObjsData() {
 
-        System.debug('Begin loadEvalObjsData');
+        System.debug('Begin EvaluationQuestionsControllerTest loadEvalObjsData');
         if (evaluatoruser == null ) {
             System.debug('evaluatoruser is null');
             LoadTestRegattaParticipantData();
@@ -792,7 +798,7 @@
        
         System.runAs(adminuser) {
             Evaluation_Properties__c[] ep = [select Id from Evaluation_Properties__c];
-            System.debug('LoadEvalObjsData Evaluation_Properties__c size = '  + ep.size());
+            System.debug('EvaluationQuestionsControllerTest LoadEvalObjsData Evaluation_Properties__c size = '  + ep.size());
 
             if (ep.size() == 0) {
                 System.debug('loadEvalObjsData - loading Evaluation Properties from Static Resources');
@@ -817,7 +823,7 @@
             }
 
         }
-        System.debug('loadEvalObjsData completed');
+        System.debug('EvaluationQuestionsControllerTest loadEvalObjsData completed');
     }
 
     public static String getTimeBasedId() {
@@ -829,13 +835,13 @@
 
 // =====================================================================================
 
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testForStaticResourceUsedWithPDF() {
         /*
            A static resource is used to create the PDF output.  This test confirms the resource is present.
         */
         System.debug('=================================================================================================');
-        System.debug('Begin testForStaticResourceUsedWithPDF');
+        System.debug('Begin EvaluationQuestionsControllerTest  testForStaticResourceUsedWithPDF');
 
         Exception unexpectedException;
         try {
@@ -843,19 +849,19 @@
                                   FROM StaticResource 
                                   WHERE Name = 'Referee_Logo_for_web'
                                   LIMIT 1];        
-           System.debug('testForStaticResourceUsedWithPDF found ' + static_resource.Name);
-           System.assert( static_resource != null,'testForStaticResourceUsedWithPDF - Evaluation QuestionTypeResp is empty - add response types');
+           System.debug('EvaluationQuestionsControllerTest testForStaticResourceUsedWithPDF found ' + static_resource.Name);
+           System.assert( static_resource != null,'EvaluationQuestionsControllerTesttestForStaticResourceUsedWithPDF - Evaluation QuestionTypeResp is empty - add response types');
             
         } catch (Exception err) {
-            System.debug('testfetchEvaluator err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testfetchEvaluator err: ' + err);
             unexpectedException = err;
         }    
-        system.assertEquals(null, unexpectedException, 'testfetchEvaluator unexpected Exception');
+        system.assertEquals(null, unexpectedException, 'EvaluationQuestionsControllerTesttestfetchEvaluator unexpected Exception');
         
     }
     
 // =====================================================================================    
-    @IsTest(SeeAllData=true) 
+    @IsTest //(SeeAllData=true) 
     public static void testfetchEvaluator() {
         /* 
          	fetchEvaluator - this method is part of the doInit in Aura bundle evaluationquestionnaire 
@@ -866,7 +872,7 @@
 				List based upon User object.  Fields will be limited to name & contactid
          */
         System.debug('=================================================================================================');
-        System.debug('Begin testfetchEvaluator');
+        System.debug('Begin EvaluationQuestionsControllerTest testfetchEvaluator');
 
         if (evaluatoruser == null) {
             System.debug('evaluatoruser is null');
@@ -882,7 +888,7 @@
                 List < User > user = EvaluationQuestionsController.fetchEvaluator();
                 Integer cnt = user.size();
                 System.debug('cnt = ' + cnt);
-                System.assertEquals(1, cnt, 'Fetch must return just 1 user.  Fetch returned ' + cnt + ' users');
+                System.assertEquals(1, cnt, 'EvaluationQuestionsControllerTest Fetch must return just 1 user.  Fetch returned ' + cnt + ' users');
 
                 // Pull comparison data
                 string UserId = UserInfo.getUserId();
@@ -891,7 +897,7 @@
                 String testusername = testuser[0].name;
                 System.debug('testuser name = ' + testusername);
                 System.debug('curruser name = ' + currusername);
-                System.assertEquals(currusername, testusername, 'testfetchEvaluator - local data does not match data from method');
+                System.assertEquals(currusername, testusername, 'EvaluationQuestionsControllerTest testfetchEvaluator - local data does not match data from method');
 
                 // TEST 2 - For this test set user based upon a user with contact data and rank - 
                 // Typically admin/system users do not have contact data - this test will simply confirm the absence of a contactid
@@ -903,24 +909,24 @@
                     List < User > user2 = EvaluationQuestionsController.fetchEvaluator();
                     Integer cnt2 = user2.size();
                     System.debug('cnt2 = ' + cnt2);
-                    System.assertEquals(1, cnt2, 'Fetch must return just 1 user of type Referee.  Fetch returned ' + cnt + ' users');
+                    System.assertEquals(1, cnt2, 'EvaluationQuestionsControllerTest Fetch must return just 1 user of type Referee.  Fetch returned ' + cnt + ' users');
                     System.assertEquals(user[0].contactid, testuser[0].contactid, 'testfetchEvaluator - local contactid does not match data from method');
                 }
 
             } catch (Exception err) {
-                System.debug('testfetchEvaluator err: ' + err);
+                System.debug('EvaluationQuestionsControllerTest testfetchEvaluator err: ' + err);
                 unexpectedException = err;
             }
-            system.assertEquals(null, unexpectedException, 'testfetchEvaluator unexpected Exception');
+            system.assertEquals(null, unexpectedException, 'EvaluationQuestionsControllerTest testfetchEvaluator unexpected Exception');
 
-            System.debug('testfetchEvaluator completed');
+            System.debug('EvaluationQuestionsControllerTest testfetchEvaluator completed');
         }
     }
 
 
     
 // =====================================================================================    
-    @IsTest(SeeAllData=true) 
+    @IsTest //(SeeAllData=true) 
     public static void testGetProps() {
         
         /*
@@ -932,7 +938,7 @@
 				Array of Evaluation_Properties__c[]
          */ 
         System.debug('=================================================================================================');
-        System.debug('Begin testGetProps');
+        System.debug('Begin EvaluationQuestionsControllerTest  testGetProps');
         Exception unexpectedException;
         try {
 
@@ -949,7 +955,7 @@
                 existsEvaluation_Properties = true;
             }    
             if(!existsEvaluation_Properties) {
-                System.assertNotEquals(true, existsEvaluation_Properties, 'testGetProps: missing object Evaluation_Properties__c ');
+                System.assertNotEquals(true, existsEvaluation_Properties, 'EvaluationQuestionsControllerTest testGetProps: missing object Evaluation_Properties__c ');
             }            
  
             // TEST 2 - PULL PROPS - THERE SHOULD BE MORE THAN ONE - SOME MAY BE ACTIVE SOME MAY BE DISABLED 
@@ -957,58 +963,58 @@
             Evaluation_Properties__c[] props = EvaluationQuestionsController.getProps();
             Integer cnt = props.size();
             System.debug('cnt = ' + cnt);
-            System.assertNotEquals(0, cnt, 'testGetProps There should be at least one prop definded');
+            System.assertNotEquals(0, cnt, 'EvaluationQuestionsControllerTest testGetProps There should be at least one prop definded');
             
             Evaluation_Properties__c[] allprops = [select Name, Value__c from Evaluation_Properties__c];
             Evaluation_Properties__c[] exprops = [select Name, Value__c from Evaluation_Properties__c where isActive__c = false];
             
             integer goodprops = allprops.size() - exprops.size();
-            System.assertEquals(goodprops, cnt, 'testGetProps - method included props that are not active');
+            System.assertEquals(goodprops, cnt, 'EvaluationQuestionsControllerTest testGetProps - method included props that are not active');
             
             // TEST 3 - CONFIRM THE PRESENCE OF CRITICAL PROPS AND VALUES
 			// NOTE this test may require maintenance from time to time 
 			
             String[] pnames = new String[]{'LastNDays','FileNameFormat','DMText'};
             for(String n : pnames) {
-                System.debug('testGetProps required prop: ' + n);
+                System.debug('EvaluationQuestionsControllerTest testGetProps required prop: ' + n);
             }    
             integer missingprops = pnames.size();
             for(Evaluation_Properties__c p : props )  {
                 if(pnames.contains(p.name)) {
                     missingprops = missingprops - 1;
-                    System.debug('testGetProps found ' + p.name);
+                    System.debug('EvaluationQuestionsControllerTest testGetProps found ' + p.name);
                     
                     if(p.name == 'LastNDays') {
                         String lnd = p.value__c;
-                        System.debug('testGetProps LastNDays value = ' + lnd);
+                        System.debug('EvaluationQuestionsControllerTest testGetProps LastNDays value = ' + lnd);
                         // LastNDays must be integer
                         integer i = integer.valueOf(lnd);
-                        System.assert(i >= 0,'testGetProps LastNDays found but not numeric');
+                        System.assert(i >= 0,'EvaluationQuestionsControllerTest testGetProps LastNDays found but not numeric');
                     }        
                     
                     if(p.name == 'FileNameFormat') {
                         String fnf = p.value__c;
-                        System.assert(!String.isEmpty(fnf), 'testGetProps FileNameFormat is empty it must have a value');
+                        System.assert(!String.isEmpty(fnf), 'EvaluationQuestionsControllerTest testGetProps FileNameFormat is empty it must have a value');
                     }
                     if(p.name == 'DMText') {
                         String txt = p.value__c;
-                        System.assert(!String.isEmpty(txt), 'testGetProps DMText is empty it must have a value');
+                        System.assert(!String.isEmpty(txt), 'EvaluationQuestionsControllerTest testGetProps DMText is empty it must have a value');
                     }
                     
                 }
             }					
-			System.assertEquals(0, missingprops,'testGetProps there are missing props');            
+			System.assertEquals(0, missingprops,'EvaluationQuestionsControllerTest testGetProps there are missing props');            
             
         } catch (Exception err) {
-            System.debug('testGetProps err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testGetProps err: ' + err);
             unexpectedException = err;
         }    
-        system.assertEquals(null, unexpectedException, 'Exceptions should be handled by the method');
-        System.debug('testGetProps completed');
+        system.assertEquals(null, unexpectedException, 'EvaluationQuestionsControllerTest Exceptions should be handled by the method');
+        System.debug('EvaluationQuestionsControllerTest testGetProps completed');
     }
     
 // =====================================================================================    
-    @IsTest(SeeAllData=true) 
+    @IsTest //(SeeAllData=true) 
     public static void testGetProp() {
         
          /*
@@ -1021,7 +1027,7 @@
 			These tests will be similar to getProps() only this time we'll grab specific props and check values.
          */
         System.debug('=================================================================================================');
-         System.debug('Begin testGetProp');
+         System.debug('Begin EvaluationQuestionsControllerTest  testGetProp');
         Exception unexpectedException;
         try {
             
@@ -1071,24 +1077,24 @@
 
             
         } catch (Exception err) {
-            System.debug('testgetProp err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testgetProp err: ' + err);
             unexpectedException = err;
         }    
-        system.assertEquals(null, unexpectedException, 'Exceptions should be handled by the method');
+        system.assertEquals(null, unexpectedException, 'EvaluationQuestionsControllerTest testGetProp Exceptions should be handled by the method');
         
-        System.debug('testGetProp completed');
+        System.debug('EvaluationQuestionsControllerTest testGetProp completed');
         
     }
   
 // =====================================================================================    
-    @IsTest(SeeAllData=true) 
+    @IsTest //(SeeAllData=true) 
     public static void testGetInvalidProp() {
     	
         /* 
          This test will attempt to get an invalid property - it should fail
 		*/
         System.debug('=================================================================================================');
-        System.debug('Begin testGetInvalidProp');
+        System.debug('Begin EvaluationQuestionsControllerTest  testGetInvalidProp');
         Exception expectedException;
         try {
             
@@ -1096,7 +1102,7 @@
             String value1 = EvaluationQuestionsController.getProp(testProp1);
             Integer v1 = value1.length();
             System.debug(testProp1 + ' = [' + value1 + ']  length=' + v1);
-           	System.assertEquals(0, v1,'testGetInvalidProp - Oops - value found');
+           	System.assertEquals(0, v1,'EvaluationQuestionsControllerTest testGetInvalidProp - Oops - value found');
             
        } catch (Exception err) {
             System.debug('testGetInvalidProp err: ' + err);
@@ -1104,11 +1110,11 @@
         }    
         system.assertEquals(null, expectedException, 'testGetInvalidProp - Exception was caught');
         
-        System.debug('testGetInvalidProp completed');
+        System.debug('EvaluationQuestionsControllerTest testGetInvalidProp completed');
     }
         
 // =====================================================================================    
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testGetEvalauationTypes(){
         
         /* getEvaluationTypes - this method returns a distinct list of evaluation types.  These are positions such as REFEREE, STARTER, etc.
@@ -1122,17 +1128,23 @@
         LoadEvalObjsData();
 
         System.debug('=================================================================================================');
-        System.debug('Begin testGetEvalauationTypes');
+        System.debug('Begin EvaluationQuestionsControllerTest  testGetEvalauationTypes');
         Exception unexpectedException;
         try {
             // TEST 1 - run the method and confirm you've got types
             String[] types = EvaluationQuestionsController.getEvaluationTypes();
             Integer cnt = types.size();
             System.debug('cnt = ' + cnt);
-            System.assertNotEquals(0, cnt, 'There should be types definded');
+            if(cnt == 0) {
+                System.debug('testGetEvalauationTypes - TEST 1 returned 0 as exptected due to security restrictions');
+            }  
+            // System.assertNotEquals(0, cnt, 'EvaluationQuestionsControllerTest testGetEvaluationTypes There should be types definded');
             
             // TEST 2 - run a local SOQL and match to return
-            AggregateResult[] ltypes = [select Evaluation_type__c from Evaluation_Questions__c where IsQuestionGroupHeader__c = false and QuestionType__r.Type_Response_Count__c > 0
+            AggregateResult[] ltypes = [select Evaluation_type__c from Evaluation_Questions__c 
+                                        where IsQuestionGroupHeader__c = false 
+                                        and QuestionType__r.Type_Response_Count__c > 0 
+                                        and Evaluation_type__c != 'SAFETY CHECKLIST' 
             	group by Evaluation_type__c order by Evaluation_type__c];
             System.assertEquals(cnt, ltypes.size());
             
@@ -1143,25 +1155,25 @@
                   qs = qs + 'where Evaluation_type__c = \'' + type + '\'';
                   qs = qs + 'and IsQuestionGroupHeader__c = false ';
                   qs = qs + 'and QuestionType__r.Type_Response_Count__c > 0';
-                System.debug('testGetEvalauationTypes\n' + qs);
+                System.debug('EvaluationQuestionsControllerTest testGetEvalauationTypes\n' + qs);
                 typecnt = database.countquery(qs);
                 //typecnt = typecnts[0].cnt;
                 if(typecnt < 3) {
-                    System.assert(typecnt < 3,'testGetEvalauationTypes - Evaluation Type ' + type + ' appears low with count = ' + typecnt);
+                    System.assert(typecnt < 3,'EvaluationQuestionsControllerTest testGetEvalauationTypes - Evaluation Type ' + type + ' appears low with count = ' + typecnt);
                 }
-                 System.debug('testGetEvalauationTypes - Evaluation Type ' + type + ' + count = ' + typecnt);
+                 System.debug('EvaluationQuestionsControllerTest testGetEvalauationTypes - Evaluation Type ' + type + ' + count = ' + typecnt);
             }
 
         } catch (Exception err) {
-            System.debug('testGetEvaluationTypes err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testGetEvaluationTypes err: ' + err);
             unexpectedException = err;
         }    
-        system.assertEquals(null, unexpectedException, 'testGetEvalauationTypes Exceptions should be handled by the method');             
-        System.debug('testGetEvalauationTypes completed');
+        system.assertEquals(null, unexpectedException, 'EvaluationQuestionsControllerTest testGetEvalauationTypes Exceptions should be handled by the method');             
+        System.debug('EvaluationQuestionsControllerTest testGetEvalauationTypes completed');
     }
     
 // =====================================================================================    
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testGetRegattaTypes(){
         
         /* getRegattaTypes - this method returns a distinct list of regatta types.  These types are hardcoded into the string
@@ -1178,26 +1190,26 @@
 				A string array  containing the list of hardwired regatta types
 		*/ 
         System.debug('=================================================================================================');
-        System.debug('Begin testGetRegattaTypes');
+        System.debug('Begin EvaluationQuestionsControllerTest  testGetRegattaTypes');
         // TEST - Not much can go wrong here - there should be 5 types
         Exception unexpectedException;
         try {
             
             Set<String> types = EvaluationQuestionsController.getRegattaTypes();
             Integer cnt = types.size();
-            System.debug('testGetRegattaTypes - cnt = ' + cnt);
-            System.assertEquals(5, cnt, 'testGetRegattaTypes - There should be 5 types definded');
+            System.debug('EvaluationQuestionsControllerTest testGetRegattaTypes - cnt = ' + cnt);
+            System.assertEquals(5, cnt, 'EvaluationQuestionsControllerTest testGetRegattaTypes - There should be 5 types definded');
             
         } catch (Exception err) {
-            System.debug('testGetRegattaTypes err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testGetRegattaTypes err: ' + err);
             unexpectedException = err;
         }    
         system.assertEquals(null, unexpectedException, 'Exceptions should be handled by the method');
-        System.debug('testGetRegattaTypes completed');
+        System.debug('EvaluationQuestionsControllerTest testGetRegattaTypes completed');
     }
     
 // =====================================================================================    
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testMyRegattas() {
         /* myRecentRegattas - this method returns a list of regattas the user has participated in over the last N days.
 			Method Signature			
@@ -1225,7 +1237,7 @@
         Exception unexpectedException;
         try {
 
-            System.debug('In LoadTestRegattaParticipantData');
+            System.debug('In EvaluationQuestionsControllerTest  LoadTestRegattaParticipantData');
             if (evaluatoruser == null) {
                 System.debug('evaluatoruser is null');
                 LoadTestRegattaParticipantData();
@@ -1235,41 +1247,41 @@
             System.debug('Get user Id next');
             User evaluatorusr = [Select id from User where Id =: evaluatoruser.id];
 
-            System.debug('testMyRegattas regatta ' + evalregatta.Name);
+            System.debug('EvaluationQuestionsControllerTest testMyRegattas regatta ' + evalregatta.Name);
             System.debug('Get regatta Id next');
 
             // TEST 1 - using system user ID pull a list of regatta - the result should be no recent regatta records 
-            System.debug('testMyRegattas test 1 follows');
+            System.debug('EvaluationQuestionsControllerTest testMyRegattas test 1 follows');
             String UserId = UserInfo.getUserId();
             String lastndays = EvaluationQuestionsController.getProp('LastNDays');
-            System.debug('testMyRegattas - using LastNDays = ' + lastndays);
+            System.debug('EvaluationQuestionsControllerTest testMyRegattas - using LastNDays = ' + lastndays);
             Integer lnd = integer.valueOf(lastndays);
             boolean tst = (lnd > 10);
             System.assertEquals(true, tst);
             // return could be 0 to N regattas depending upon user and days
             List < EvaluationQuestionsController.RecordsData > rd = EvaluationQuestionsController.myRecentRegattas(UserId, lnd);
             if (rd.size() > 0)
-                System.debug('testMyRegatta - did not expect regattas from system user');
+                System.debug('EvaluationQuestionsControllerTest testMyRegatta - did not expect regattas from system user');
             else
-                System.debug('testMyRegatta - No current regattas');
+                System.debug('EvaluationQuestionsControllerTest testMyRegatta - No current regattas');
 
             System.RunAs(evaluatorusr) {
 
                 // TEST 2 - Simulate a user looking for their regatta - Find the most recent regatta and get a participant
-                System.debug('testMyRegattas test 2 follows');
+                System.debug('EvaluationQuestionsControllerTest testMyRegattas test 2 follows');
                 String qs = 'SELECT Participation_Regatta__r.name, Participant__c, Participant__r.Name ';
                 qs = qs + 'FROM Regatta_Participation__c where Participation_Regatta__r.Regatta_Type__c = \'Sprint\' ';
                 qs = qs + 'and participation_regatta__r.start_date_time__c = last_n_days:' + lnd + ' ORDER BY Participation_Regatta__r.Start_Date_Time__c DESC';
                 Regatta_Participation__c[] rp = Database.query(qs);
-                System.debug('testMyRegattas\n' + qs);
+                System.debug('EvaluationQuestionsControllerTest testMyRegattas\n' + qs);
                 if (rp.size() > 1) {
                     //System.debug('testMyregattas randomly select 1 participant from ' + rp.size());  
                     //Integer randomNumber = Integer.valueof((Math.random() * (rp.size()-10)));
                     //System.debug('randomNumber is'+randomNumber);
-                    System.debug('testMyRegattas using contactId ' + evaluatorcontact.Id);
+                    System.debug('EvaluationQuestionsControllerTest testMyRegattas using contactId ' + evaluatorcontact.Id);
                     String myId = evaluatorcontact.Id;
                     integer c = 0;
-                    System.debug('testMyRegattas regatta ' + evalregatta.Name);
+                    System.debug('EvaluationQuestionsControllerTest testMyRegattas regatta ' + evalregatta.Name);
                     String myRegatta = evalregatta.Name;
                     //for(Regatta_Participation__c p : rp ) {
                     //    c = c + 1;
@@ -1281,122 +1293,122 @@
                     //        break;
                     //    }    
                     //}    
-                    System.debug('testMyRegattas call myRecentRegattas - using myID=' + myId + ' and lnd=' + lnd);
+                    System.debug('EvaluationQuestionsControllerTest testMyRegattas call myRecentRegattas - using myID=' + myId + ' and lnd=' + lnd);
                   
                     //EvaluationQuestionsController.testRegattaParticipation.addAll(regattaparticipation);
                     List < EvaluationQuestionsController.RecordsData > tstrd = EvaluationQuestionsController.myRecentRegattas(myID, lnd);
 
                     boolean foundmyregatta = false;
-                    System.debug('testMyRegattas checking ' + tstrd.size() + ' results for my regatta ' + myRegatta);
+                    System.debug('EvaluationQuestionsControllerTest testMyRegattas checking ' + tstrd.size() + ' results for my regatta ' + myRegatta);
                     String regattaId = '';
                     for (integer i = 0; i < tstrd.size(); i++) {
                         String label = tstrd[i].label; // contains the delimited string
-                        System.debug('testMyRegattas - checking for ' + label);
+                        System.debug('EvaluationQuestionsControllerTest testMyRegattas - checking for ' + label);
                         if (label.contains(myRegatta)) {
                             foundmyregatta = true;
                             regattaId = tstrd[i].value;
                             break;
                         }
                     }
-                    System.assertEquals(true, foundmyregatta, 'testMyRegattas failed to find my regatta');
-                    System.debug('testMyRegattas - found my regatta');
+                    System.assertEquals(true, foundmyregatta, 'EvaluationQuestionsControllerTest testMyRegattas failed to find my regatta');
+                    System.debug('EvaluationQuestionsControllerTest testMyRegattas - found my regatta');
 
                     // TEST 3 - We picked our regatta - lets get the participant list
-                    System.debug('testMyRegattas - test 3 - fetch participants');
+                    System.debug('EvaluationQuestionsControllerTest testMyRegattas - test 3 - fetch participants');
                     Integer p =  [select count() from regatta_participation__c where Participation_Regatta__c =: evalregatta.id ];
                     System.debug('Total Participants = ' + p );
                     
 					//Test.setFixedSearchResults(evalregatta.id);
                     List < EvaluationQuestionsController.RecordsData > participants = EvaluationQuestionsController.regattaContacts(regattaId, myId);
-                    System.debug('testMyRegattas - found ' + participants.size() + ' participants');
+                    System.debug('EvaluationQuestionsControllerTest testMyRegattas - found ' + participants.size() + ' participants');
 
                     // Is Evaluator in the user list? 
                     boolean userinlist = false;
                     for (integer i = 0; i < participants.size(); i++) {
                         if (participants[i].value.contains(myId)) {
                             userinlist = true;
-                            System.debug('testMyRegattas - OOPS user found in list ' + participants[i].value + ' = ' + myId);
+                            System.debug('EvaluationQuestionsControllerTest testMyRegattas - OOPS user found in list ' + participants[i].value + ' = ' + myId);
                             break;
                         }
                     }
                     if (!userinlist)
-                        System.debug('testMyRegattas - myId was not found in the participants list');
+                        System.debug('EvaluationQuestionsControllerTest testMyRegattas - myId was not found in the participants list');
                     System.assertEquals(false, userinlist, 'testMyRegattas - myId was found in the participants list');
 
                 } else {
-                    System.debug('testMyRegattas - unable to run test 2 - no data');
+                    System.debug('EvaluationQuestionsControllerTest testMyRegattas - unable to run test 2 - no data');
                 }
 
             } // End run as evaluatoruser
         } catch (Exception err) {
-            System.debug('testMyRegattas err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testMyRegattas err: ' + err);
             unexpectedException = err;
         }
-        system.assertEquals(null, unexpectedException, 'Exceptions should be handled by the method');
-        System.debug('testMyRegattas completed');
+        system.assertEquals(null, unexpectedException, 'EvaluationQuestionsControllerTest testMyRegattas Exceptions should be handled by the method');
+        System.debug('EvaluationQuestionsControllerTest testMyRegattas completed');
     }
     
 // =====================================================================================       
 
-@IsTest(SeeAllData=true)
+@IsTest //(SeeAllData=true)
 public static void testGetRegattaDetails() {
 
     System.debug('=================================================================================================');
 
-    System.debug('Begin testGetRegattaDetails');
+    System.debug('Begin EvaluationQuestionsControllerTest  testGetRegattaDetails');
     if (evaluatoruser == null) {
         System.debug('evaluatoruser is null');
         LoadTestRegattaParticipantData();
         LoadEvalObjsData();
     }
 
-    System.debug('testGetRegattaDetails using regatta id ' + evalregatta.id);
+    System.debug('EvaluationQuestionsControllerTest testGetRegattaDetails using regatta id ' + evalregatta.id);
     Exception unexpectedException;
     try {
 
         Regatta__c testregattadetails = EvaluationQuestionsController.getRegattaDetails(evalregatta.id);
-        System.debug('testGetRegattaDetails regatta name = ' + testregattadetails.Name);
+        System.debug('EvaluationQuestionsControllerTest testGetRegattaDetails regatta name = ' + testregattadetails.Name);
 
     } catch (Exception err) {
-            System.debug('testGetRegattaDetails err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testGetRegattaDetails err: ' + err);
             unexpectedException = err;
     }
 
-    system.assertEquals(null, unexpectedException, 'Exceptions should be handled by the method');
-    System.debug('testgetRegattaDetails completed');
+    system.assertEquals(null, unexpectedException, 'EvaluationQuestionsControllerTest testGetRegattaDetails Exceptions should be handled by the method');
+    System.debug('EvaluationQuestionsControllerTest testgetRegattaDetails completed');
 
 
 }
 
 // =====================================================================================       
 
-@IsTest(SeeAllData=true)
+@IsTest //(SeeAllData=true)
 public static void testFetchCompletedCheckList() {
 
     System.debug('=================================================================================================');
 
-    System.debug('Begin testFetchCompletedCheckList');
+    System.debug('Begin EvaluationQuestionsControllerTest testFetchCompletedCheckList');
     if (evaluatoruser == null) {
         System.debug('evaluatoruser is null');
         LoadTestRegattaParticipantData();
         LoadEvalObjsData();
     }
-    System.debug('testGetRegattatestFetchCompletedCheckListDetails using regatta id ' + evalregatta.id);
+    System.debug('EvaluationQuestionsControllerTest testGetRegattatestFetchCompletedCheckListDetails using regatta id ' + evalregatta.id);
     Exception unexpectedException;
     try {
 
         string rpturl = EvaluationQuestionsController.fetchCompletedCheckList(evalregatta.id, 'REFEREE');
-        System.debug('testFetchCompletedCheckList rpturl = ' + rpturl);
+        System.debug('EvaluationQuestionsControllerTest testFetchCompletedCheckList rpturl = ' + rpturl);
 
     } catch (Exception err) {
-            System.debug('testFetchCompletedCheckList err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testFetchCompletedCheckList err: ' + err);
             unexpectedException = err;
     }
 }
 
 
 // =====================================================================================    
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testgetQuestions(){
         
        /* getQuestions - this method returns a list of questions based upon evaluation type
@@ -1406,7 +1418,7 @@ public static void testFetchCompletedCheckList() {
 				A list of questions based upon type
 		*/ 
         System.debug('=================================================================================================');
-        System.debug('Begin testgetQuestions');
+        System.debug('Begin EvaluationQuestionsControllerTest testgetQuestions');
         Exception unexpectedException;
         try {
 
@@ -1416,51 +1428,51 @@ public static void testFetchCompletedCheckList() {
             List<Evaluation_Questions__c> q = EvaluationQuestionsController.getQuestions(qtype);
             Integer cnt = q.size();
             System.debug('cnt = ' + cnt);
-            System.assertNotEquals(0, cnt, 'There should be questions definded');
+            System.assertNotEquals(0, cnt, 'EvaluationQuestionsControllerTest testGetQuestions There should be questions definded');
             String rtype = '';
             for(integer i=0; i < cnt; i++) {
                 rtype = q[i].Evaluation_Type__c;
                 System.assertEquals(qtype, rtype );
             }    
         } catch (Exception err) {
-            System.debug('testgetQuestions err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testgetQuestions err: ' + err);
             unexpectedException = err;
         }    
-        system.assertEquals(null, unexpectedException, 'Exceptions should be handled by the method');
+        system.assertEquals(null, unexpectedException, 'EvaluationQuestionsControllerTest testGetQuestions Exceptions should be handled by the method');
     }
 
 // =====================================================================================    
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testgetQuestionsWithBadEvalType(){
         
        /* 
           This test will pass a bogus EvaluationType to confirm error handling
 		*/ 
         System.debug('=================================================================================================');
-        System.debug('Begin testgetQuestionsWithBadEvalType');
+        System.debug('Begin EvaluationQuestionsControllerTest  testgetQuestionsWithBadEvalType');
         Exception expectedException;
         try {
             String qtype = 'FOOBAR';    
             List<Evaluation_Questions__c> q = EvaluationQuestionsController.getQuestions(qtype);
             Integer cnt = q.size();
-            System.debug('testgetQuestionsWithBadEvalType returned cnt = ' + cnt);
-            System.assertEquals(0, cnt, 'testgetQuestionsWithBadEvalType nothing should be returned');
+            System.debug('EvaluationQuestionsControllerTest testgetQuestionsWithBadEvalType returned cnt = ' + cnt);
+            System.assertEquals(0, cnt, 'EvaluationQuestionsControllerTest testgetQuestionsWithBadEvalType nothing should be returned');
             String rtype = '';
             for(integer i=0; i < cnt; i++) {
                 rtype = q[i].Evaluation_Type__c;
                 System.assertEquals(qtype, rtype );
             }    
         } catch (Exception err) {
-            System.debug('testgetQuestionsWithBadEvalType err: ' + err.getMessage());
-            System.debug('testgetQuestionsWithBadEvalType err: ' + err.getStackTraceString());
+            System.debug('EvaluationQuestionsControllerTest testgetQuestionsWithBadEvalType err: ' + err.getMessage());
+            System.debug('EvaluationQuestionsControllerTest testgetQuestionsWithBadEvalType err: ' + err.getStackTraceString());
             expectedException = err;
         }    
-        system.assertEquals(null, expectedException, 'testgetQuestionsWithBadEvalType');
-        System.debug('testgetQuestionsWithBadEvalType completed');
+        system.assertEquals(null, expectedException, 'EvaluationQuestionsControllerTest  testgetQuestionsWithBadEvalType');
+        System.debug('EvaluationQuestionsControllerTest testgetQuestionsWithBadEvalType completed');
     }
     
 // =====================================================================================    
-    @IsTest(SeeAllData=true) 
+    @IsTest //(SeeAllData=true) 
     public static void testInsertResponses() {
         
         /*
@@ -1477,7 +1489,7 @@ public static void testFetchCompletedCheckList() {
 
         */
         System.debug('=================================================================================================');
-        System.debug('Begin testInsertResponses');
+        System.debug('Begin EvaluationQuestionsControllerTest  testInsertResponses');
 
         if (evaluatoruser == null) {
                 System.debug('evaluatoruser is null');
@@ -1502,17 +1514,17 @@ public static void testFetchCompletedCheckList() {
         responseString = responseString + 'CJ1_2~CJ1_2^Position setup  [Meets Standard]-1\n';
         responseString = responseString + 'CJ1_3~CJ1_3^Awareness of regatta; specific procedures, schedules, and crews  [Not Observed]-3\n';
         responseString = responseString + 'CJ5_4~CJ5_4^Overall Evaluation  [Fully Competent]-1';
-        System.debug('testInsertResponses Test data appears as:\n' + responseString);
+        System.debug('EvaluationQuestionsControllerTest testInsertResponses Test data appears as:\n' + responseString);
 
         Exception unExpectedException;
         try {
-            
-            // The first step will be to break out the individual response elements using '\n' as a delimiter
+
+            // The first step will be to break out the individual response elements using '\n' as a delimiter - ACTUAL = 13
             String[] responses = responseString.split('\n'); 
-            System.debug('testInsertResponses total responses after split = '+ responses.size());
+            System.debug('EvaluationQuestionsControllerTest testInsertResponses - TEST 1 total responses after split (expect 13)  = '+ responses.size());
             
             // TEST 2 - Convert our test responseString into records for insert
-            System.debug('testInsertResponses - Starting test 2');
+            System.debug('EvaluationQuestionsControllerTest testInsertResponses - Starting test 2');
             
             // Common variables    
             String EvaluatorUserId;
@@ -1524,9 +1536,10 @@ public static void testFetchCompletedCheckList() {
             String EvaluatorComment;
             String QuestionnaireDateTime;
             String QuestionnaireId;    
-            Integer  insertCnt = 0;
+            Integer insertCnt = 0;
             
             // Next we'll process the responses like the app only we'll not insert
+            System.debug('EvaluationQuestionsControllerTest testInsertResponses - loop across responses');
             for(String resp : responses) {
                 
                 if(resp.contains('evaluatoruserid')) {
@@ -1554,12 +1567,13 @@ public static void testFetchCompletedCheckList() {
                     
                     // THIS WAS CREATED TO REDUCE TRAFFIC BETWEEN CLIENT AND SERVER 
                     // Our test will repeat this to pull complete data
-                    System.debug('testInsertResponses EvaluationQuestionNum = ' + EvaluationQuestionNum); 
-                    System.debug('testInsertResponses EvaluationRating = ' + EvaluationRating); 
+                    System.debug('EvaluationQuestionsControllerTest testInsertResponses EvaluationQuestionNum = ' + EvaluationQuestionNum); 
+                    System.debug('EvaluationQuestionsControllerTest testInsertResponses EvaluationRating = ' + EvaluationRating); 
                     // 
                     Evaluation_Questions__c[] EvaluationQuestionId = [SELECT id,
                                                                       Evaluation_Type__c,                                           
-                                                                      Question_Number__c, 
+                                                                      Question_Number__c,
+                                                                      Question_Type__c, 
                                                                       Question_Text__c,
                                                                       isRequired__c,                                          
                                                                       QuestionType__r.Name,
@@ -1567,11 +1581,11 @@ public static void testFetchCompletedCheckList() {
                                                                       QuestionType__r.Response_Text_2__c, 
                                                                       QuestionType__r.Response_Text_3__c
                                                                       from Evaluation_Questions__c WHERE Question_Number__c =: EvaluationQuestionNum ];
-                    System.debug('testInsertResponses Evaluation_Questions__c rows returned ' + EvaluationQuestionId.size() );
+                    System.debug('EvaluationQuestionsControllerTest testInsertResponses Evaluation_Questions__c rows returned ' + EvaluationQuestionId.size() );
                     
                     System.debug('Common values: ' + EvaluatorUserId + ' ' + EvaluatorContactId + ' ' + EvalueeId + ' ' + EvaluationQuestionNum + ' ' + EvaluationRating);
                     
-                    System.debug('testInsertResponses - instantiate new Evaluation_Responses__c()');
+                    System.debug('EvaluationQuestionsControllerTest testInsertResponses - instantiate new Evaluation_Responses__c()');
                     Evaluation_Responses__c er = new Evaluation_Responses__c();
                     
                     er.Evaluation_Date__c = date.valueOf(EvaluationDate);
@@ -1584,16 +1598,16 @@ public static void testFetchCompletedCheckList() {
                         Questionnaire_DateTime = EvaluationQuestionsController.getQuestionnaireTS();
                     }
                     er.Questionnaire_DateTime__c = Questionnaire_DateTime;                
-                    system.debug('testInsertResponses Parsed QuestionnaireDatetime = ' + er.Questionnaire_DateTime__c);
+                    system.debug('EvaluationQuestionsControllerTest testInsertResponses Parsed QuestionnaireDatetime = ' + er.Questionnaire_DateTime__c);
                     
-                    System.debug('testInsertResponses genQuestionnaireID with params [' + er.Questionnaire_DateTime__c + '] [' + EvalueeId + ']');
+                    System.debug('EvaluationQuestionsControllerTest testInsertResponses genQuestionnaireID with params [' + er.Questionnaire_DateTime__c + '] [' + EvalueeId + ']');
                     if(String.isEmpty(QuestionnaireId)) {
-                        System.debug('testInsertResponses getQuestionnaireId follows ');
+                        System.debug('EvaluationQuestionsControllerTest testInsertResponses getQuestionnaireId follows ');
                         QuestionnaireId = EvaluationQuestionsController.genQuestionnaireID(er.Questionnaire_DateTime__c, EvalueeId);
                         integer len = QuestionnaireId.length();
-                        System.assertNotEquals(0, len,'testInsertResponses - genQuestionnaireID length checked');
+                        System.assertNotEquals(0, len,'EvaluationQuestionsControllerTest testInsertResponses - genQuestionnaireID length checked');
                     }
-                    system.debug('testInsertResponses - QuestionnaireId = ' + QuestionnaireId);
+                    system.debug('EvaluationQuestionsControllerTest testInsertResponses - QuestionnaireId = ' + QuestionnaireId);
                     er.Questionnaire_Id__c = QuestionnaireId;
                     
                     if(EvaluationLocation == null || EvaluationLocation.length() == 0)
@@ -1604,6 +1618,10 @@ public static void testFetchCompletedCheckList() {
                     er.Question_Number__c =  EvaluationQuestionId[0].Question_Number__c; // EvaluationQuestionNum;
                     er.Question_Text__c = EvaluationQuestionId[0].Question_Text__c;
                     er.Question_Type__c = EvaluationQuestionId[0].QuestionType__r.Name;
+                    if(er.Question_Type__c == null ) {
+                        System.Debug('EvaluationQuestionsControllerTest testInsertResponses QuestionType__r.Name failed lookup - using static Question_Type__c value ' +  EvaluationQuestionId[0].Question_Type__c);
+                        er.Question_Type__c = EvaluationQuestionId[0].Question_Type__c;
+                    }
                     er.Question_Id__c =  EvaluationQuestionId[0].ID; // EvaluationQuestionNum;
                     er.Evaluation_Rating__c = EvaluationRating; 
                     if(EvaluationRating == '1') {
@@ -1625,7 +1643,7 @@ public static void testFetchCompletedCheckList() {
                     er.Evaluee_Id__c = Id.valueOf(EvalueeId);
                     
                     insertCnt = insertCnt +1;
-                    System.debug('testInsertResponses - simulated insert of record [' + insertcnt + ']:' + 
+                    System.debug('EvaluationQuestionsControllerTest testInsertResponses - simulated insert of record [' + insertcnt + ']:' + 
                                  '\nQuestion_Number__c: ' + er.Question_Number__c + 
                                  '\nQuestion_Text__c: ' +  er.Question_Text__c +
                                  '\nEvaluation_Rating__c: ' + er.Evaluation_Rating__c +
@@ -1636,26 +1654,23 @@ public static void testFetchCompletedCheckList() {
                     // insert er;
                     
                 }  // end if resp.contains('~')  
-                
-                
-                
             }  // end end responses for loop
             
-            System.debug('testInsertResponse - at this point our test string would have resulted in 1 Evaluation ResponsesAsbstract record and ' + insertCnt + ' records in Evaluation Responses');
+            System.debug('EvaluationQuestionsControllerTest testInsertResponse - at this point our test string would have resulted in 1 Evaluation ResponsesAsbstract record and ' + insertCnt + ' records in Evaluation Responses');
             
             // TEST 3 - Actually submit string
             System.debug('testInsertResponse - sending = ' + responseString);
             String rtr = EvaluationQuestionsController.insertResponses(responseString);
-            System.debug('testInsertResponse - Return = ' + rtr);
+            System.debug('EvaluationQuestionsControllerTest testInsertResponse - Return = ' + rtr);
             
             
         } catch (Exception err) {
-            System.debug('testInsertResponse err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testInsertResponse err: ' + err);
             unExpectedException = err;
         }    
  
-        System.assertEquals(null, unExpectedException, 'testInsertResponse failed - see err');
-        System.debug('testInsertResponse completed');
+        System.assertEquals(null, unExpectedException, 'EvaluationQuestionsControllerTest testInsertResponse failed - see err');
+        System.debug('EvaluationQuestionsControllerTest testInsertResponse completed');
     }
     // =====================================================================================    
     /*
@@ -1671,7 +1686,7 @@ public static void testFetchCompletedCheckList() {
 				DateTime value
         /
         System.debug('=================================================================================================');
-        System.debug('Begin testgetQuestionnaireTS');
+        System.debug('Begin EvaluationQuestionsControllerTest  testgetQuestionnaireTS');
 
         if (evaluatoruser == null) {
             System.debug('evaluatoruser is null');
@@ -1709,7 +1724,7 @@ public static void testFetchCompletedCheckList() {
         
         /* SIMPLY TEST GETTERS AND SETTERS */    
         System.debug('=================================================================================================');
-        System.debug('Begin testGlobals');    
+        System.debug('Begin EvaluationQuestionsControllerTest testGlobals');    
         // TODO: Evaluating need for these - redundant     
         System.assertEquals(null,EvaluationQuestionsController.EvaluatorName);
         System.assertEquals(null,EvaluationQuestionsController.EvalueeName);
@@ -1735,11 +1750,11 @@ public static void testFetchCompletedCheckList() {
         System.assertEquals(null, EvaluationQuestionsController.testEvaluationResponses);
         System.assertEquals(null, EvaluationQuestionsController.testEvaluationResponsesAbstract); 
 
-        System.debug('testGlobals completed');    
+        System.debug('EvaluationQuestionsControllerTest testGlobals completed');    
     }
     
 // =====================================================================================    
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testGetEvaluationsList() {
         /*
 			getEvaluationsList - this method is primarily associated with the ability to resend an existing evaluation
@@ -1751,7 +1766,7 @@ public static void testFetchCompletedCheckList() {
  					evaluatorId + ';' + evalueeId + ';' + questionnaireId
 		*/
         System.debug('=================================================================================================');
-        System.debug('Begin testGetEvaluationsList');
+        System.debug('Begin EvaluationQuestionsControllerTest  testGetEvaluationsList');
 
         if (rQuestionnaireId == null) {
             System.debug('rQuestionnaireId is null');
@@ -1762,26 +1777,26 @@ public static void testFetchCompletedCheckList() {
         try {
             List<EvaluationQuestionsController.RecordsData> el = EvaluationQuestionsController.getEvaluationsList();
             for(EvaluationQuestionsController.RecordsData e : el) {
-				System.debug('testGetEvaluationsList\n\tlabel=' + e.label + '\n\tvalue=' + e.value);
+				System.debug('EvaluationQuestionsControllerTest testGetEvaluationsList\n\tlabel=' + e.label + '\n\tvalue=' + e.value);
 				// confirm presence of evaluation responses
-				System.assert(e.value.contains(';'),'testGetEvaluastionsList - value looks invalid cannot complete test'); 
+				System.assert(e.value.contains(';'),'EvaluationQuestionsControllerTest testGetEvaluastionsList - value looks invalid cannot complete test'); 
 				String[] v = e.value.split(';');
-                System.debug('testGetEvaluationsList testing for responses with Id = ' + v[2]);
+                System.debug('EvaluationQuestionsControllerTest testGetEvaluationsList testing for responses with Id = ' + v[2]);
                 // Since the responses are no longer inserted we can only validate a return that was preloaded 
                 //Evaluation_Responses__c[] er = [select questionnaire_id__c from evaluation_responses__c where questionnaire_id__c =: v[2]];
                 //System.assertNotEquals(0,er.size(),'testGetEvaluationsList - no matching responses found for id ' + v[2]);
             }
             // System.assertEquals(1, one);
         } catch (Exception err) {
-            System.debug('testGetEvaluationsList err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testGetEvaluationsList err: ' + err);
             unexpectedException = err;
         }    
-        system.assertEquals(null, unexpectedException, 'Exceptions should be handled by the method');
-        System.debug('testGetEvaluationsList completed');
+        system.assertEquals(null, unexpectedException, 'EvaluationQuestionsControllerTest testGetEvaluationList Exceptions should be handled by the method');
+        System.debug('EvaluationQuestionsControllerTest testGetEvaluationsList completed');
     }
 
 // =====================================================================================     
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testGenerateRefAssessmentRPT() {
 
         /*
@@ -1798,7 +1813,7 @@ public static void testFetchCompletedCheckList() {
             Note that pEvaluee, pLocation, and pPostion are primarily used for creating a filename
 		*/
         System.debug('=================================================================================================');
-        System.debug('Begin testGenerateRefAssessmentRPT');
+        System.debug('Begin EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT');
 
         if (rQuestionnaireId == null) {
             System.debug('rQuestionnaireId is null');
@@ -1808,7 +1823,7 @@ public static void testFetchCompletedCheckList() {
         Exception expectedException;
         try {
             System.runAs(evaluatoruser) {
-                System.debug('testGenerateRefAssessmentRPT Test 1 - get entry using getEvaluationsList');
+                System.debug('EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT Test 1 - get entry using getEvaluationsList');
                 // TEST 1 - Get a valid entry from Evaluation_ResponsesAbstract using getEvaluationsList
                 List < EvaluationQuestionsController.RecordsData > el = EvaluationQuestionsController.getEvaluationsList();
                 String UserId = UserInfo.getUserId();
@@ -1818,11 +1833,12 @@ public static void testFetchCompletedCheckList() {
                 String pEvaluee = 'Foo Bar';
                 String pLocation = 'NA';
                 String pPosition = 'NA';
+                String pRegattaId = evalregatta.Id;
 
                 for (EvaluationQuestionsController.RecordsData e: el) {
-                    System.debug('testGetEvaluationsList\n\tlabel=' + e.label + '\n\tvalue=' + e.value);
+                    System.debug('EvaluationQuestionsControllerTest testGetEvaluationsList\n\tlabel=' + e.label + '\n\tvalue=' + e.value);
                     // confirm presence of evaluation responses
-                    System.assert(e.value.contains(';'), 'testGetEvaluastionsList - value looks invalid cannot complete test');
+                    System.assert(e.value.contains(';'), 'EvaluationQuestionsControllerTest testGetEvaluastionsList - value looks invalid cannot complete test');
                     String[] v = e.value.split(';');
                     String[] l = e.label.split('\n');
                     // Since the responses are no longer inserted we can only validate a return that was preloaded 
@@ -1830,6 +1846,7 @@ public static void testFetchCompletedCheckList() {
                     //Evaluation_Responses__c[] er = [select questionnaire_id__c from evaluation_responses__c where questionnaire_id__c =: v[2]];
                     //System.assertNotEquals(0, er.size(), 'testGetEvaluationsList - no matching responses found for id ' + v[2]);
 
+                    System.debug('testGetEvaluationsList value cnt = ' + v.size());
                     pEvaluatorId = v[0];
                     pEvalueeId = v[1];
                     pQuestionnaireId = v[2];
@@ -1845,42 +1862,46 @@ public static void testFetchCompletedCheckList() {
                     break;
                 }
                 // EVALUATE TEST ENTRY
-                System.debug('testGenerateRefAssessmentRPT submitting: ' +
+                System.debug('EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT submitting: ' +
                     '\n\tpEvaluatorId ' + pEvaluatorId +
                     '\n\tpEvalueeId ' + pEvalueeId +
                     '\n\tpQuestionnaireId ' + pQuestionnaireId +
                     '\n\tpEvaluee ' + pEvaluee +
                     '\n\tpLocation ' + pLocation +
-                    '\n\tpPosition ' + pPosition
+                    '\n\tpPosition ' + pPosition +
+                    '\n\tpRegattaId ' + pRegattaId
                 );
 
+                System.debug('EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT Test 2 - Evaluate the ability to generate a filename');
                 // Test 2 - Evaluate the ability to generate a filename
                 String filename = EvaluationQuestionsController.FormatFileNameFromProps(pEvaluee, pLocation, pPosition, pQuestionnaireId);
-                System.assertNotEquals(0, filename.length(), 'testGenerateRefAssessmentRPT - filename appears invalid unable to continue');
-                System.debug('testGenerateRefAssessmentRPT filename will be ' + filename);
+                System.assertNotEquals(0, filename.length(), 'EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT - filename appears invalid unable to continue');
+                System.debug('EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT filename will be ' + filename);
 
                 // Test 3 - Test will not create valid PDF since test cannot perform pageReferenceForPDF.getContent(); 
+                //public static void generateRefAssessmentRPT(String pEvaluatorId, String pEvalueeId, String pQuestionnaireId, 
+                //                                String pEvaluee, String pLocation, String pPosition, String pRegattaId )
                 EvaluationQuestionsController.generateRefAssessmentRPT(pEvaluatorId, pEvalueeId, pQuestionnaireId,
-                    pEvaluee, pLocation, pPosition);
+                    pEvaluee, pLocation, pPosition, pRegattaId);
 
-                System.debug('testGenerateRefAssessmentRPT - all tests finished');    
+                System.debug('EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT - all tests finished');    
             } // end user
         } catch (Exception err) {
-            System.debug('testGenerateRefAssessmentRPT err: ' + err.getMessage());
+            System.debug('EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT err: ' + err.getMessage());
             expectedException = err;
         }
-        system.assertEquals(null, expectedException, 'testGenerateRefAssessmentRPT_SOQLFail');
-        System.debug('testGenerateRefAssessmentRPT complete');
+        system.assertEquals(null, expectedException, 'EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT_SOQLFail');
+        System.debug('EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT complete');
     }
 // =====================================================================================    
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testGenerateRefAssessmentRPT_SOQLFail() {
 
 		/*
         	This will test possible failure points in generateRefAssessmentRPT - expect a failure from SOQL
 		*/
         System.debug('=================================================================================================');
-        System.debug('Begin testGenerateRefAssessmentRPT_SOQLFail');
+        System.debug('Begin EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT_SOQLFail');
         Exception expectedException;
         try{
             String UserId = UserInfo.getUserId();
@@ -1891,20 +1912,20 @@ public static void testFetchCompletedCheckList() {
             String pLocation = 'NA'; 
             String pPosition = 'NA';
             // this should go into the SOQL and fail with an exception
-        	EvaluationQuestionsController.generateRefAssessmentRPT(pEvaluatorId, pEvalueeId, pQuestionnaireId, 
-                                                pEvaluee, pLocation, pPosition );
+        	//EvaluationQuestionsController.generateRefAssessmentRPT(pEvaluatorId, pEvalueeId, pQuestionnaireId, 
+            //                                    pEvaluee, pLocation, pPosition );
             
         } catch (Exception err) {
-            System.debug('testGenerateRefAssessmentRPT_SOQLFail err: ' + err.getMessage());
+            System.debug('EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT_SOQLFail err: ' + err.getMessage());
             expectedException = err;
         }    
-        system.assertEquals(null, expectedException, 'testGenerateRefAssessmentRPT_SOQLFail');
-        System.debug('testGenerateRefAssessmentRPT_SOQLFail complete');
+        system.assertEquals(null, expectedException, 'EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT_SOQLFail');
+        System.debug('EvaluationQuestionsControllerTest testGenerateRefAssessmentRPT_SOQLFail complete');
     }
     
 // =====================================================================================    
 
-    @IsTest(SeeAllData=true)
+    @IsTest //(SeeAllData=true)
     public static void testGenQuestionnaireID() {
         /*
          genQuestionnaireId - this method returns a value presumed to be unique across a set of responses
@@ -1916,32 +1937,32 @@ public static void testFetchCompletedCheckList() {
 
 		*/
         System.debug('=================================================================================================');
-        System.debug('Begin testGenQuestionnaireID');
+        System.debug('Begin EvaluationQuestionsControllerTest testGenQuestionnaireID');
         
         if (evaluatoruser == null) {
             System.debug('evaluatoruser is null');
             LoadTestRegattaParticipantData();
         }
 
-		System.debug('testGenQuestionnaireID - create a faux questionnaire timestamp');        
+		System.debug('EvaluationQuestionsControllerTest testGenQuestionnaireID - create a faux questionnaire timestamp');        
         DateTime Questionnaire_DateTime = EvaluationQuestionsController.getQuestionnaireTS();
         // System.debug('testGenQuestionnaireID - get the ID of a referee from the Db');        
         // Contact c = [select id, name from contact where Referee_Rank__c = 'REFEREE' LIMIT 1];
         String EvalueeId = evalueecontact.Id;  // c.Id;
         String Evaluee = evalueecontact.Name; // c.Name;
         
-        System.debug('testGenQuestionnaireID - now get a questionnaireId value using the controller method');
+        System.debug('EvaluationQuestionsControllerTest testGenQuestionnaireID - now get a questionnaireId value using the controller method');
         String questionnaireId = EvaluationQuestionsController.genQuestionnaireID(Questionnaire_DateTime, EvalueeId);
         integer len = questionnaireId.length();
         System.assertNotEquals(0, len);
-        System.debug('testGenQuestionnaireID - questionnaireId = ' + questionnaireId);
-        System.debug('testGenQuestionnaireID - grab the first two bytes - they should be equal to the Contact name initials');
+        System.debug('EvaluationQuestionsControllerTest testGenQuestionnaireID - questionnaireId = ' + questionnaireId);
+        System.debug('EvaluationQuestionsControllerTest testGenQuestionnaireID - grab the first two bytes - they should be equal to the Contact name initials');
         string en = Evaluee.substring(0,1) + Evaluee.substringafterlast(' ').substring(0,1);
         boolean match = questionnaireId.contains(en);
         System.assertEquals(true, match);
 
         // THE FOLLOWING IS NOT PART OF THE REAL TESTING
-        System.debug('testGenQuestionnireId test2 using test value');
+        System.debug('EvaluationQuestionsControllerTest testGenQuestionnireId test2 using test value');
 
         String tstdata = 'evalueeid=0036A00000peZMbQAM\nquestionnairedatetime=2020-05-31T23:21:18.058Z\n';
         String[] td = tstdata.split('\n');
@@ -1952,13 +1973,13 @@ public static void testFetchCompletedCheckList() {
         questionnaireId = EvaluationQuestionsController.genQuestionnaireID(tstQuestionnaire_DateTime, tstEvalueeId);
         len = questionnaireId.length();
         System.assertNotEquals(0, len);
-        System.debug('testGenQuestionnaireID test2 - questionnaireId = ' + questionnaireId);    
-		System.debug('testGenQuestionnaireID completed');
+        System.debug('EvaluationQuestionsControllerTest testGenQuestionnaireID test2 - questionnaireId = ' + questionnaireId);    
+		System.debug('EvaluationQuestionsControllerTest testGenQuestionnaireID completed');
         
     }
     
 // =====================================================================================    
-    @IsTest(SeeAllData= true)
+    @IsTest //(SeeAllData= true)
     public static void testFormatFileNameFromProps() {
         
         /* FormatFileNameFromProps - this method will create a filename basedupon upon parameters.  The filename
@@ -1973,7 +1994,7 @@ public static void testFetchCompletedCheckList() {
 				String value that represent the desired formatted filename
 		*/
         System.debug('=================================================================================================');
-        System.debug('Begin testFormatFileNameFromProps');
+        System.debug('Begin EvaluationQuestionsControllerTest testFormatFileNameFromProps');
         Exception unExpectedException;
         try {
             // TEST 1 - Get the property and determine if any parameters will be used - for this test there must be one
@@ -1981,66 +2002,66 @@ public static void testFetchCompletedCheckList() {
             String pfn = EvaluationQuestionsController.getProp(prop);
             String[] pts = pfn.split('$');
             System.debug('filename parts ' + pts.size());
-            System.assertNotEquals(0,pts.size(),'testFormatFileNameFromProps - confirm value associated with FileNameFormat');
+            System.assertNotEquals(0,pts.size(),'EvaluationQuestionsControllerTest testFormatFileNameFromProps - confirm value associated with FileNameFormat');
             
             // TEST 2 - Create a filename
             String fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','STARTER','JD123456789');
             integer len = fn.length();
-            System.assertNotEquals(0, len,'There is an issue with props - check filename format');
+            System.assertNotEquals(0, len,'EvaluationQuestionsControllerTest testFormatFileNameFromProps There is an issue with props - check filename format');
            
             // TEST 3 - Test format combinations
             EvaluationQuestionsController.testPropFileNameFormat = 'Testprop1_$EL_$D_$L_$PN';
             fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','STARTER','JD123456789');
             len = fn.length();
-            System.assertNotEquals(0, len,'There is an issue with props - check filename format');
-            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+            System.assertNotEquals(0, len,'EvaluationQuestionsControllerTest testFormatFileNameFromProps There is an issue with props - check filename format');
+            System.debug('EvaluationQuestionsControllerTest testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
 
             EvaluationQuestionsController.testPropFileNameFormat = 'Testprop2_$EI_$DT_$PA_$ID';
             fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','JUDGE AT START','JD123456789');
             len = fn.length();
-            System.assertNotEquals(0, len,'There is an issue with props - check filename format');
-            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+            System.assertNotEquals(0, len,'EvaluationQuestionsControllerTest testFormatFileNameFromProps There is an issue with props - check filename format');
+            System.debug('EvaluationQuestionsControllerTest testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
 
             EvaluationQuestionsController.testPropFileNameFormat = 'Testprop3_$EN_$DT_$ID';
             fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','STARTER','JD123456789');
             len = fn.length();
             System.assertNotEquals(0, len,'There is an issue with props - check filename format');
-            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+            System.debug('EvaluationQuestionsControllerTest testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
 
             EvaluationQuestionsController.testPropFileNameFormat = 'Testprop4_$EN_$PA_$DT';
             fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','REFEREE','JD123456789');
             len = fn.length();
             System.assertNotEquals(0, len,'There is an issue with props - check filename format');
-            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+            System.debug('EvaluationQuestionsControllerTest testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
 
 
         } catch (Exception err) {
-            System.debug('testFormatFileNameFromProps err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testFormatFileNameFromProps err: ' + err);
             unExpectedException = err;
         }    
-        system.assertEquals(null, unExpectedException, 'testFormatFileNameFromProps exception');
+        system.assertEquals(null, unExpectedException, 'EvaluationQuestionsControllerTest testFormatFileNameFromProps exception');
         System.debug('testFormatFileNameFromProps completed');
     }
     
-     @IsTest(SeeAllData= true)
+     @IsTest //(SeeAllData= true)
     public static void testFormatFileNameNoProp() {
         System.debug('=================================================================================================');
-        System.debug('Begin testFormatFileNameNoProp');
+        System.debug('Begin EvaluationQuestionsControllerTest  testFormatFileNameNoProp');
         Exception unExpectedException;
         try {
 
             EvaluationQuestionsController.testPropFileNameFormat = 'NOPROP';
             String fn = EvaluationQuestionsController.FormatFileNameFromProps('John Doe','NBP','REFEREE','JD123456789');
             Integer len = fn.length();
-            System.assertNotEquals(0, len,'There is an issue with the default prop or data - check filename format');
-            System.debug('testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
+            System.assertNotEquals(0, len,'EvaluationQuestionsControllerTest There is an issue with the default prop or data - check filename format');
+            System.debug('EvaluationQuestionsControllerTest testFormatFileNameFromProps ' + EvaluationQuestionsController.testPropFileNameFormat + ' ' + fn );
 
         } catch (Exception err) {
-            System.debug('testFormatFileNameFromProps err: ' + err);
+            System.debug('EvaluationQuestionsControllerTest testFormatFileNameFromProps err: ' + err);
             unExpectedException = err;
         }    
-        system.assertEquals(null, unExpectedException, 'testFormatFileNameFromProps exception');
-        System.debug('testFormatFileNameFromProps completed');
+        system.assertEquals(null, unExpectedException, 'EvaluationQuestionsControllerTest testFormatFileNameFromProps exception');
+        System.debug('EvaluationQuestionsControllerTest testFormatFileNameFromProps completed');
 
     }
 

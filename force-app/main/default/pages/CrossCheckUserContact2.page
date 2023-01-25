@@ -1,0 +1,41 @@
+<apex:page Controller="CrossCheckUserContactController" action="{!generateCrossCheckUserContactResults}"
+    sidebar="false"  cache="false">
+
+    <head>
+        <style>
+            @page {
+                size: A4 landscape;
+            }
+
+            .headerRow .ResumeTable {
+                background: rgb(3, 78, 118); 
+                color: white; 
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div ID="renderedPage">
+            <apex:form >
+            
+                <apex:pageBlock title="CrossCheck">
+                    
+                    <apex:pageBlockTable value="{!TextResults}" var="line" >
+                    
+                        <apex:column >
+                             <apex:outputText value="{!line}"/>
+                        </apex:column>
+                        
+                    </apex:pageBlockTable>
+                    
+                </apex:pageBlock>
+                
+            </apex:form>
+            
+            
+        </div>
+        
+    </body>
+    
+    
+</apex:page>

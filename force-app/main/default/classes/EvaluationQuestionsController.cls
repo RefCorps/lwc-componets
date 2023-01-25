@@ -54,8 +54,9 @@ public with sharing class EvaluationQuestionsController {
    @AuraEnabled
     public static String[] getEvaluationTypes() {
         List<Evaluation_Questions__c> selectedquestions = new List<Evaluation_Questions__c>();
-        AggregateResult[] types = [select Evaluation_type__c from Evaluation_Questions__c where IsQuestionGroupHeader__c = false and QuestionType__r.Type_Response_Count__c > 0
-            group by Evaluation_type__c order by Evaluation_type__c];
+        AggregateResult[] types = [select Evaluation_type__c from Evaluation_Questions__c 
+        where IsQuestionGroupHeader__c = false and QuestionType__r.Type_Response_Count__c > 0 and Evaluation_type__c != 'SAFETY CHECKLIST'
+        group by Evaluation_type__c order by Evaluation_type__c];
         String[] rts =  new List<String>();
         for (AggregateResult type : types)  {
             rts.add((String) type.get('Evaluation_type__c') );            
@@ -175,7 +176,8 @@ public with sharing class EvaluationQuestionsController {
 
                 // URI as commented out below not required - simply pass parameters
                 //string rpturl = 'https://uat-usrowing.cs166.force.com/apex/refereeassessment?inline=1';
-                rpturl = '/apex/refereeassessment?inline=1';
+                //rpturl = URL.getSalesforceBaseUrl().toExternalForm();
+                rpturl = rpturl + '/apex/refereeassessment?inline=1';
                 rpturl = rpturl + '&pEvaluatorId=' + pEvaluatorId;
                 rpturl = rpturl + '&pEvalueeId=' + pEvalueeId;
                 rpturl = rpturl + '&pQuestionnaireId=' + pQuestionnaireId;

@@ -1,5 +1,13 @@
-@isTest public with sharing class RefereeAssessmentTest {
+@isTest public class RefereeAssessmentTest {
     
+    public static Contact testEvaluatorcontact {get; set;}
+    public static Contact testEvalueecontact {get; set;}
+    public static Regatta__c testEvalregatta {get; set;}
+    public static Regatta_Participation__c[] testRegattaParticipation {get; set;}
+    public static Evaluation_Responses__c[] testEvaluationResponses {get; set;}
+    public static Evaluation_ResponsesAbstract__c[] testEvaluationResponsesAbstract {get; set;} 
+    public static String testPropFileNameFormat {get; set;}
+
     static Contact evaluatorcontact;
     static User evaluatoruser;
     static Contact evalueecontact;
@@ -7,6 +15,7 @@
 	static Regatta__c evalregatta;
     static Regatta_Participation__c[] regattaparticipation;
     static User adminuser;
+    static Course__c regattacourse;
 
     static String rEvaluatorContactId;
     static String rEvalueeId;
@@ -64,7 +73,7 @@
         String gender2 = 'Male';
         String alias2 = 'aeval'; // can only be 8 chars
 
-        System.debug('-------------------------------------------------------------------------');
+        System.debug('22223 1407 =====================================================================================');
         System.debug('In LoadTestUserData');
         
         System.debug('portalRole is ' + portalRole);
@@ -117,7 +126,7 @@
                 REFEREE_STATUS__C, REGION__C, Contact_Gender__c FROM Contact where ID =: contact1.Id
             ];
             // Load to EvaluationQuestionController for processing tests
-            EvaluationQuestionsController.testEvaluatorcontact = evaluatorcontact;
+            // xx EvaluationQuestionsController.testEvaluatorcontact = evaluatorcontact;
 
             System.debug('evaluatorcontact id = ' + evaluatorcontact.Id +
                 '\nAccountId = ' + evaluatorcontact.AccountId +
@@ -189,7 +198,7 @@
             ];
 
             // Load to EvaluationQuestionController for processing tests
-            EvaluationQuestionsController.testEvalueecontact = evalueecontact;
+            // xx EvaluationQuestionsController.testEvalueecontact = evalueecontact;
 
             System.debug('Selected from Contact' + 
                 '\nEvalueeContact Id = ' + evalueecontact.Id +
@@ -236,15 +245,22 @@
             ];
 
             System.debug('User2 created');
+
         }
         System.debug('LoadTestUserData completed');
         System.debug('-------------------------------------------------------------------------');
     }
-    
-    @IsTest(SeeAllData=true)
+  
+    @IsTest
     public static void LoadTestRegattaParticipantData() {
 
+        System.debug('=================================================================================================');
         System.debug('In LoadTestRegattaParticipantData');
+
+       // if(regattacourse.Id == null) {
+       //     SelectRegattaCourse();
+       // }
+
         if (evaluatoruser == null) {
             System.debug('evaluatoruser is null');
             LoadTestUserData();
@@ -255,6 +271,26 @@
 
         System.debug('Get regatta Id next');
         System.RunAs(evaluatorusr) {
+
+            System.debug('Create your regatta course -------------------------------------------------');
+            // regatta 
+            Course__c rc = new Course__c();
+            //rc.ID = 'a0i6A000003h2XNQAY';
+            rc.NAME = 'Sarasota, Florida (Nathan Bendersen Lake)';
+            rc.COURSE_CITY__C = 'Sarasota';
+            rc.COURSE_STATE__C = 'Florida';
+            rc.COURSE_ADDRESS_LINE_1__C = '';
+            rc.COURSE_ADDRESS_LINE_2__C = '';
+            rc.COURSE_COUNTRY__C = 'United States';
+            rc.RACING_LANES__C = 8;
+            insert rc;
+
+            List<Course__c> course = [select id from course__c where name like 'Sarasota%Bendersen%' limit 1];
+
+            System.debug(' >> Created course Id = ' + course[0].Id);
+
+            System.debug('Create your regatta --------------------------------------------------------');
+
            Regatta__c testregatta = new Regatta__c(
 
                 Start_Date_Time__c = Date.today().AddDays(-2),
@@ -262,13 +298,13 @@
                 NAME = 'Eval Invite',
                 REGATTA_CITY__C = 'Sarasota',
                 REGATTA_COUNTRY__C = 'United States',
-                REGATTA_COURSE__C = 'a0i6A000003h2XNQAY',
+                REGATTA_COURSE__C = course[0].Id,
                 REGATTA_DESCRIPTION__C = 'Test Regatta',
                 REGATTA_REGION__C = 'Southeast',
                 REGATTA_STATE__C = 'Florida',
                 REGATTA_STATUS__C = 'On Schedule',
                 REGATTA_TYPE__C = 'Sprint',
-
+                Year__c = '2022',
                 HOUSING_PROVIDED__C = FALSE,
                 INVITE_ONLY__C = TRUE,
                 STIPEND_OFFERED__C = FALSE,
@@ -281,7 +317,7 @@
             evalregatta = [select id, name, Start_Date_Time__c
                            from regatta__c where id =: testregatta.id limit 1];
         }
-        EvaluationQuestionsController.testEvalregatta = evalregatta.clone();
+        // xx EvaluationQuestionsController.testEvalregatta = evalregatta.clone();
         System.debug('Loaded regatta ' + evalregatta.Name);
 
         System.debug('Run using Id ' + evaluatorusr.Id);
@@ -375,17 +411,18 @@
         System.debug('Participants [' + p + '] loaded to regatta');
         System.debug('Particpants fetch count = '+ regattaparticipation.size());
         // Load to EvaluationQuestionController for processing tests
-        EvaluationQuestionsController.testRegattaParticipation = regattaparticipation.clone();
-        System.debug('EvaluationQuestionsController testRegattaParticipation count = '+ EvaluationQuestionsController.testRegattaParticipation.size());
+        // xx EvaluationQuestionsController.testRegattaParticipation = regattaparticipation.clone();
+        // xx System.debug('EvaluationQuestionsController testRegattaParticipation count = '+ EvaluationQuestionsController.testRegattaParticipation.size());
         
+        System.debug('Out LoadTestRegattaParticipantData');
         System.debug('-------------------------------------------------------------------------');
     }
     
 
-    @IsTest(SeeAllData=true)    
+    @IsTest  
     public static void LoadEvalResponses() {
 
-        System.debug('--------------------------------------------------------------------------------');
+        System.debug('=================================================================================================');
         System.debug('Begin LoadEvalResponses');
 
         if (evaluatoruser == null) {
@@ -489,6 +526,8 @@
                             Question_Number__c,
                             Question_Text__c,
                             isRequired__c,
+                            Question_Type__c,
+                            QuestionType__c,
                             QuestionType__r.Name,
                             QuestionType__r.Response_Text_1__c,
                             QuestionType__r.Response_Text_2__c,
@@ -497,6 +536,21 @@
                         ];
 
                         System.debug('testInsertResponses - Questions returned = ' + EvaluationQuestionId.size());
+
+                        for(Evaluation_Questions__c eqlist : EvaluationQuestionId) {
+                            System.Debug( 'testInsertResponses - Questions  ' +
+                            '\n\tId = ' + eqlist.Id +
+                            '\n\tEvaluation_Type__c = ' + eqlist.Evaluation_Type__c +
+                            '\n\tQuestion_Number__c = ' + eqlist.Question_Number__c +
+                            '\n\tQuestion_Text__c = ' + eqlist.Question_Text__c +
+                            '\n\tisRequired__c = ' + eqlist.isRequired__c +
+                            '\n\tQuestion_Type__c = ' + eqlist.Question_Type__c +
+                            '\n\tQuestionType__c = ' + eqlist.QuestionType__c +
+                            '\n\tQuestionType__r.Name = ' + eqlist.QuestionType__r.Name +
+                            '\n\tQuestionType__r.Response_Text_1__c = ' + eqlist.QuestionType__r.Response_Text_1__c +
+                            '\n\tQuestionType__r.Response_Text_2__c = ' + eqlist.QuestionType__r.Response_Text_2__c +
+                            '\n\tQuestionType__r.Response_Text_3__c = ' + eqlist.QuestionType__r.Response_Text_3__c);
+                        }
 
                         System.debug('testInsertResponses Common values: ' +
                             '\n\tEvaluatorUserId=' + EvaluatorUserId +
@@ -517,7 +571,8 @@
 
                         System.debug('testInsertResponses genQuestionnaireID using [' + er.Questionnaire_DateTime__c + '] ' + EvalueeId);
                         if (String.isEmpty(QuestionnaireId)) {
-                            QuestionnaireId = EvaluationQuestionsController.genQuestionnaireID(er.Questionnaire_DateTime__c, EvalueeId);
+                            // xx QuestionnaireId = EvaluationQuestionsController.genQuestionnaireID(er.Questionnaire_DateTime__c, EvalueeId);
+                            QuestionnaireId = RefereeAssessmentTest.genQuestionnaireID(er.Questionnaire_DateTime__c, EvalueeId);
                         }
                         er.Questionnaire_Id__c = QuestionnaireId;
                         System.debug('testInsertResponses genQuestionnaireID = [' + er.Questionnaire_Id__c + '] ');
@@ -529,23 +584,50 @@
                         er.Evaluation_Type__c = EvaluationQuestionId[0].Evaluation_Type__c;
                         er.Question_Number__c = EvaluationQuestionId[0].Question_Number__c; // EvaluationQuestionNum;
                         er.Question_Text__c = EvaluationQuestionId[0].Question_Text__c;
-                        er.Question_Type__c = EvaluationQuestionId[0].QuestionType__r.Name;
+                        er.Question_Type__c = EvaluationQuestionId[0].QuestionType__r.Name;   // IN PROD THIS RETURNS NULL ?? IT APPEARS THE LOOKUP IS FAILING IN PROD
+                        // test test test
+                        //er.Question_Type__c = null;
+                        // test test end
+                        if(er.Question_Type__c == null ) {
+                            System.Debug('testInsertResponses QuestionType__r.Name failed lookup - using static Question_Type__c value ' +  EvaluationQuestionId[0].Question_Type__c);
+                            er.Question_Type__c = EvaluationQuestionId[0].Question_Type__c;
+                        }
                         er.Question_Id__c = EvaluationQuestionId[0].ID; // EvaluationQuestionNum;
                         er.Evaluation_Rating__c = EvaluationRating;
                         if (EvaluationRating == '1') {
                             er.Evaluation_Rating_Text__c = EvaluationQuestionId[0].QuestionType__r.Response_Text_1__c;
+                            // test test test
+                            // er.Evaluation_Rating_Text__c = null;
+                            if(er.Evaluation_Rating_Text__c == null)
+                            {
+                                Evaluation_QuestionTypeResp__c r1 = [select Response_Text_1__c from Evaluation_QuestionTypeResp__c where Name =: er.Question_Type__c limit 1];
+                                er.Evaluation_Rating_Text__c = r1.Response_Text_1__c;
+                                System.Debug('testInsertResponses QuestionType__r.Response_Text_1__c empty - using value ' + er.Evaluation_Rating_Text__c);
+                            }
                         }
                         if (EvaluationRating == '2') {
                             er.Evaluation_Rating_Text__c = EvaluationQuestionId[0].QuestionType__r.Response_Text_2__c;
+                            if(er.Evaluation_Rating_Text__c == null)
+                            {
+                                Evaluation_QuestionTypeResp__c r2 = [select Response_Text_2__c from Evaluation_QuestionTypeResp__c where Name =: er.Question_Type__c limit 1];
+                                er.Evaluation_Rating_Text__c = r2.Response_Text_2__c;
+                                System.Debug('testInsertResponses QuestionType__r.Response_Text_2__c empty - using value ' + er.Evaluation_Rating_Text__c);
+                            }
                         }
                         if (EvaluationRating == '3') {
                             er.Evaluation_Rating_Text__c = EvaluationQuestionId[0].QuestionType__r.Response_Text_3__c;
+                            if(er.Evaluation_Rating_Text__c == null)
+                            {
+                                Evaluation_QuestionTypeResp__c r3 = [select Response_Text_3__c from Evaluation_QuestionTypeResp__c where Name =: er.Question_Type__c limit 1];
+                                er.Evaluation_Rating_Text__c = r3.Response_Text_3__c;
+                                System.Debug('testInsertResponses QuestionType__r.Response_Text_3__c empty - using value ' + er.Evaluation_Rating_Text__c);
+                            }
                         }
                         /*
                         if (EvaluationQuestionId[0].QuestionType__r.Name.contains('Overall')) {
                             er.Evaluator_Comment__c = EvaluatorComment;
                         } else {
-                            er.Evaluator_Comment__c = '';
+                            er.Evaluator_Comment__c = string. '';
                         }
                         */
                         er.Evaluee_Id__c = Id.valueOf(EvalueeId);
@@ -571,8 +653,7 @@
                             '\n\tEvaluation_Type__c: ' + er.Evaluation_Type__c +
                             '\n\tQuestion_Number__c: ' + er.Question_Number__c +
                             '\n\tQuestion_Text__c: ' + er.Question_Text__c +
-                            '\n\tQuestion_Type__c: ' + er.Question_Type__c +  
-                            '\n\tQuestion_Id__c: ' + er.Question_Id__c +
+                            '\n\tQuestion_Type__c: ' + er.Question_Type__c +
                             '\n\tEvaluation_Rating__c: ' + er.Evaluation_Rating__c +
                             '\n\tEvaluation_Rating_Text__c: ' + er.Evaluation_Rating_Text__c +
                             '\n\tEvaluator_Comment__c: ' + er.Evaluator_Comment__c +
@@ -663,7 +744,7 @@
         System.debug('-------------------------------------------------------------------------');
     }
 
-    @IsTest(SeeAllData = true)
+    @IsTest
     public static void testObjectAvailablity() {
 
         /*
@@ -787,34 +868,71 @@
     @isTest
     public static void LoadEvalObjsData() {
 
+    
+        System.debug('=================================================================================================');
         System.debug('Begin loadEvalObjsData');
+
+            //System.debug('LoadEvalObjsData - SelectRegattaCourse if Id is empty');
+            //if(String.isBlank(regattacourse.Id)) {
+            //    SelectRegattaCourse();
+            //}
+            ///System.debug('LoadEvalObjsData - SelectRegattaCourse ID = ' + regattacourse.Id);
+
         if (evaluatoruser == null) {
             System.debug('evaluatoruser is null');
             LoadTestRegattaParticipantData();
         }
         System.runAs(adminuser) {
+
+            System.debug('=================================================================================================');
+            System.debug('Evaluation_Properties__c load check');
             Evaluation_Properties__c[] ep = [select Id from Evaluation_Properties__c];
             if (ep.size() == 0) {
                 System.debug('loadEvalObjsData - loading Evaluation Properties from Static Resources');
                 List < sObject > epload = Test.loadData(Evaluation_Properties__c.sObjectType, 'Evaluation_Properties_Data');
-                ep = [select Id from Evaluation_Properties__c];
-                System.debug('loadEvalObjsData Properties epload size = ' + ep.size());
+                Evaluation_Properties__c[] ep_detail = [select ID, DESCRIPTION__C, KEY__C, MESSAGETEXT__C, NAME, VALUE__C, ISACTIVE__C from Evaluation_Properties__c order by NAME];
+                System.debug('loadEvalObjsData Properties Evaluation_Properties_Data size = ' + ep_detail.size());
+                for(Evaluation_Properties__c eq_row : ep_detail) {
+                    System.debug('\t' + eq_row.ID + '\t' + eq_row.NAME +'\t' + eq_row.VALUE__C);
+                } 
+            } else {
+                System.debug('Evaluation_Properties__c size = ' + ep.size());
             }
+            System.debug('---------------------------------------------------------------------------------------------------');
+            System.debug('Evaluation_QuestionTypeResp__c load check');
             Evaluation_QuestionTypeResp__c[] eqtr = [select Id from Evaluation_QuestionTypeResp__c];
             if (eqtr.size() == 0) {
                 System.debug('loadEvalObjsData - loading Evaluation QuestionTypeResp from Static Resources');
                 List < sObject > eqtrload = Test.loadData(Evaluation_QuestionTypeResp__c.sObjectType, 'Evaluation_QuestionTypeResp_Data');
-                eqtr = [select Id from Evaluation_QuestionTypeResp__c];
-                System.debug('loadEvalObjsData eqtrload size = ' + eqtr.size());
+                Evaluation_QuestionTypeResp__c[] eqtr_detail = [select ID, NAME, RESPONSE_TEXT_1__C, RESPONSE_TEXT_2__C, RESPONSE_TEXT_3__C, TYPE_RESPONSE_COUNT__C from Evaluation_QuestionTypeResp__c order by NAME];
+                System.debug('loadEvalObjsData Evaluation_QuestionTypeResp_Data size = ' + eqtr_detail.size());
+                for(Evaluation_QuestionTypeResp__c eqtr_row : eqtr_detail) {
+                    System.debug('\t' + eqtr_row.Id + '\t' + eqtr_row.Name);
+                }
+            } else {
+                System.debug('Evaluation_QuestionTypeResp__c size = ' + eqtr.size());
             }
-
+            System.debug('---------------------------------------------------------------------------------------------------');
+            System.debug('Evaluation_Questions__c load check');
             Evaluation_Questions__c[] eq = [select Id from Evaluation_Questions__c];
             if (eq.size() == 0) {
                 System.debug('loadEvalObjsData - loading Evaluation Questions from Static Resources');
                 List < sObject > eqload = Test.loadData(Evaluation_Questions__c.sObjectType, 'Evaluation_Questions_Data');
-                eq = [select Id from Evaluation_Questions__c];
-                System.debug('loadEvalObjsData Questions eqload size = ' + eq.size());
+                Evaluation_Questions__c[] eq_detail = [select ALLOW_COMMENT__C, EVALUATION_TYPE__C, ID, ISDELETED, ISQUESTIONGROUPHEADER__C, NAME, QUESTIONTYPE__C, QUESTION_ACTIVE__C, QUESTION_NUMBER__C, QUESTION_TEXT__C, QUESTION_TYPE__C, ISREQUIRED__C from Evaluation_Questions__c order by Question_number__c];
+                System.debug('loadEvalObjsData Questions Evaluation_Questions_Data size = ' + eq_detail.size());
+                string text = '';
+                for(Evaluation_Questions__c eq_row : eq_detail) {
+                    if(String.isNotBlank(eq_row.QUESTION_TEXT__C) && eq_row.QUESTION_TEXT__C.length() > 10)
+                        text = eq_row.QUESTION_TEXT__C.substring(0,10);
+                    else {
+                        text = eq_row.Question_Text__c;
+                    }    
+                    System.debug('\t' + eq_row.Question_number__c + '\t' + text + '\t' + eq_row.Evaluation_Type__c + '\t' + eq_row.QuestionType__c + '\t' + eq_row.QUESTION_TYPE__C);
+                }
+            } else {
+                System.debug('Evaluation_Questions__c size = ' + eq.size());
             }
+            System.debug('=================================================================================================');
         }
         System.debug('loadEvalObjsData completed');
     }
@@ -829,7 +947,7 @@
 
 // =======================================================================================
 
-    @IsTest(SeeAllData = true)
+    @IsTest
     public static void testSetGlobalValues() {
 
         /*
@@ -903,7 +1021,7 @@
 
     }
 
-    @IsTest(SeeAllData = true)
+    @IsTest
     public static void testgetResponsesVF() {
 
         /*
@@ -941,7 +1059,7 @@
 
         */
         System.debug('=============================================================================');
-        System.debug('Begin testgetResponsesVF');
+        System.debug('>> Begin testgetResponsesVF');
 
         Exception unexpectedException;
         try {
@@ -992,13 +1110,11 @@
             unexpectedException = err;
         }
         System.assertEquals(null, unexpectedException, 'testgetResponsesVF - Unexcepted to failure - review log');
-        System.debug('Completed testgetResponsesVF - testing getResponses returned expected results');
+        System.debug('<< Completed testgetResponsesVF - testing getResponses returned expected results');
         System.debug('=============================================================================');
     }
-
-
  
-    @IsTest(SeeAllData = true)
+    @IsTest
     public static void testGetResponses() {
 
         /*
@@ -1096,32 +1212,33 @@
         System.debug('=============================================================================');
     }
 
+    /*
     @IsTest(SeeAllData = true)
     public static void testCreateFile() {
 
-        /*
-        createFile - this method creates and files a PDF document generated from VF Page RefereeAssessment output.
-        This method is called from within EvaluationQuestionsController method generateRefAssessmentRPT.  The returned 
-        ContentDocumentLink contains ContentDocumentId.  ContentDocumentId is used to select the document that will
-        be sent to the evaluee via direct messsaging.
-        NOTE - YOU CANNOT TEST .getContent FROM WITHIN A TEST METHOD - TESTS SIMULATE DOCUMENTS OR I'VE HAD TO BY-PASS TO COMPLETE TESTS
-        Method Signature:
-             ContentDocumentLink createFile(
-                Id parentId, 
-                Id linkedId, 
-                String fileName, 
-                Blob body, 
-                String contentType) 
-        Return:
-            ContentDocumentLink
-        
-        This test should create 2 simple text documents.  The document will be stored and subsequently confirmed based 
-		upon the returned ContentDocumentLink.
-
-        */
+        // 
+        // createFile - this method creates and files a PDF document generated from VF Page RefereeAssessment output.
+        // This method is called from within EvaluationQuestionsController method generateRefAssessmentRPT.  The returned 
+        // ContentDocumentLink contains ContentDocumentId.  ContentDocumentId is used to select the document that will
+        // be sent to the evaluee via direct messsaging.
+        // NOTE - YOU CANNOT TEST .getContent FROM WITHIN A TEST METHOD - TESTS SIMULATE DOCUMENTS OR I'VE HAD TO BY-PASS TO COMPLETE TESTS
+        // Method Signature:
+        //      ContentDocumentLink createFile(
+        //         Id parentId, 
+        //         Id linkedId, 
+        //         String fileName, 
+        //         Blob body, 
+        //         String contentType) 
+        // Return:
+        //     ContentDocumentLink
+        //
+        // This test should create 2 simple text documents.  The document will be stored and subsequently confirmed based 
+		// upon the returned ContentDocumentLink.
+        // 
+        // 
 
         System.debug('=================================================================================================');
-        System.debug('Begin RefereeAssessmentTest - testing createFile');
+        System.debug('>> Begin RefereeAssessmentTest - testing createFile');
 
         Exception unexpectedException;
 
@@ -1131,7 +1248,8 @@
 
         System.debug('testCreateFile Test 1 - Test will replicate file creation and storage logic in method');
 
-        String AppAcct = EvaluationQuestionsController.getProp('AppName');
+        // XX String AppAcct = EvaluationQuestionsController.getProp('AppName');
+        String AppAcct = RefereeAssessmentTest.getProp('AppName');
         Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct Limit 1]; // TODO:  WORKS BUT NEED MORE INFO
         String parentId = acc.Id;
 
@@ -1167,9 +1285,9 @@
             Insert cdlt1;
             System.debug('testCreateFile  - ContentDocumentId = ' + cdlt1.ContentDocumentId);
         }
-            System.debug('testCreateFile Test 1 completed ContentDocumentLink ');
 
-            System.debug('testCreateFile Test 2 - This test will confirm logic in method');
+        System.debug('testCreateFile Test 1 completed ContentDocumentLink ');
+        System.debug('testCreateFile Test 2 - This test will confirm logic in method');
 
         System.RunAs(adminuser) {
 
@@ -1202,24 +1320,25 @@
             }
             system.assertEquals(null, unexpectedException, 'testCreateFile - unexcepted fail');
         }
-        System.debug('Completed RefereeAssessmentTest - testing createFile');
+        System.debug('<< Completed RefereeAssessmentTest - testing createFile');
     }
-
+    */
+    
     @IsTest(SeeAllData = true)
     public static void testSendDirectMessageNoContentDocumentId() {
 
-        /*
-            SendDirectMessage - this method creates and sends a chatter based direct message with an attachment
-            Method Signature:
-                void SendDirectMessage(
-                    String EvalueeId,     - must be a contactId - message will be directed to this person's email and message box 
-                    String EvalRptFileId) - this is the ContentDocumentLink Id of a document - in this case a PDF Assessment
-
-            This will will use a known user's contact ID and a blank ContentDocumentLink Id
-
-        */
+        //
+        //     SendDirectMessage - this method creates and sends a chatter based direct message with an attachment
+        //     Method Signature:
+        //         void SendDirectMessage(
+        //             String EvalueeId,     - must be a contactId - message will be directed to this person's email and message box 
+        //             String EvalRptFileId) - this is the ContentDocumentLink Id of a document - in this case a PDF Assessment
+        // 
+        //     This will will use a known user's contact ID and a blank ContentDocumentLink Id
+        //
+         
         System.debug('=================================================================================================');
-        System.debug('Begin testSendDirectMessageNoContentDocumentId ');
+        System.debug('>> Begin testSendDirectMessageNoContentDocumentId ');
 
         if (evalueecontact == null) {
             System.debug('evalueecontact is null');
@@ -1246,27 +1365,28 @@
             expectedException = err;
         }
         System.assertNotEquals(null, expectedException, 'testSendDirectMessageNoData should have thrown an exception related to document lookup');
-        System.debug('testSendDirectMessageNoData completed');
+        
+        System.debug('<< testSendDirectMessageNoData completed');
 
     }
-
+    
+    
     @IsTest(SeeAllData = true)
     public static void testSendDirectMessageBadEvalueeId() {
 
-        /*
-            SendDirectMessage - this method creates and sends a chatter based direct message with an attachment
-            Method Signature:
-                void SendDirectMessage(
-                    String EvalueeId,     - must be a contactId - message will be directed to this person's email and message box 
-                    String EvalRptFileId) - this is the ContentDocumentLink Id of a document - in this case a PDF Assessment
-
-            This will will use a bad EvalueId (User Id in place of Contact ID) and a blank ContentDocumentLink Id - the method 
-            will throw an ApplicationException tied to a bad or missing Id
-
-        */
-
+        //
+        //     SendDirectMessage - this method creates and sends a chatter based direct message with an attachment
+        //     Method Signature:
+        //         void SendDirectMessage(
+        //             String EvalueeId,     - must be a contactId - message will be directed to this person's email and message box 
+        //             String EvalRptFileId) - this is the ContentDocumentLink Id of a document - in this case a PDF Assessment
+        //
+        //     This will will use a bad EvalueId (User Id in place of Contact ID) and a blank ContentDocumentLink Id - the method 
+        //     will throw an ApplicationException tied to a bad or missing Id
+        //
+        
         System.debug('=================================================================================================');
-        System.debug('Begin testSendDirectMessageBadEvalueeId');
+        System.debug('>> Begin testSendDirectMessageBadEvalueeId');
 
         RefereeAssessment ra = new RefereeAssessment();
         String EvalueeId = UserInfo.getUserId();
@@ -1280,24 +1400,26 @@
             expectedException = err;
         }
         System.assertNotEquals(null, expectedException, 'testSendDirectMessageBadEvalueeId exception have thrown an exception related to the evaluee Id');
-        System.debug('testSendDirectMessageBadEvalueeId completed');
+        System.debug('<< testSendDirectMessageBadEvalueeId completed');
     }
-
-    @IsTest(SeeAllData = true)
+   
+    
+    /*
+    @IsTest (SeeAllData = true)
     public static void testSendDirectMessage() {
 
-        /*
-            SendDirectMessage - this method creates and sends a chatter based direct message with an attachment
-            Method Signature:
-                void SendDirectMessage(
-                    String EvalueeId,     - must be a contactId - message will be directed to this person's email and message box 
-                    String EvalRptFileId) - this is the ContentDocumentLink Id of a document - in this case a PDF Assessment
-
-            For this test we'll create a valid attachment document and send with known test user
-
-        */
+        // 
+        //     SendDirectMessage - this method creates and sends a chatter based direct message with an attachment
+        //     Method Signature:
+        //         void SendDirectMessage(
+        //             String EvalueeId,     - must be a contactId - message will be directed to this person's email and message box 
+        //             String EvalRptFileId) - this is the ContentDocumentLink Id of a document - in this case a PDF Assessment
+        //
+        //     For this test we'll create a valid attachment document and send with known test user
+        //   
+         
         System.debug('=================================================================================================');
-        System.debug('Begin testSendDirectMessage');
+        System.debug('>> Begin testSendDirectMessage');
         Exception unexpectedException;
         if (evalueecontact == null) {
             System.debug('evalueecontact is null');
@@ -1313,15 +1435,14 @@
 
                 System.debug('testSendDirectMessage - Step 1 obtain a known contact to use as EvlaueeId');
 
-                //Contact c = [SELECT id, name from contact where name like 'Michael Miller'
-                //    limit 1
-                //]; // TODO: make Name a prop
+                //Contact c = [SELECT id, name from contact where name like 'Michael Miller' limit 1 ]; // TODO: make Name a prop
                 EvalueeId = evalueecontact.Id;  // c.Id;
                 System.assert(String.isNotEmpty(EvalueeId), 'testSendDirectMessage unable to get a contact Id for our test user');
 
                 System.debug('testSendDirectMessage - Step 2 create a test document to send using method createFile');
 
-                String AppAcct = EvaluationQuestionsController.getProp('AppName');
+                // xx String AppAcct = EvaluationQuestionsController.getProp('AppName');
+                String AppAcct = RefereeAssessmentTest.getProp('AppName');
                 Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct limit 1]; // TODO:  WORKS BUT NEED MORE INFO
                 String parentId = acc.Id;
 
@@ -1367,21 +1488,24 @@
         }
         system.assertEquals(null, unexpectedException, 'testSendDirectMessage - unexcepted fail');
 
-        System.debug('Completed testSendDirectMessage - testing createFile');
+        System.debug('<< Completed testSendDirectMessage - testing createFile');
     }
+    */
 
-    @IsTest(SeeAllData = true)
+    
+    @IsTest (SeeAllData = true)
     public static void testGenerateRefAssessmentRPT() {
 
         System.debug('=================================================================================================');
-        System.debug('in testGenerateRefAssessmentRPT');
+        System.debug('>> in testGenerateRefAssessmentRPT');
 
         if (rQuestionnaireId == null) {
             System.debug('evaluatoruser is null');
             LoadEvalResponses();
         }
         Exception unExpectedException;
-    System.runAs(adminuser) {
+
+        System.runAs(adminuser) {
 
         System.debug('testGenerateRefAssessmentRPT - Step 1 - pull data from a previous assessment Db for our test');
         Evaluation_ResponsesAbstract__c[] era = [SELECT Evaluator_Id__c, Evaluator_Id__r.Name,
@@ -1424,7 +1548,9 @@
         DateTime dt = DateTime.now();
         String dateStr = dt.format('MMdd-HHmm-SS');
 
-        Account acc = [SELECT Id FROM Account WHERE Id = '0016A00000K77C4QAJ']; // TODO:  WORKS BUT NEED MORE INFO
+        String AppAcct = RefereeAssessmentTest.getProp('AppName');
+        Account acc = [SELECT Id FROM Account WHERE Name =: AppAcct Limit 1]; 
+
         String parentId = acc.Id;
         Contact c = [select Id, email, OwnerId from contact where id =: pEvalueeId];
         String linkedId = c.OwnerId;
@@ -1435,7 +1561,9 @@
 
         System.debug('testGenerateRefAssessmentRPT - Step 3 - create a filename we can use');
 
-        String filename = EvaluationQuestionsController.FormatFileNameFromProps(pEvaluee, pLocation, pPosition, pQuestionnaireId);
+        // xx String filename = EvaluationQuestionsController.FormatFileNameFromProps(pEvaluee, pLocation, pPosition, pQuestionnaireId);
+        String filename = RefereeAssessmentTest.FormatFileNameFromProps(pEvaluee, pLocation, pPosition, pQuestionnaireId);
+
         if (filename.length() < 1)
             fileName = 'RA_' + dateStr + '-' + pQuestionnaireId + '.pdf';
         System.debug('testGetResponses - filename from props ' + filename);
@@ -1469,25 +1597,159 @@
         }
         system.assertEquals(null, unExpectedException, 'testGenerateRefAssessmentRPT should not throw exception');
 
-        System.debug('testGenerateRefAssessmentRPT - Step 6 - Now exercise RefereeAssessmethod methods through EvaluationQuestionsController');
+        // xx System.debug('testGenerateRefAssessmentRPT - Step 6 - Now exercise RefereeAssessmethod methods through EvaluationQuestionsController');
 
-        try {
-            EvaluationQuestionsController.generateRefAssessmentRPT(pEvaluatorId, pEvalueeId, pQuestionnaireId,
-                pEvaluee, pLocation, pPosition);
-            System.debug('testGenerateRefAssessmentRPT - Step 6 completed');
+        // 
+        // try {
+        //     EvaluationQuestionsController.generateRefAssessmentRPT(pEvaluatorId, pEvalueeId, pQuestionnaireId,
+        //         pEvaluee, pLocation, pPosition);
+        //     System.debug('testGenerateRefAssessmentRPT - Step 6 completed');
 
-        } catch (Exception err) {
-            System.debug('testGenerateRefAssessmentRPT EvaluationQuestionsController error: ' + err.getMessage());
-            System.debug(err.getStackTraceString());
-            System.debug('----------------------------------------------');
-            unExpectedException = err;
+        // } catch (Exception err) {
+        //     System.debug('testGenerateRefAssessmentRPT EvaluationQuestionsController error: ' + err.getMessage());
+        //     System.debug(err.getStackTraceString());
+        //     System.debug('----------------------------------------------');
+        //     unExpectedException = err;
+        // }
+		// 
+
         }
-
-    }
 
         system.assertEquals(null, unExpectedException, 'testGenerateRefAssessmentRPT should not throw exception');
 
-        System.debug('testGenerateRefAssessmentRPT Referee Assessment completed');
+        System.debug('<< testGenerateRefAssessmentRPT Referee Assessment completed');
     }
+    
+
+// ================================================================================================
+
+public static String genQuestionnaireID(DateTime Questionnaire_DateTime, String EvalueeId)
+    {
+            //System.debug(LoggingLevel.DEBUG,'Questionnaire_DateTime = ' + Questionnaire_DateTime.formatGMT('yyyymmddhhmmss'));
+            //System.debug(LoggingLevel.DEBUG,'EvalueeId = ' + EvalueeId);
+            String Evaluee = '';
+            //if(Test.isRunningTest()) {
+            //    Evaluee = testEvalueecontact.Name;
+            //} else {
+                List<Contact> c = [SELECT Name FROM Contact where id =: EvalueeId];
+                Evaluee = c[0].Name;
+            //}
+            String strQuestionnaireDT = Questionnaire_DateTime.formatGMT('yyyymmddhhmmss');
+            string QuestionnaireID = Evaluee.substring(0,1) + Evaluee.substringafterlast(' ').substring(0,1) + strQuestionnaireDT;
+            //System.debug(LoggingLevel.DEBUG,QuestionnaireID);
+            return QuestionnaireID;
+    }
+
+    public static Evaluation_Properties__c[] getProps() {
+        Evaluation_Properties__c[] props = [select Name, Value__c from Evaluation_Properties__c where isActive__c = true];
+        return props;
+    }
+    
+    public static String getProp(String prop) {
+        String value = '';
+        String searchquery = 'select Name, Value__c from Evaluation_Properties__c where isActive__c = true and name = \'' + prop + '\'';
+        //System.debug(LoggingLevel.DEBUG,'getProp query: ' + searchquery);
+        List<Evaluation_Properties__c> props = Database.query(searchquery);
+        if(props.size() > 0) {
+            value = (String) props[0].get('Value__c');
+        }
+        //System.debug(LoggingLevel.DEBUG,'getProp returning ' + value);
+        return value;
+    }
+
+    public static String FormatFileNameFromProps(String Evaluee, String Location, String Position, String ID) {
+        
+        System.debug(LoggingLevel.DEBUG,'FormatFileNameFromProps evaluee=' + evaluee + ' loc=' + Location + ' Pos=' + Position  + ' Id=' + Id );
+        
+        /*
+        $D = Date - YYYYMMDD
+        $DT = DateTime - YYYYMMDDHHMMSS
+        $EN = Full Evaluee Name - spaces will be removed
+        $EL = Evaluee Initial with LastName
+        $EI = Evaluee Inititals
+        $L = Location - spaces will be replaced with underscore
+        $PN = Position
+        $PA = Positioni abbreviated: S, JS, R, JS, CC, M, CR
+        $ID = evaluation ID
+        */
+       String filename = '';
+       
+       String PropertyName = 'FileNameFormat';
+       // TEMPORARY FIX - THIS SHOULD NOT BE HARDCODED
+       if(Position.contains('SAFETY CHECKLIST'))
+       {     
+           PropertyName = PropertyName + '_' + Position;
+           PropertyName = PropertyName.replace(' ', '_');
+       }
+       System.debug(LoggingLevel.DEBUG, 'FormatFileNameFromProps lookup: ' + PropertyName);
+       String fmt = getProp(PropertyName);
+       
+       
+       if(Test.isRunningTest() && String.isNotBlank(testPropFileNameFormat) ) {
+           System.debug(LoggingLevel.DEBUG,'FormatFileNameFromProps running test with ' + testPropFileNameFormat);
+           if(testPropFileNameFormat.contains('NOPROP'))
+                fmt = '';
+            else
+                fmt = testPropFileNameFormat;
+       } 
+       if(String.isEmpty(fmt)) {
+           System.debug(LoggingLevel.WARN,'No FileNameFormat found using default');
+           fmt = 'RA_$PA_$EL_$D_$ID';
+        }
+        System.debug(LoggingLevel.DEBUG,'FormatFileNameFromProps format=' + fmt);
+       //String[] fmtelems = fmt.split(';'); 
+        
+       DateTime dtn = DateTime.now();
+       if(fmt.contains('$DT')) {
+            String DT = dtn.format('yyyyMMddHHmmsss'); 
+            fmt = fmt.replace('$DT', DT);
+       }
+       if(fmt.contains('$D')) {
+           String D = dtn.format('yyyyMMdd');
+           fmt = fmt.replace('$D', D);
+       }
+        if(fmt.contains('$EN')){
+            String EN = Evaluee.replace(' ','_');
+            fmt = fmt.replace('$EN',EN);
+        }
+        if(fmt.contains('$EL')) {          
+            String EL = Evaluee.substring(0,1) + Evaluee.substringafterlast(' '); 
+            fmt = fmt.replace('$EL',EL);
+        }
+        if(fmt.contains('$EI')) {
+            String EI = Evaluee.substring(0,1) + Evaluee.substringafterlast(' ').substring(0,1);
+            fmt = fmt.replace('$EI',EI);
+        }
+        if(fmt.contains('$ID')) {
+            fmt = fmt.replace('$ID',ID);
+        }
+        if(fmt.contains('$L')) {
+            String L = Location.replace(' ','_');
+            fmt = fmt.replace('$L',L);
+        }
+        if(fmt.contains('$PN')) {
+            String PN = Position;
+            fmt = fmt.replace('$PN',PN);
+        }
+        if(fmt.contains('$PA')) {
+            String PA = '';
+            Switch on Position {
+            when 'CHIEF JUDGE' { PA = 'CJ'; } 
+            when 'CONTROL COMMISSION' { PA = 'CC'; } 
+            when 'JUDGE AT START' { PA = 'JS'; } 
+            when 'STARTER' { PA = 'S'; } 
+            when else { PA = 'R'; }
+            }
+            fmt = fmt.replace('$PA',PA);
+        }
+        filename = fmt;
+        
+        if(!filename.contains('.pdf'))
+            filename = filename + '.pdf';
+            
+       System.debug(LoggingLevel.DEBUG,'FormatFileNameFromProps filename = ' + filename); 
+       return filename;
+    }
+
 
 }

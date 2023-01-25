@@ -1,0 +1,619 @@
+<apex:page Controller="RefereeResumeController" action="{!generateRefResumeVF}" renderAs="PDF" showHeader="false"
+    applyBodyTag="false">
+
+    <head>
+        <style>
+            @page {
+                size: A4 landscape;
+            }
+
+            .headerRow .ResumeTable {
+                background: rgb(3, 78, 118); 
+                color: white; 
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div ID="renderedPage">
+
+            <script>
+                $(document).ready(function () {
+                    $("th").remove("th");
+                });
+            </script>
+            <apex:form id="assessment">
+
+                <div style="font-family: Arial Unicode MS;">
+
+                    <apex:outputPanel id="panelout1">
+
+<!-- ---------------------------------------------------------------------------------------------------------------- -->
+                      <!-- Detail -->                        
+                        <apex:pageBlock rendered="{!renderDemo}" >
+                            
+                            <apex:image id="theImage" value="{!$Resource.Referee_Logo_for_web}" width="75" height="75" alt="RefereeLogo"/>
+                            <h3>
+                                Referee's Activity and History
+                            </h3>
+
+                            <table style="background:rgb(240,248,255);" width="100%">
+                                <tr>
+                                    <td colspan="3" style="background:#b40839;color:white">{!contactData.Name}</td>
+                                </tr>
+                                <tr>
+                                    <td>{!contactData.MailingStreet}</td>
+                                    <td>Licensed: {!contactData.Referee_License_Year__c}</td>
+                                    <td>Region: {!contactData.Region__c}</td>
+                                </tr>
+                                <tr>
+                                    <td>{!contactData.MailingCity} {!contactData.MailingState} {!contactData.MailingPostalCode}</td>
+                                    <td>DOB:<apex:outputText value="{0,date,MM'/'dd'/'yyyy}"> <apex:param value="{!contactData.Birthdate}"/></apex:outputText> </td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Home: {!contactData.Phone}</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Work: {!contactData.npe01__WorkPhone__c}</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Cell: {!contactData.MobilePhone}</td>
+                                    <td>Current Rank: {!contactData.Referee_Rank__c}</td>
+                                    <td>USRowing No: {!contactData.Membership_Number__c}</td>
+                                </tr>
+                                <tr>
+                                    <td>Email: {!contactData.Email}</td>
+                                    <td>Current Status: {!contactData.Referee_Status__c}</td>
+                                    <td>Lic. No: {!contactData.Referee_License_Number__c} </td>
+                                </tr>
+                            </table>
+                            <br />
+                            <br />
+                            <br />
+                            <br />
+                            <table>
+                                <tr>
+                                    <td tyle="width: 30%; vertical-align:top">
+
+                                        <apex:pageBlockTable border="1" value="{!ranks}" var="rank" rules="rows"
+                                            align="center" columns="3" columnsWidth="50%,25%,25%">
+
+                                            <apex:column headerValue="Rank" headerClass="ResumeTable">
+                                                <apex:outputText value="{!rank.Designation__c}" />
+                                            </apex:column>
+
+                                            <apex:column headerValue="Start" headerClass="ResumeTable"
+                                                style="padding:5px">
+                                                <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                    <apex:param value="{!rank.Designation_Start_Date__c}" />
+                                                </apex:outputText>
+                                            </apex:column>
+
+                                            <apex:column headerValue="End" headerClass="ResumeTable"
+                                                style="padding:5px">
+                                                <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                    <apex:param value="{!rank.Designation_End_Date__c}" />
+                                                </apex:outputText>
+                                            </apex:column>
+
+                                        </apex:pageBlockTable>
+                                    </td>
+                                    <td width="40%">
+                                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                    </td>
+
+                                    <td tyle="width: 30%; vertical-align:top">
+
+                                        <apex:pageBlockTable border="1" value="{!endorsements}" var="endorsement"
+                                            rules="rows" align="center" columns="3" columnsWidth="50%,25%,25%">
+
+                                            <apex:column headerClass="ResumeTable" headerValue="Endorsement">
+                                                <apex:outputText value="{!endorsement.Designation__c}" />
+                                            </apex:column>
+
+                                            <apex:column headerClass="ResumeTable" headerValue="Start"
+                                                style="padding:5px">
+                                                <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                    <apex:param value="{!endorsement.Designation_Start_Date__c}" />
+                                                </apex:outputText>
+                                            </apex:column>
+
+                                            <apex:column headerClass="ResumeTable" headerValue="End"
+                                                style="padding:5px">
+                                                <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                    <apex:param value="{!endorsement.Designation_End_Date__c}" />
+                                                </apex:outputText>
+                                            </apex:column>
+
+                                        </apex:pageBlockTable>
+
+
+                                    </td>
+
+
+                                </tr>
+                            </table>
+
+                        </apex:pageBlock>
+
+<!-- ---------------------------------------------------------------------------------------------------------------- -->                        
+                     <!-- Current Year Regattas -->  
+                        <apex:pageBlock rendered="{!renderDetail}">
+                            
+                             <div style="page-break-after:auto;" />
+                            
+                            <table style="background:rgb(240,248,255); border: 0px;"  width="100%">
+                                <tr>
+                                    <td style="background:#b40839; color:white; border: 0px;">
+                                        {!contactData.Name}    
+                                        <span style="float:right;">
+                                        Lic. No: {!contactData.Referee_License_Number__c}     
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>    
+                            <h4>
+                                Current Data Call Year Regattas ({!currYear})
+                            </h4>
+
+                            <apex:pageBlockTable border="1" value="{!currRegattas}" var="regatta" rules="rows"
+                                align="center" columns="8" style="font-size: 11px;" >
+
+                                <apex:column headerClass="ResumeTable" headerValue="Name" style="padding:5px">
+                                    <apex:outputText value="{!regatta.Participation_Regatta__r.name}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Start" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!regatta.Participation_Regatta__r.Start_Date_Time__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="End" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!regatta.Participation_Regatta__r.End_Date_Time__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Location" style="padding:5px">
+                                    <apex:outputText value="{!regatta.Participation_Regatta__r.Regatta_Course__r.Name}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Region" 
+                                      style="{!IF(regatta.Participation_Regatta__r.Regatta_Region__c != contactData.Region__c,'background-color: rgb(255, 255, 0);','')};padding:5px">
+                                    <apex:outputText value="{!regatta.Participation_Regatta__r.Regatta_Region__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Type" style="padding:5px">
+                                    <apex:outputText value="{!regatta.Participation_Regatta__r.Regatta_Type__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="NRR" 
+                                    style="{!IF(regatta.Participation_Regatta__r.Nationally_Recognized_Regatta__c,'background-color: rgb(255, 255, 0);','')};padding:5px" >
+                                    <apex:outputText value="{!IF(regatta.Participation_Regatta__r.Nationally_Recognized_Regatta__c,'Yes','No') }" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Days"
+                                    style="padding:5px; text-align:center;">
+                                    <apex:outputText value="{!regatta.Days_Worked__c}" />
+                                </apex:column>
+
+                            </apex:pageBlockTable>
+
+                            <p style="font-size: 11px;">
+                                Current Year Regatta Count = {!currRegattaCnt}
+                            </p>
+
+                        </apex:pageBlock>
+
+<!-- ---------------------------------------------------------------------------------------------------------------- -->                        
+                    <!-- Current Year Clinics -->
+                        <apex:pageBlock rendered="{!renderDetail}">
+                            
+                           <div style="page-break-after:auto;" />
+                            
+							<table style="background:rgb(240,248,255); border: 0px;"  width="100%">
+                                <tr>
+                                    <td style="background:#b40839; color:white; border: 0px;">
+                                        {!contactData.Name}    
+                                        <span style="float:right;">
+                                        Lic. No: {!contactData.Referee_License_Number__c}     
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>    
+                            <h4>
+                                Current Data Call Year Clinics ({!currYear})
+                            </h4>
+
+                            <apex:pageBlockTable border="1" value="{!currClinics}" var="clinic" rules="rows" align="center"
+                                columns="6"  style="font-size: 11px;" >
+
+                                <apex:column headerClass="ResumeTable" headerValue="Name" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Participation_Clinic__r.name}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Start" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!clinic.Participation_Clinic__r.Start_Date__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="End" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!clinic.Participation_Clinic__r.End_Date__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Location" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Participation_Clinic__r.Clinic_City__c} {!clinic.Participation_Clinic__r.Clinic_State__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Type" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Participation_Clinic__r.Clinic_Type__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Role" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Clinic_Participant_Role__c}" />
+                                </apex:column>
+
+                            </apex:pageBlockTable>
+                            
+                             <p style="font-size: 11px;">
+                                Current Year Clinic Count = {!currClinicCnt}
+                            </p>
+                            
+                        </apex:pageBlock>
+
+<!-- ---------------------------------------------------------------------------------------------------------------- -->                                                
+					<!-- Last Year Regattas -->
+                        <apex:pageBlock rendered="{!renderDetail}">
+                            
+                        <div style="page-break-after:auto;" />
+
+							<table style="background:rgb(240,248,255); border: 0px;"  width="100%">
+                                <tr>
+                                    <td style="background:#b40839; color:white; border: 0px;">
+                                        {!contactData.Name}    
+                                        <span style="float:right;">
+                                        Lic. No: {!contactData.Referee_License_Number__c}     
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>    
+                            <h4>
+                                Regattas - Data Call {!lastYear}
+                            </h4>
+
+                            <apex:pageBlockTable border="1" value="{!lastyrRegattas}" var="regatta1" rules="rows"
+                                align="center" columns="8"  style="font-size: 11px;" >
+
+                                <apex:column headerClass="ResumeTable" headerValue="Name" style="padding:5px">
+                                    <apex:outputText value="{!regatta1.Participation_Regatta__r.name}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Start" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!regatta1.Participation_Regatta__r.Start_Date_Time__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="End" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!regatta1.Participation_Regatta__r.End_Date_Time__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Location" style="padding:5px">
+                                    <apex:outputText value="{!regatta1.Participation_Regatta__r.Regatta_Course__r.Name}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Region" 
+                                             style="{!IF(regatta1.Participation_Regatta__r.Regatta_Region__c != contactData.Region__c,'background-color: rgb(255, 255, 0);','')};padding:5px">
+                                    <apex:outputText value="{!regatta1.Participation_Regatta__r.Regatta_Region__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Type" style="padding:5px">
+                                    <apex:outputText value="{!regatta1.Participation_Regatta__r.Regatta_Type__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="NRR" style="{!IF(regatta1.Participation_Regatta__r.Nationally_Recognized_Regatta__c,'background-color: rgb(255, 255, 0);','')};padding:5px" >
+                                    <apex:outputText value="{!IF(regatta1.Participation_Regatta__r.Nationally_Recognized_Regatta__c,'Yes','No') }" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Days"
+                                    style="padding:5px; text-align:center;">
+                                    <apex:outputText value="{!regatta1.Days_Worked__c}" />
+                                </apex:column>
+
+                            </apex:pageBlockTable>
+                            <p style="font-size: 11px;">
+                                Regatta Count {!lastYear} = {!lastyrRegattaCnt}
+                            </p>
+
+                        </apex:pageBlock>
+
+<!-- ---------------------------------------------------------------------------------------------------------------- -->                                                
+					<!-- Last Year Clinics -->
+                        <apex:pageBlock rendered="{!renderDetail}" >
+                            
+                              <div style="page-break-after:auto;" />
+                            
+							<table style="background:rgb(240,248,255); border: 0px;"  width="100%">
+                                <tr>
+                                    <td style="background:#b40839; color:white; border: 0px;">
+                                        {!contactData.Name}    
+                                        <span style="float:right;">
+                                        Lic. No: {!contactData.Referee_License_Number__c}     
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>    
+                            <h4>
+                               Clinics - Data Call {!lastYear}
+                            </h4>
+
+                            <apex:pageBlockTable border="1" value="{!lastyrClinics}" var="clinic" rules="rows" align="center"
+                                columns="6"  style="font-size: 11px;" >
+
+                                <apex:column headerClass="ResumeTable" headerValue="Name" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Participation_Clinic__r.name}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Start" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!clinic.Participation_Clinic__r.Start_Date__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="End" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!clinic.Participation_Clinic__r.End_Date__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Location" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Participation_Clinic__r.Clinic_City__c} {!clinic.Participation_Clinic__r.Clinic_State__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Type" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Participation_Clinic__r.Clinic_Type__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Role" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Clinic_Participant_Role__c}" />
+                                </apex:column>
+
+                            </apex:pageBlockTable>
+                            
+                             <p style="font-size: 11px;">
+                                Clinic Count = {!lastyrClinicCnt}
+                            </p>
+                            
+                        </apex:pageBlock>
+
+<!-- ---------------------------------------------------------------------------------------------------------------- -->                                                
+                     <!-- Prior Year Regattas -->                           
+                        <apex:pageBlock rendered="{!renderDetail}" >
+                                
+                        <div style="page-break-after:auto;" />
+                                
+                            <table style="background:rgb(240,248,255); border: 0px;"  width="100%">
+                                <tr>
+                                    <td style="background:#b40839; color:white; border: 0px;">
+                                        {!contactData.Name}    
+                                        <span style="float:right;">
+                                        Lic. No: {!contactData.Referee_License_Number__c}     
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>    
+                            <h4>
+                                Regattas - Data Call {!priorYear}
+                            </h4>
+
+                            <apex:pageBlockTable border="1" value="{!prioryrRegattas}" var="regatta2" rules="rows"
+                                align="center" columns="8"  style="font-size: 11px;" >
+
+                                <apex:column headerClass="ResumeTable" headerValue="Name" style="padding:5px">
+                                    <apex:outputText value="{!regatta2.Participation_Regatta__r.name}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Start" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!regatta2.Participation_Regatta__r.Start_Date_Time__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="End" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!regatta2.Participation_Regatta__r.End_Date_Time__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Location" style="padding:5px">
+                                    <apex:outputText value="{!regatta2.Participation_Regatta__r.Regatta_Course__r.Name}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Region" 
+                                             style="{!IF(regatta2.Participation_Regatta__r.Regatta_Region__c != contactData.Region__c,'background-color: rgb(255, 255, 0);','')};padding:5px">
+                                    <apex:outputText value="{!regatta2.Participation_Regatta__r.Regatta_Region__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Type" style="padding:5px">
+                                    <apex:outputText value="{!regatta2.Participation_Regatta__r.Regatta_Type__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="NRR" style="{!IF(regatta2.Participation_Regatta__r.Nationally_Recognized_Regatta__c,'background-color: rgb(255, 255, 0);','')};padding:5px" >
+                                    <apex:outputText value="{!IF(regatta2.Participation_Regatta__r.Nationally_Recognized_Regatta__c,'Yes','No') }" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Days"
+                                    style="padding:5px; text-align:center;">
+                                    <apex:outputText value="{!regatta2.Days_Worked__c}" />
+                                </apex:column>
+
+                            </apex:pageBlockTable>
+                          <p style="font-size: 11px;">
+                                Regatta Count {!priorYear} = {!prioryrRegattaCnt}
+                            </p>   
+
+                        </apex:pageBlock>
+                        
+ <!-- ---------------------------------------------------------------------------------------------------------------- -->                                                
+                   <!-- Prior Year Clinics -->
+                        <apex:pageBlock rendered="{!renderDetail}">
+                            
+                            <div style="page-break-after:auto;" />
+                            
+							<table style="background:rgb(240,248,255); border: 0px;"  width="100%">
+                                <tr>
+                                    <td style="background:#b40839; color:white; border: 0px;">
+                                        {!contactData.Name}    
+                                        <span style="float:right;">
+                                        Lic. No: {!contactData.Referee_License_Number__c}     
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>    
+                            <h4>
+                                Clinics - Data Call {!priorYear}
+                            </h4>
+
+                            <apex:pageBlockTable border="1" value="{!prioryrClinics}" var="clinic" rules="rows" align="center"
+                                columns="6"  style="font-size: 11px;" >
+
+                                <apex:column headerClass="ResumeTable" headerValue="Name" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Participation_Clinic__r.name}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Start" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!clinic.Participation_Clinic__r.Start_Date__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="End" style="padding:5px">
+                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                        <apex:param value="{!clinic.Participation_Clinic__r.End_Date__c}" />
+                                    </apex:outputText>
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Location" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Participation_Clinic__r.Clinic_City__c} {!clinic.Participation_Clinic__r.Clinic_State__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Type" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Participation_Clinic__r.Clinic_Type__c}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Role" style="padding:5px">
+                                    <apex:outputText value="{!clinic.Clinic_Participant_Role__c}" />
+                                </apex:column>
+
+                            </apex:pageBlockTable>
+                            
+                             <p style="font-size: 11px;">
+                                Clinic Count = {!prioryrClinicCnt}
+                            </p>
+                            
+                        </apex:pageBlock>
+                       
+ <!-- ---------------------------------------------------------------------------------------------------------------- -->                                                
+                        <!-- Summary -->
+                        <apex:pageBlock rendered="{!renderSummary}" >
+                            
+                         <div style="page-break-after:auto;" />
+                            
+						<table style="background:rgb(240,248,255); border: 0px;"  width="100%">
+                                <tr>
+                                    <td style="background:#b40839; color:white; border: 0px;">
+                                        {!contactData.Name}    
+                                        <span style="float:right;">
+                                        Lic. No: {!contactData.Referee_License_Number__c}     
+                                        </span>
+                                    </td>
+                                </tr>
+                        </table>    
+                            <h4>
+                               Data Call Summary
+                            </h4>
+
+                            <apex:pageBlockTable border="1" value="{!rptDataCallSummaryYear}" var="summary" rules="rows" align="center"
+                                columns="8"  style="font-size: 11px;" >
+
+                                <apex:column headerClass="ResumeTable" headerValue="Year" style="padding:5px">
+                                    <apex:outputText value="{!summary.yrsumDataCallYear}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Rank" style="padding:5px">
+                                    <apex:outputText value="{!summary.yrsumRank}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Number of Regattas" style="padding:5px">
+                                    <apex:outputText value="{!summary.yrsumNumberOfRegattas}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Number of Regatta Days" style="padding:5px">
+                                    <apex:outputText value="{!summary.yrsumNumberOfRegattaDays}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Number of Courses" style="padding:5px">
+                                    <apex:outputText value="{!summary.yrsumNumberOfCourses}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Attended Clinic" style="padding:5px">
+                                    <apex:outputText value="{!IF(summary.yrsumAttendedClinic,'Yes','No')}" />
+                                </apex:column>
+
+                                <apex:column headerClass="ResumeTable" headerValue="Worked NRR" style="padding:5px">
+                                    <apex:outputText value="{!IF(summary.yrsumWorkedNRR,'Yes','No')}" />
+                                </apex:column>
+                                <apex:column headerClass="ResumeTable" headerValue="Worked Out of Region" style="padding:5px">
+                                    <apex:outputText value="{!IF(summary.yrsumWorkedOutOfRegion,'Yes','No')}" />
+                                </apex:column>
+                                
+                            </apex:pageBlockTable>
+ 
+                        </apex:pageBlock>
+                       
+ <!-- ---------------------------------------------------------------------------------------------------------------- -->                                                
+
+                    </apex:outputPanel>
+
+                </div>
+
+            </apex:form>
+
+        </div>
+
+    </body>
+    <script type="text/javascript">
+        window.setTimeout(getresponses, 2000);
+
+        function fetchPageHTML() {
+            getJSHTMLData();
+        }
+
+        /*
+        function didIt() {
+            alert("setApexHTML completed");
+        }
+        */
+        /*
+        function getJSHTMLData() {
+                var divPage = element = document.getElementById('renderedPage');
+            var strHTML = divPage.innerHTML;
+                alert("strHTML size = " + strHTML.length);
+                setApexHTML(strHTML);
+         }
+        */
+    </script>
+
+</apex:page>

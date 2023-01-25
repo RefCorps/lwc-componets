@@ -315,6 +315,7 @@ public List < Evaluation_Responses__c > getResponses(
                 //if (String.isNotBlank(er.Evaluator_Comment__c)) {
                 //    EvaluatorComment = er.Evaluator_Comment__c; 
                 //}
+                er.Question_Text__c = RemoveHTMLMarkup(er.Question_Text__c);
                 editedresp.add(er);
                 System.debug(LoggingLevel.DEBUG, '\n\n ### Added matched response: ' + er);
                 match = true;
@@ -331,7 +332,7 @@ public List < Evaluation_Responses__c > getResponses(
             // THESE WILL BE VALUES ADDED TO editedresp
             Evaluation_Responses__c r = new Evaluation_Responses__c();
             System.debug(LoggingLevel.DEBUG, 'no match ' + q.Question_Number__c + '  ' + q.Question_Text__c);
-            r.Question_Text__c = q.Question_Text__c;
+            r.Question_Text__c = RemoveHTMLMarkup(q.Question_Text__c);
             r.Question_Number__c = q.Question_Number__c;
             r.Question_Type__c = q.QuestionType__r.Name;
             if (q.IsQuestionGroupHeader__c)
@@ -354,6 +355,26 @@ public List < Evaluation_Responses__c > getResponses(
     //ra.GeneratePDF();
 
     return editedresp;
+}
+
+// =================================================================
+
+private static string RemoveHTMLMarkup(string text) {
+
+    System.debug(LoggingLevel.DEBUG,'>> RemoveHTMLMarkup ' + text);
+    text = text.replaceAll('<br>', ' ');    // should be \n
+    text = text.replaceAll('</br>','');
+    text = text.replaceAll('<p>',' ');
+    text = text.replaceAll('</p>',' ');
+    text = text.replaceAll('&#8208;','-');
+    text = text.replaceAll('&hyphen;','-');
+    text = text.replaceAll('&lt;','<');
+    text = text.replaceAll('&gt;','>');
+    text = text.replaceAll('&quot;','"');
+    text = text.replaceAll('&amp;','&');
+    System.debug(LoggingLevel.DEBUG,'<< RemoveHTMLMarkup ' + text);
+
+    return text;
 }
 
 // =================================================================

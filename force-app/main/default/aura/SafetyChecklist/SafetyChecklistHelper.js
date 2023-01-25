@@ -55,7 +55,9 @@
 				component.set("v.regattaDetail", result);
                 component.set("v.regattaId",regattaId);
                 //alert('usrowing registred ' + result.US_Rowing_Registered__c);
-                component.set("v.regattaCklistRequired", result.US_Rowing_Registered__c);
+                // COMMENTED OUT --> component.set("v.regattaCklistRequired", result.US_Rowing_Registered__c);
+                // THE NEXT LINE ENABLES ALL REGATTAS 
+                component.set("v.regattaCklistRequired", true);
              }else if (state === "ERROR") {
                 console.log('Error');
             }
@@ -83,7 +85,16 @@
                 {
                     component.set("v.regattaDetail", result);
                     component.set("v.completedCheckList",true);
-                    component.set("v.rptURL", result );
+                    //component.set("v.rptURL", result );
+                    /* THE FOLLOWING PATH IS BASED UPON THE REGATTA PAGE LINK - IF THIS CHANGES THE PATH MUST BE FIXED
+                     <a href="/refcorps/s/regatta/related/a0h3u000005YiVyAAK/AttachedContentDocuments" 
+                        class="slds-card__header-link baseCard__header-title-container" 
+                        data-aura-rendered-by="1226:0">
+                        <span title="Files" class="slds-truncate slds-m-right--xx-small" data-aura-rendered-by="1227:0">Files</span>
+                        <span title="(3)" class="slds-shrink-none slds-m-right--xx-small" data-aura-rendered-by="1230:0">(3)</span>
+                     </a>
+                    */ 
+                    component.set("v.rptURL","/refcorps/s/regatta/related/" + regattaId + "/AttachedContentDocuments");
                 } else {
                     component.set("v.completedCheckList",false);
                 }   

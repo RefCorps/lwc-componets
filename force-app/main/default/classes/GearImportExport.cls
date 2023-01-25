@@ -130,7 +130,14 @@ public class GearImportExport {
                     gear.Thanks_Sent_Date__c = NULL;
                 }
 
-                gear.DisplayOnList__c = true; // wrapper.DisplayOnList;
+                //gear.DisplayOnList__c = true; // wrapper.DisplayOnList;
+                if( wrapper.DisplayOnList != null && (wrapper.DisplayOnList.containsIgnoreCase('FALSE') || wrapper.DisplayOnList.containsIgnoreCase('NO')))
+                { 
+                    gear.DisplayOnList__c = false; 
+                }
+                else {
+                    gear.DisplayOnList__c = true;
+                }
 
                 GearExchangeWorkSheet.add(gear);
 

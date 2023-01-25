@@ -24,7 +24,7 @@
     <aura:attribute name="questionnaireTS" type="DateTime" default="" />
     <aura:attribute name="lastNDays" type="string" default="190" />
 
-     <!-- isPhone is used to ID Phone devices vs. browsers - adjusts formatting -->
+    <!-- isPhone is used to ID Phone devices vs. browsers - adjusts formatting -->
     <aura:attribute name="isPhone" type="boolean" default="false" />
     <aura:attribute name="doExposeForm" type="boolean" default="false" />
     <aura:attribute name="rptURL" type="string" default="" />
@@ -114,7 +114,7 @@
 
         <aura:if isTrue="{!v.completedCheckList}">
             <lightning:layoutItem padding="around-small" size="12">
-                <div style="text-align:center;  padding: 10px; background: white; height: 50px">
+                <div style="text-align:right;  padding: 10px; background: white; height: 50px">
                     <lightning:button variant="success" label="Regatta Safety Checklist Completed"
                         title="Open completed checklist report" onclick="{!c.launchCompletedForm}" />
                 </div>
@@ -122,7 +122,7 @@
             <aura:set attribute="else">
                 <aura:if isTrue="{!v.regattaCklistRequired}" >
                 <lightning:layoutItem padding="around-small" size="12">
-                    <div style="text-align:center;  padding: 10px; background: white; height: 50px">
+                    <div style="text-align:right;  padding: 10px; background: white; height: 50px">
                         <lightning:button variant="destructive" label="Complete Regatta Safety Checklist"
                             title="Open checklist form" onclick="{! c.exposeForm }" />
                     </div>
@@ -133,6 +133,7 @@
 
     </lightning:layout>
 
+    <!-- TEST LINK <a href="{!v.rptURL}" >REPORT</a> -->
 
     <!-- HIDDEN FORM FOLLOWS -->
     <aura:if isTrue="{!v.doExposeForm}">
@@ -282,7 +283,7 @@
 
                                                 <aura:set attribute="else">
 <!-- ========================================================================================= -->
-                                                    <aura:if isTrue="{!v.isPhone}">
+                                                <aura:if isTrue="{!v.isPhone}">
                                                         <!-- begin phone -->
                                                         <tr width="100%">
 
@@ -330,7 +331,7 @@
                                                                         <tr
                                                                             style="font-size: 60%; text-align:center; border-bottom: thin solid lightgray; height: 50px;">
                                                                             <td
-                                                                                style="text-aligh: center; padding: 10px;">
+                                                                                style="text-align: center; padding: 10px;">
                                                                                 <aura:if
                                                                                     isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
                                                                                     <input type="radio"
@@ -384,7 +385,7 @@
 
                                                                 <!-- col 1 - question -->
                                                                 <td id="{!(q.Question_Number__c+'-0r')}"
-                                                                    style="padding-left: 20px"
+                                                                    style="padding-left: 20px; width:80%"
                                                                     colspan="{!(4-q.QuestionType__r.Type_Response_Count__c)}">
                                                                     <lightning:formattedRichText
                                                                         value="{!q.Question_Text__c}" />
@@ -395,7 +396,7 @@
                                                                         name="questionId" value="{!q.Id}" />
                                                                 </td>
                                                                 <!-- col 2 - resp 1 -->
-                                                                <td style="text-align: center; vertical-align: middle; padding: 5px">
+                                                                <td style="text-align: center; vertical-align: middle; width: 10%; padding: 5px">
                                                                     <aura:if
                                                                         isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 1}">
                                                                         <input type="radio"
@@ -408,7 +409,7 @@
                                                                     </aura:if>
                                                                 </td>
                                                                 <!-- col 3 - resp 2 -->
-                                                                <td style="text-align: center; vertical-align: middle; padding: 5px">
+                                                                <td style="text-align: center; vertical-align: middle; width:10%; padding: 5px">
                                                                     <aura:if
                                                                         isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 2}">
                                                                         <input type="radio"
@@ -421,7 +422,7 @@
                                                                     </aura:if>
                                                                 </td>
                                                                 <!-- col 4 - resp 3 -->
-                                                                <td style="text-align: center; vertical-align: middle; padding: 5px">
+                                                                <td style="text-align: center; vertical-align: middle; width: 10%; padding: 5px">
                                                                     <aura:if
                                                                         isTrue="{!q.QuestionType__r.Type_Response_Count__c >= 3}">
                                                                         <input type="radio"

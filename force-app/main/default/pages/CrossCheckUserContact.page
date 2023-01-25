@@ -1,0 +1,5 @@
+<apex:page Controller="CrossCheckUserContactController" action="{!generateCrossCheckUserContactResults}"
+           contentType="text/csv"       
+    sidebar="false"  cache="false">
+{!TextLines}
+</apex:page>
